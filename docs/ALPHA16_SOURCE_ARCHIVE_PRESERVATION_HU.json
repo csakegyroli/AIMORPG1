@@ -1,0 +1,29 @@
+[
+  {
+    "uploaded_archive": "AIMORPG_Grafikai_Koncepcio_01(1).zip",
+    "preserved_copy": "docs/artwork-sources/concept-pack-01/AIMORPG_Grafikai_Koncepcio_01_original.zip",
+    "bytes": 17717262,
+    "sha256": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+    "zip_entries": 41,
+    "integrity": "PASS",
+    "copy_hash_matches": "PASS"
+  },
+  {
+    "uploaded_archive": "AIMORPG_Grafikai_Koncepcio_02(2).zip",
+    "preserved_copy": "docs/artwork-sources/concept-pack-02/AIMORPG_Grafikai_Koncepcio_02_original.zip",
+    "bytes": 26294364,
+    "sha256": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+    "zip_entries": 110,
+    "integrity": "PASS",
+    "copy_hash_matches": "PASS"
+  },
+  {
+    "uploaded_archive": "AIMORPG_Grafikai_Koncepcio_03(2).zip",
+    "preserved_copy": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03_original.zip",
+    "bytes": 10107570,
+    "sha256": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073",
+    "zip_entries": 64,
+    "integrity": "PASS",
+    "copy_hash_matches": "PASS"
+  }
+]

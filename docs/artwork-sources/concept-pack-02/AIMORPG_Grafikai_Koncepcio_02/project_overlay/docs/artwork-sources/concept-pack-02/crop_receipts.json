@@ -1,0 +1,503 @@
+{
+  "package": "AIMORPG grafikai koncepciócsomag 02",
+  "source_board": {
+    "filename": "concept_board_02.png",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "11b8defcb2c51405a90b402ad9cc181ca4f52564c6579a3da489275dc9e78232"
+  },
+  "asset_count": 32,
+  "counts": {
+    "items": 22,
+    "npc_portraits": 4,
+    "districts": 6
+  },
+  "assets": [
+    {
+      "concept_id": "concept02_item_01",
+      "name_hu": "Nemes hosszúkard",
+      "png_source_crop": "source_crops/items/concept02_item_01_nemesi_hosszukard.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_01_nemesi_hosszukard.png",
+      "png_sha256": "4a21354f43c645105afdb7b9b9b3b6e5feba988e06be836fb306a037c3cf176c",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_01_nemesi_hosszukard.webp",
+      "webp_sha256": "9e21e7785146fcdcf3f801adc7a1547cdaab629282a076576c4c02072f0ab203",
+      "webp_bytes": 28780,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_02",
+      "name_hu": "Városi őrpajzs",
+      "png_source_crop": "source_crops/items/concept02_item_02_varosi_orpajzs.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_02_varosi_orpajzs.png",
+      "png_sha256": "7ab322f1ea5b498071f6ae9790b1262c74e66b5a33119ea519cc4ba6302798d8",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_02_varosi_orpajzs.webp",
+      "webp_sha256": "836f8a7813e8e30c56dc71037c75a3c0e9ba339b010d516b76ca18472d70f846",
+      "webp_bytes": 48170,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_03",
+      "name_hu": "Krónika-kódex",
+      "png_source_crop": "source_crops/items/concept02_item_03_kronika_kodex.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_03_kronika_kodex.png",
+      "png_sha256": "d08ae7cc4e84fbcbbadf480315c73802fee726f9de959368583afa61f1907793",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_03_kronika_kodex.webp",
+      "webp_sha256": "0d509f7023ee8cdf095320b66d6d7d318136a66ca2620c748fadf54bd44cff30",
+      "webp_bytes": 41208,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_04",
+      "name_hu": "Léleklámpás",
+      "png_source_crop": "source_crops/items/concept02_item_04_leleklampas.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_04_leleklampas.png",
+      "png_sha256": "20f544eb10b0d92f33204e4d24baa412d1f7547a3ae4d8f874654dfcbf2f213a",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_04_leleklampas.webp",
+      "webp_sha256": "abc85cef2c322d8bc6339761e8b7c405440e9b0c7d49dfddf8963c25a1e71d21",
+      "webp_bytes": 37940,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_05",
+      "name_hu": "Életerő főzet",
+      "png_source_crop": "source_crops/items/concept02_item_05_eletero_fozet.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_05_eletero_fozet.png",
+      "png_sha256": "eba2fd5588311211dd035ca753ca9aa38ebacfbe6b36cc96c71188f81163caf8",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_05_eletero_fozet.webp",
+      "webp_sha256": "87e70b4fd60acf7b440c31134f259c24ec0ed2fa21751c9044f5c28c3bd94e97",
+      "webp_bytes": 32386,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_06",
+      "name_hu": "Dobókések",
+      "png_source_crop": "source_crops/items/concept02_item_06_dobokesek.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_06_dobokesek.png",
+      "png_sha256": "dfab4d880f98c475d2a95b20b38288faf104cf61a211e52cd0ab42d14e416af5",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_06_dobokesek.webp",
+      "webp_sha256": "a5d4f2ae09534daf8553cef97c78dcb01f16344bdfd2c3bf94353600acad8489",
+      "webp_bytes": 34678,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_07",
+      "name_hu": "Mágusbot",
+      "png_source_crop": "source_crops/items/concept02_item_07_magusbot.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_07_magusbot.png",
+      "png_sha256": "4d6dd81262838a855629a235dc79c823096ba1f0f2746829de2b91cc7b66ec07",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_07_magusbot.webp",
+      "webp_sha256": "757eeadb47ff4c04038e80ec3069d9ae27b78e67234433df9ec5ccaeed7221a8",
+      "webp_bytes": 32328,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_08",
+      "name_hu": "Kalandozó táska",
+      "png_source_crop": "source_crops/items/concept02_item_08_kalandozo_taska.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_08_kalandozo_taska.png",
+      "png_sha256": "1b9795819a7152bebdc017841e166b60dcaff2e2d017c3632139378ce5525518",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_08_kalandozo_taska.webp",
+      "webp_sha256": "e5655b7972fc8f3cb8b82a067fbce631bc9f66feeb6cd42867f993faf22bdc98",
+      "webp_bytes": 38734,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_09",
+      "name_hu": "Hit jelvénye",
+      "png_source_crop": "source_crops/items/concept02_item_09_hit_jelvenye.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_09_hit_jelvenye.png",
+      "png_sha256": "d158321d426a9a7b8da8e7b91d9f1b8e26c2265f65c45bcbd886e8ba546a2cb4",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_09_hit_jelvenye.webp",
+      "webp_sha256": "f39021f89b2caeec64bdd192c931e1ccc6735cd66238d01470aa62a3b3ca1fde",
+      "webp_bytes": 36854,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_10",
+      "name_hu": "Küldetéstérkép",
+      "png_source_crop": "source_crops/items/concept02_item_10_kuldetesterkep.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_10_kuldetesterkep.png",
+      "png_sha256": "15cc19801d4e167add1ae16d8c81760d1f987b2ea3776bedefba57296c36feb5",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_10_kuldetesterkep.webp",
+      "webp_sha256": "2a1c31c31c4183136a09d28f7efb82888ec3a192dcc3727187536b5b6cf1f657",
+      "webp_bytes": 35630,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_11",
+      "name_hu": "Tengeri távcső",
+      "png_source_crop": "source_crops/items/concept02_item_11_tengeri_tavcso.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_11_tengeri_tavcso.png",
+      "png_sha256": "4d4924577e856d76c6cd53c54b3f767865bc9919d92b4658e47a1c403f37d8d0",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_11_tengeri_tavcso.webp",
+      "webp_sha256": "a030556b88c774f715d85f521da847d4bbcb5b6bec38d772c2610e06014bad43",
+      "webp_bytes": 27542,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_12",
+      "name_hu": "Aranypénz",
+      "png_source_crop": "source_crops/items/concept02_item_12_aranypenz.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_12_aranypenz.png",
+      "png_sha256": "79f674e700a25462f69062cc3b462be784814c1f0eaa4a7af5a8ae639796ad24",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_12_aranypenz.webp",
+      "webp_sha256": "4926bca27d43d7c1dfbdcbd794126c4c7068ecbfabe7136e2af9815970b23408",
+      "webp_bytes": 35972,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_13",
+      "name_hu": "Éterkristály",
+      "png_source_crop": "source_crops/items/concept02_item_13_eterkristaly.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_13_eterkristaly.png",
+      "png_sha256": "66ed3234f030a3ded8de33253f32389c2d3b710b73a4baedee5c244e174a056b",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_13_eterkristaly.webp",
+      "webp_sha256": "23d6e45bc8b23783ed3cef63af1e9605992ebc0aab17fd942646f4fe836f6256",
+      "webp_bytes": 26280,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_14",
+      "name_hu": "Nemesi pipa",
+      "png_source_crop": "source_crops/items/concept02_item_14_nemesi_pipa.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_14_nemesi_pipa.png",
+      "png_sha256": "14c28b8d32334df9fd7af0435de741e41a4ebc9b735ea74f45c1376dbb7ae607",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_14_nemesi_pipa.webp",
+      "webp_sha256": "351e7f273f63ee60f9eb7cf7e5c38483c87cecb86d5ce33e8fee87a4740970e3",
+      "webp_bytes": 26392,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_15",
+      "name_hu": "Számszeríj",
+      "png_source_crop": "source_crops/items/concept02_item_15_szamszerij.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_15_szamszerij.png",
+      "png_sha256": "9e3785a249b738cf565380375820322150850af746eadf5991100021301f519c",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_15_szamszerij.webp",
+      "webp_sha256": "bd71cbb66861eca956ed87603de695ce7c89780cec4a030be85090cfbb2dab9e",
+      "webp_bytes": 40920,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_16",
+      "name_hu": "Nyílvesszők",
+      "png_source_crop": "source_crops/items/concept02_item_16_nyilvesszok.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_16_nyilvesszok.png",
+      "png_sha256": "b36d0bd716bcb3b6720079f62aae43e4c6c83bb8145756900315a6c6e3d44178",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_16_nyilvesszok.webp",
+      "webp_sha256": "951e5d36ce9cefc00d0222884af04d80e498fdcfc5068e66c872da443c6eda7d",
+      "webp_bytes": 35312,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_17",
+      "name_hu": "Hadikalapács",
+      "png_source_crop": "source_crops/items/concept02_item_17_hadikalapacs.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_17_hadikalapacs.png",
+      "png_sha256": "fe63bb113d2856f5ca68dfe88f3c4ad9aaa298a50c7bff1b763035906a6c4a18",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_17_hadikalapacs.webp",
+      "webp_sha256": "51bcae0831d9e403c0f68485d490ef533d09e86a5a91f974cf2ad9cca9850835",
+      "webp_bytes": 32492,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_18",
+      "name_hu": "Harci sisak",
+      "png_source_crop": "source_crops/items/concept02_item_18_harci_sisak.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_18_harci_sisak.png",
+      "png_sha256": "9a2366d52cea1ece2014eed82744cdcc76ca496ceb468ef9ae3b301bab9970af",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_18_harci_sisak.webp",
+      "webp_sha256": "c1b9115f3e85cfdeeebd2f70a9d81e210a43ddc9090b6832d60d22b040f9ac25",
+      "webp_bytes": 35204,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_19",
+      "name_hu": "Páncélkesztyű",
+      "png_source_crop": "source_crops/items/concept02_item_19_pancelkesztyu.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_19_pancelkesztyu.png",
+      "png_sha256": "f0121c3358efa505b50a7b343221e9797183a15c521a49e5270936a57b3cd789",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_19_pancelkesztyu.webp",
+      "webp_sha256": "fc6bd89d65adf998955e7c8cf199623d4c56a084413472a5390bd532428ed765",
+      "webp_bytes": 39232,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_20",
+      "name_hu": "Holdkő amulett",
+      "png_source_crop": "source_crops/items/concept02_item_20_holdko_amulet.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_20_holdko_amulet.png",
+      "png_sha256": "e6628ecec7b81bf9244cc381a5de769ead37c30d7d32e3cf0abd63d87e3df623",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_20_holdko_amulet.webp",
+      "webp_sha256": "fa5da25c3aa9675f87794fd7029e72042d0a04af4b992ee7efa361da1ee64ecb",
+      "webp_bytes": 40878,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_21",
+      "name_hu": "Ékszeres láda",
+      "png_source_crop": "source_crops/items/concept02_item_21_ekszeres_lada.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_21_ekszeres_lada.png",
+      "png_sha256": "b4520b9fc1233ae5b9f54d2da3738c62d34823640f59adde02d7dbb00f422ded",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_21_ekszeres_lada.webp",
+      "webp_sha256": "921f5823fc3146c1c16578d09f111fa84d307d63f8d0465c0eff170daaf686a6",
+      "webp_bytes": 41528,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_item_22",
+      "name_hu": "Gyógynövény",
+      "png_source_crop": "source_crops/items/concept02_item_22_gyogynoveny.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/items/concept02_item_22_gyogynoveny.png",
+      "png_sha256": "f871467344cbc9970111a5d9c643911811d173917f28187a7e0951e6112556d1",
+      "webp_path": "/assets/concept-staging/pack02/items/concept02_item_22_gyogynoveny.webp",
+      "webp_sha256": "b23a538705913d98f2b907df4a79aad345111c584c292848028882fa553646b6",
+      "webp_bytes": 47426,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_npc_01",
+      "name_hu": "Városi parancsnok",
+      "png_source_crop": "source_crops/npc_portraits/concept02_npc_01_city_commander.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/npc_portraits/concept02_npc_01_city_commander.png",
+      "png_sha256": "3f0e01571cc26d4e0c026e9c4f69ca4e60fa8e1d738808df7d37d511b3892b18",
+      "webp_path": "/assets/concept-staging/pack02/npc-portraits/concept02_npc_01_city_commander.webp",
+      "webp_sha256": "71fdbaeacb36020f5eaa1c5dcf67767cea911586c12e3534cf4a7224ae87b6b7",
+      "webp_bytes": 38050,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_npc_02",
+      "name_hu": "Nemes hölgy",
+      "png_source_crop": "source_crops/npc_portraits/concept02_npc_02_court_noblewoman.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/npc_portraits/concept02_npc_02_court_noblewoman.png",
+      "png_sha256": "b8a35251e9af7f508ea0e1d4d98f35c89833016cae9fa504548422eb9a4ce067",
+      "webp_path": "/assets/concept-staging/pack02/npc-portraits/concept02_npc_02_court_noblewoman.webp",
+      "webp_sha256": "7f5422e3e5ee672439cf4c1ae009e4439369cff92b7d0265d32aefeeaa223161",
+      "webp_bytes": 27968,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_npc_03",
+      "name_hu": "Kikötői kapitány",
+      "png_source_crop": "source_crops/npc_portraits/concept02_npc_03_harbor_captain.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/npc_portraits/concept02_npc_03_harbor_captain.png",
+      "png_sha256": "fbe93e368fb5926a87a58cffda3b558b761a2f02dec56359905d83b5a15cdb4b",
+      "webp_path": "/assets/concept-staging/pack02/npc-portraits/concept02_npc_03_harbor_captain.webp",
+      "webp_sha256": "40674d63a2ca6fcbdf41e0c4be8e5b8427395136557f5d03a107d14ec47059ac",
+      "webp_bytes": 37316,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_npc_04",
+      "name_hu": "Alkimista",
+      "png_source_crop": "source_crops/npc_portraits/concept02_npc_04_alchemist.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/npc_portraits/concept02_npc_04_alchemist.png",
+      "png_sha256": "00e96dee7764d3abb1810d704f18fc1d490e1fb89a74f7e46de06af25032d029",
+      "webp_path": "/assets/concept-staging/pack02/npc-portraits/concept02_npc_04_alchemist.webp",
+      "webp_sha256": "4496540085bdfa8fb18e94cd9c00d4e3af41e5dfbb16b09d626b9007eaf55cad",
+      "webp_bytes": 34086,
+      "dimensions": [
+        512,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_district_01",
+      "name_hu": "Palotanegyed",
+      "png_source_crop": "source_crops/districts/concept02_district_01_palace_district.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/districts/concept02_district_01_palace_district.png",
+      "png_sha256": "423826289190ef8b3725441d1756d74d8eab0275b5b7548b791dbe978a5fa62d",
+      "webp_path": "/assets/concept-staging/pack02/districts/concept02_district_01_palace_district.webp",
+      "webp_sha256": "af40a444a02cf03b7f30f5fc0b97ebe288ffab4a9ac02f64f4aba83d55551ccf",
+      "webp_bytes": 68528,
+      "dimensions": [
+        768,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_district_02",
+      "name_hu": "Kereskedelmi központ",
+      "png_source_crop": "source_crops/districts/concept02_district_02_trade_center.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/districts/concept02_district_02_trade_center.png",
+      "png_sha256": "b40caa1407716694506ae7da986dffaef82a61ad20ddb0321810f10cbbaf7856",
+      "webp_path": "/assets/concept-staging/pack02/districts/concept02_district_02_trade_center.webp",
+      "webp_sha256": "b381d820958989b065aab1486e66288ab2c1c054018d1dd12900b3caf9dc9df8",
+      "webp_bytes": 82342,
+      "dimensions": [
+        768,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_district_03",
+      "name_hu": "Kikötőnegyed",
+      "png_source_crop": "source_crops/districts/concept02_district_03_harbor.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/districts/concept02_district_03_harbor.png",
+      "png_sha256": "d34d9d0045ce052ff5a2dfe90c2e38a9b0de1716e8d2f64517304887f01fb059",
+      "webp_path": "/assets/concept-staging/pack02/districts/concept02_district_03_harbor.webp",
+      "webp_sha256": "7ca95c5f076f8e4c56ae7ecaf5d2f27fb78ec2ca7046dba003864768a228bd1c",
+      "webp_bytes": 72092,
+      "dimensions": [
+        768,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_district_04",
+      "name_hu": "Aréna",
+      "png_source_crop": "source_crops/districts/concept02_district_04_arena.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/districts/concept02_district_04_arena.png",
+      "png_sha256": "71848b180c8a66548212d91ea9cb7bf512b7b9f8968417a66caba05f36a01928",
+      "webp_path": "/assets/concept-staging/pack02/districts/concept02_district_04_arena.webp",
+      "webp_sha256": "f72757293104d8bfe0e6bac95e066d3eec3acbcb952f97dca4c32f052cb52418",
+      "webp_bytes": 71874,
+      "dimensions": [
+        768,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_district_05",
+      "name_hu": "Belváros",
+      "png_source_crop": "source_crops/districts/concept02_district_05_inner_city.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/districts/concept02_district_05_inner_city.png",
+      "png_sha256": "bb2bc9f194a7728272964ac1d7dc0de6a044cb1e12f2a8d4d7afc16e266a6bf1",
+      "webp_path": "/assets/concept-staging/pack02/districts/concept02_district_05_inner_city.webp",
+      "webp_sha256": "7d300eb4c97070458a2cab91ae6c0893095376a3591aec19b45348599ea16604",
+      "webp_bytes": 66834,
+      "dimensions": [
+        768,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    },
+    {
+      "concept_id": "concept02_district_06",
+      "name_hu": "Külváros",
+      "png_source_crop": "source_crops/districts/concept02_district_06_outer_district.png",
+      "project_source_crop": "docs/artwork-sources/concept-pack-02/source-crops/districts/concept02_district_06_outer_district.png",
+      "png_sha256": "ce67e20425e24a2e3b142228df887ed8205be348e82aa8ccdf2c646ce8a21b72",
+      "webp_path": "/assets/concept-staging/pack02/districts/concept02_district_06_outer_district.webp",
+      "webp_sha256": "6b42aa6d2d16aeacbd61abf8f1808b7a3c64cf1087bb9afb775f95cef195e68a",
+      "webp_bytes": 74158,
+      "dimensions": [
+        768,
+        512
+      ],
+      "status": "CONCEPT_ONLY_NOT_INTEGRATED"
+    }
+  ],
+  "limitations": [
+    "A játékbeli stabil ID-k nincsenek hozzárendelve.",
+    "Ezek fogalmi illusztrációk, nem runtime-integráció; a forrás a 1536x1024-es, többpaneles koncepciótábla.",
+    "A kivágások felnagyított koncepcióképek; a végleges, nagy részletességű játékassetekhez önálló nagyfelbontású újraalkotás vagy külön művészeti ellenőrzés ajánlott.",
+    "Nincs átlátszó háttér, nincs igazolt alkalmazáson belüli megjelenítés."
+  ]
+}

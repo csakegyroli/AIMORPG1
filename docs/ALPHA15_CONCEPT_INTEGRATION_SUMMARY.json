@@ -1,0 +1,139 @@
+{
+  "version": "2.0.0-alpha.15",
+  "created_local_date": "2026-10-19",
+  "archives": [
+    {
+      "filename": "AIMORPG_Grafikai_Koncepcio_01(1).zip",
+      "bytes": 17717262,
+      "sha256": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+      "file_entries": 41,
+      "zip_integrity": "PASS"
+    },
+    {
+      "filename": "AIMORPG_Grafikai_Koncepcio_02(2).zip",
+      "bytes": 26294364,
+      "sha256": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+      "file_entries": 110,
+      "zip_integrity": "PASS"
+    }
+  ],
+  "standalone_assets": {
+    "items": 34,
+    "npc_portraits": 20,
+    "region_or_district_concepts": 12,
+    "total": 66
+  },
+  "integration_counts": {
+    "items_integrated": 10,
+    "items_needs_review": 24,
+    "npc_portraits_integrated": 6,
+    "npc_portraits_needs_review": 14,
+    "regions_integrated": 6,
+    "district_concepts_needs_review": 6,
+    "integrated_total": 22,
+    "needs_review_total": 44
+  },
+  "contact_board_only": {
+    "pack02_items": 2,
+    "pack02_npc_portraits": 2,
+    "details": "The Pack 02 concept board visibly shows a travel cloak and ruby ring in the item row, and a mysterious scholar plus another blacksmith in the NPC strip. There are no standalone source-crop files or manifest rows for these four panels. They are not counted among the 66 standalone assets or integrated as runtime files."
+  },
+  "modified_source_files": [
+    "package.json",
+    "package-lock.json",
+    "src/lib/visualAssets.ts",
+    "src/components/GameClient.tsx",
+    "src/app/globals.css",
+    "scripts/smoke-test.cjs",
+    "scripts/visual-assets-smoke.cjs",
+    "scripts/visual-ui-smoke.cjs",
+    "docs/artwork-sources/integration-sources/crop-receipts.json",
+    "docs/VISUAL_ASSET_INTEGRATION_MANIFEST.csv",
+    "docs/ARTWORK_CONCEPT_INTEGRATION_MANIFEST_ALPHA15.csv",
+    "docs/ALPHA15_CONCEPT_INTEGRATION_SUMMARY.json",
+    "docs/ALPHA15_CHANGELOG_HU.md",
+    "docs/ALPHA15_TEST_REPORT_HU.md",
+    "docs/ALPHA15_CONTINUATION_STATE_HU.md",
+    "docs/QA_EVIDENCE/alpha15-integrated-concept-contact-sheet.jpg",
+    "docs/QA_EVIDENCE/alpha15-lint.log",
+    "docs/QA_EVIDENCE/alpha15-build.log",
+    "public/assets/items/{10 updated WebP files}",
+    "public/assets/npcs/{6 integrated WebP files}",
+    "public/assets/world/{6 region WebP files}",
+    "docs/artwork-sources/alpha14-overridden-assets/{rollback backups}",
+    "RELEASE-v2.0.0-alpha.15.md"
+  ],
+  "live_browser_qa": "NOT RUN",
+  "npm_ci": "NOT RUN; prior EAI_AGAIN installation failure not repeated",
+  "lint": "TO RUN",
+  "build": "TO RUN",
+  "previous_checkpoint_archives": [
+    {
+      "label": "alpha.12 eredeti checkpoint",
+      "filename": "AIMORPG-v2.0.0-alpha.12-Stage2-Visual-Integration-Checkpoint.zip",
+      "bytes": 90219616,
+      "sha256": "57358e75e0095299850f8298c96b9d56785d1d21212a79b2f43dfe14bbf3d53a",
+      "file_entries": 459,
+      "zip_integrity": "PASS"
+    },
+    {
+      "label": "alpha.13 eredeti checkpoint",
+      "filename": "AIMORPG-v2.0.0-alpha.13-Stage2-Item-Art-Integration-Checkpoint.zip",
+      "bytes": 94549946,
+      "sha256": "2e27555c5092845adad6072f2c1429b7444f6d131f8ecc4fe2d2db6cb57c364a",
+      "file_entries": 478,
+      "zip_integrity": "PASS"
+    },
+    {
+      "label": "alpha.14 eredeti checkpoint",
+      "filename": "AIMORPG-v2.0.0-alpha.14-NPC-Portrait-Audit-Checkpoint.zip",
+      "bytes": 96153463,
+      "sha256": "43bdc5780796e73c363c7c481c10f906071f4f2e8f9322b052551b44bde593ab",
+      "file_entries": 495,
+      "zip_integrity": "PASS"
+    }
+  ],
+  "concept_archives": [
+    {
+      "label": "Koncepció 01",
+      "filename": "AIMORPG_Grafikai_Koncepcio_01(1).zip",
+      "bytes": 17717262,
+      "sha256": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+      "file_entries": 41,
+      "zip_integrity": "PASS"
+    },
+    {
+      "label": "Koncepció 02",
+      "filename": "AIMORPG_Grafikai_Koncepcio_02(2).zip",
+      "bytes": 26294364,
+      "sha256": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+      "file_entries": 110,
+      "zip_integrity": "PASS"
+    }
+  ],
+  "tests": {
+    "npm_test": "PASS",
+    "npm_run_lint": "BLOCKED: tsc fails with missing next/react/@types; no dependency installation retry",
+    "npm_run_build": "BLOCKED: next: not found",
+    "npm_ci": "NOT RUN: prior EAI_AGAIN issue not retried",
+    "live_browser_qa": "NOT RUN"
+  },
+  "asset_validation": {
+    "concept_manifest_rows": 66,
+    "provenance_receipt_checks": 22,
+    "all_22_integrated_assets_source_output_hashes_match": true,
+    "all_standalone_assets_integrity": "PASS: all 66 source PNGs opened/verified during manifest generation",
+    "contact_sheet": "docs/QA_EVIDENCE/alpha15-integrated-concept-contact-sheet.jpg",
+    "checkpoint_zip_integrity": "PASS",
+    "checkpoint_unzip_test": "PASS",
+    "extracted_checkpoint_npm_test": "PASS"
+  },
+  "verification_documents": [
+    "docs/ALPHA15_CHANGELOG_HU.md",
+    "docs/ALPHA15_TEST_REPORT_HU.md",
+    "docs/ALPHA15_CONTINUATION_STATE_HU.md",
+    "docs/ALPHA15_CONCEPT_ARCHIVE_INVENTORY_HU.md",
+    "docs/ALPHA15_CONCEPT_MAPPING_REPORT_HU.md",
+    "RELEASE-v2.0.0-alpha.15.md"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "audit_title": "AIMORPG v2.0.0-alpha.14 — A 69 NPC-portré teljes auditja",
+  "source_checkpoint": "AIMORPG-v2.0.0-alpha.13-Stage2-Item-Art-Integration-Checkpoint.zip",
+  "generated_at_local": "2026-10-19",
+  "npc_count": 69,
+  "counts": {
+    "explicit_mapping": 61,
+    "direct_avatarSrc": 8,
+    "files_exist_and_open": 69,
+    "receipt_sha256_matches": 61,
+    "visual_role_match_plausible": 52,
+    "needs_review": 15,
+    "mismatch_new_portrait_required": 2,
+    "source_fixes_applied": 1,
+    "missing_files": 0,
+    "unreadable_files": 0,
+    "unique_effective_paths": 69,
+    "unique_file_sha256": 69
+  },
+  "duplicate_screen": {
+    "exact_sha_duplicates": 0,
+    "dhash_candidate_pairs_distance_le_6": [],
+    "ahash_candidate_pairs_distance_le_6": [
+      {
+        "id_a": "miri",
+        "id_b": "serin",
+        "distance": 4
+      },
+      {
+        "id_a": "miri",
+        "id_b": "velka",
+        "distance": 3
+      },
+      {
+        "id_a": "damar",
+        "id_b": "ilren",
+        "distance": 5
+      },
+      {
+        "id_a": "damar",
+        "id_b": "eldra",
+        "distance": 4
+      },
+      {
+        "id_a": "ilren",
+        "id_b": "eldra",
+        "distance": 5
+      }
+    ],
+    "interpretation": "Az aHash jelzések alacsony felbontású, sötét keretes legacy avatarok közös elrendezéséből is eredhetnek; nem bizonyítják a képtartalom duplikációját."
+  },
+  "qa_status": {
+    "npm_test": "PASS after source fix, manifest update, alpha.14 version/header and smoke-test expectation update; see npm-test-after-audit.log",
+    "lint": "BLOCKED; actual run exit 2 because Next.js/React modules and type definitions are missing; see npm-lint-after-audit.log",
+    "build": "BLOCKED; actual run exit 127, next: not found; see npm-build-after-audit.log",
+    "live_browser_desktop_mobile": "NOT RUN; no live browser visual verification",
+    "npm_ci": "NOT RUN during portrait audit; no install retry after prior EAI_AGAIN network error"
+  }
+}

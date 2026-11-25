@@ -1,0 +1,7 @@
+AIMORPG grafikai koncepciócsomag 02
+Targyak: 22
+NPC portrek: 4
+Varosresz-koncepciok: 6
+Project overlay: project_overlay/
+Preview sheets: previews/
+Original board: project_overlay/docs/artwork-sources/concept-pack-02/concept_board_02.png

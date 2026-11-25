@@ -1,0 +1,62 @@
+{
+  "version": "2.0.0-alpha.17",
+  "catalog_items": 187,
+  "unique_item_art_count": 74,
+  "family_fallback_count": 23,
+  "slot_fallback_count": 90,
+  "item_audit_status_counts": {
+    "UNIQUE_ART_AVAILABLE": 74,
+    "FAMILY_FALLBACK_ACCEPTABLE": 106,
+    "NEEDS_NEW_ART": 4,
+    "NEEDS_REVIEW": 3
+  },
+  "concept_manifest_rows": 122,
+  "concept_status_counts": {
+    "INTEGRATED_SOURCE_VERIFIED": 22,
+    "NEEDS_REVIEW": 81,
+    "INTEGRATED_SOURCE_ROLE_MATCH": 6,
+    "ALREADY_COVERED_ALTERNATE_CONCEPT": 13
+  },
+  "new_runtime_item_art": [
+    "sealedLedger"
+  ],
+  "family_fallback_adjustments": {
+    "heartyStew": "sailorsStew",
+    "stormSalt": "blackSalt"
+  },
+  "main_asset_manifest_rows": 344,
+  "tests": {
+    "npm_test_working_copy": "PASS",
+    "npm_test_final_extracted_checkpoint": "TO_VERIFY_AFTER_FINAL_PACKAGING",
+    "lint": "BLOCKED",
+    "build": "BLOCKED",
+    "browser_desktop_mobile": "NOT RUN",
+    "npm_ci_retried": false
+  },
+  "source_hashes": {
+    "sealedLedger_source": "a8b301c1a96dcc9063277ef4fa2d792df412557cb71d77d3e482fc62e6b4ead1",
+    "sealedLedger_output": "99b38bdadf76c04aaf00b121c733dd9c4c6822bd89901d3b7972826f037c5fa1"
+  },
+  "protected_archive_hashes": {
+    "AIMORPG-v2.0.0-alpha.16-Concept-Integration-Checkpoint.zip": "966cdc4c0b9b6d37ae2888154d404db40023bc1dcf3cf7be0515e6d4d433aac2",
+    "AIMORPG_Grafikai_Koncepcio_01(1).zip": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+    "AIMORPG_Grafikai_Koncepcio_02(2).zip": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+    "AIMORPG_Grafikai_Koncepcio_03(2).zip": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073"
+  },
+  "item_status_counts": {
+    "UNIQUE_ART_AVAILABLE": 74,
+    "FAMILY_FALLBACK_ACCEPTABLE": 106,
+    "NEEDS_REVIEW": 3,
+    "NEEDS_NEW_ART": 4
+  },
+  "npc_review_status": {
+    "active_npc_records_reviewed": 13,
+    "mapping_changes_for_uncertain_npcs": 0,
+    "live_ui_visual_verification": "NOT RUN"
+  },
+  "development_backlog": {
+    "tasks": 20,
+    "csv": "docs/ALPHA17_DEVELOPMENT_BACKLOG_HU.csv",
+    "markdown": "docs/ALPHA17_DEVELOPMENT_BACKLOG_HU.md"
+  }
+}

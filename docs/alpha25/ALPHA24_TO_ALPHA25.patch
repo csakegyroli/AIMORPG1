@@ -1,0 +1,294 @@
+--- alpha24/src/components/GameClient.tsx
++++ alpha25/src/components/GameClient.tsx
+@@ -14,6 +14,7 @@
+ import { npcIsPresent as npcRuntimePresent } from "../lib/simulation";
+ import { getActiveGearSynergies } from "@/lib/synergies";
+ import { AccountPanel } from "@/components/AccountPanel";
++import { EyeEntity, EyeMark } from "@/components/EyeEntity";
+ import { NPC_PORTRAIT_ART, REGION_ART, districtArtFor, itemArtFor, itemArtKindFor } from "@/lib/visualAssets";
+ import { API_BASE, apiJson, errorMessage } from "@/lib/clientApi";
+ import type { GameState } from "@/lib/store";
+@@ -237,7 +238,7 @@
+ 
+   return <main className="game-shell">
+     <header className="topbar">
+-      <div className="brand"><span className="brand-mark">✦</span><div><strong>AImorpg</strong><small>A Királyság 327. éve · élő város · V2.0 alpha.24</small></div></div>
++      <div className="brand"><span className="brand-mark">✦</span><div><strong>AImorpg</strong><small>A Királyság 327. éve · élő város · V2.0 alpha.25</small></div></div>
+       <div className="top-avatar"><img src={AVATARS.find((a) => a.id === game.avatarId)?.src ?? AVATARS[0].src} alt="" /></div>
+       <div className="top-stats">
+         <TopStat label="Arany" value={`${game.gold} 🪙`} /><TopStat label="Gyémánt" value={`${game.diamonds} 💎`} /><TopStat label="Szint" value={game.level} /><TopStat label="Hírnév" value={reputation.toLocaleString("hu-HU")} /><TopStat label="Tartózkodás" value={regionName(game.currentRegion)} wide />
+@@ -245,7 +246,7 @@
+       <ServerTowerClock />
+     </header>
+     <div className="game-layout">
+-      <aside className="sidebar"><div className="side-ribbon">VÁROS ÉS SORS</div><nav className="nav-list" aria-label="Fő navigáció">{navGroups.map((group) => <section className="nav-group" key={group.id} aria-labelledby={`nav-group-${group.id}`}><h2 className="nav-group-title" id={`nav-group-${group.id}`}>{group.label}</h2>{group.items.map((item) => <button type="button" key={item.id} aria-current={view === item.id ? "page" : undefined} className={`nav-button ${view === item.id ? "active" : ""}`} onClick={() => go(item.id)}><span className={`nav-icon ${item.id === "gm" ? "nav-icon-eye" : ""}`} aria-hidden="true">{item.id === "gm" ? <img src="/assets/eye-emblem-v2.webp" alt="" /> : item.icon}</span>{item.label}{item.id === "gm" && unread > 0 && <span className="nav-badge" aria-label={`${unread} olvasatlan megfigyelés`}>{unread}</span>}</button>)}</section>)}</nav></aside>
++      <aside className="sidebar"><div className="side-ribbon">VÁROS ÉS SORS</div><nav className="nav-list" aria-label="Fő navigáció">{navGroups.map((group) => <section className="nav-group" key={group.id} aria-labelledby={`nav-group-${group.id}`}><h2 className="nav-group-title" id={`nav-group-${group.id}`}>{group.label}</h2>{group.items.map((item) => <button type="button" key={item.id} aria-current={view === item.id ? "page" : undefined} className={`nav-button ${view === item.id ? "active" : ""}`} onClick={() => go(item.id)}><span className={`nav-icon ${item.id === "gm" ? "nav-icon-eye" : ""}`} aria-hidden="true">{item.id === "gm" ? <EyeMark /> : item.icon}</span>{item.label}{item.id === "gm" && unread > 0 && <span className="nav-badge" aria-label={`${unread} olvasatlan megfigyelés`}>{unread}</span>}</button>)}</section>)}</nav></aside>
+       <section className="main-panel" data-view={view}>
+         {view === "overview" && <Overview game={game} reputation={reputation} setView={go} setShowPrologue={setShowPrologue} onOpenCalendar={() => setShowCalendar(true)} />}
+         {view === "character" && <Character game={game} effectiveStats={effectiveStats} notify={notify} />}
+@@ -316,7 +317,7 @@
+       <section className="overview-card"><span>JELENLEGI HELYZET</span><h3>{regionName(game.currentRegion)}</h3><p>{getWorldTime().label} · A helyed a városban számít.</p><div className="overview-stats"><b>{game.level}<small>szint</small></b><b>{reputation.toLocaleString("hu-HU")}<small>hírnév</small></b><b>{completed}/{QUESTS.length}<small>küldetés</small></b></div></section>
+       <section className="overview-card"><span>KÖVETKEZŐ LÉPÉS</span><h3>{next?.title ?? "A nyom továbbvezet"}</h3><p>{next?.summary ?? "A városnak új fejezetre van szüksége."}</p><button className="outline-button" onClick={() => setView("quests")}>Megnézem</button></section>
+       <section className="overview-card"><span>VILÁGKRÓNIKA</span><div className="overview-journal">{game.journal.slice(0, 3).map((j) => <div key={j.id}><b>{j.title}</b><small>{j.text}</small></div>)}</div><button className="outline-button" onClick={() => setView("chronicle")}>Krónika megnyitása</button></section>
+-      <section className="overview-eye"><img src="/assets/eye-emblem-v2.webp" alt="A Szem"/><div><span>A JÁTÉKMESTER</span><h3>A Szem mindent lát.</h3><p>Nem kell mindent elmondanom. Elég, ha mindent megjegyzek.</p><button className="gold-button" onClick={() => setView("gm")}>Megfigyelések</button></div></section>
++      <section className="overview-eye"><EyeEntity mode="compact" label="A Szem megfigyelőrelikviája"/><div><span>A JÁTÉKMESTER</span><h3>A Szem mindent lát.</h3><p>Nem kell mindent elmondanom. Elég, ha mindent megjegyzek.</p><button className="gold-button" onClick={() => setView("gm")}>Megfigyelések</button></div></section>
+     </div>
+   </div>;
+ }
+@@ -582,7 +583,7 @@
+           <span>{heroTrackedQuest ? regionName(heroTrackedQuest.region) : "Tekintsd át a történet állapotát"} <b aria-hidden="true">›</b></span>
+         </button>
+       </aside>
+-      <div className="capital-world-hero-seal"><img src="/assets/eye-emblem-v2.webp" alt="" loading="lazy" decoding="async"/><span>A SZEM FIGYEL</span></div>
++      <div className="capital-world-hero-seal"><EyeEntity mode="compact" label="A Szem figyeli a térképet"/><span>A SZEM FIGYEL</span></div>
+     </section>
+     <nav className="capital-command-rail" aria-label="Gyorselérés a játék moduljaihoz">
+       <div className="capital-command-rail-heading"><span>GYORS ELÉRÉS</span><small>A világ ugyanazt az állapotot használja minden modulban</small></div>
+@@ -596,7 +597,7 @@
+           { id: "chronicle", icon: "☷", label: "Krónika", value: `${game.journal.length} bejegyzés`, detail: "A világ emlékezete" },
+           { id: "gm", icon: "✧", label: "A Szem", value: `${game.gmMessages.filter(message => !message.seen).length} új jelzés`, detail: "Megfigyelések és naptár" },
+         ] as { id: ViewId; icon: string; label: string; value: string; detail: string }[]).map(item => <button type="button" key={item.id} className="capital-command-card" onClick={() => setView(item.id)} aria-label={`${item.label} megnyitása. ${item.value}`}>
+-          <span className="capital-command-icon" aria-hidden="true">{item.icon}</span>
++          <span className="capital-command-icon" aria-hidden="true">{item.id === "gm" ? <EyeMark /> : item.icon}</span>
+           <span className="capital-command-copy"><strong>{item.label}</strong><small>{item.detail}</small></span>
+           <span className="capital-command-value">{item.value}</span>
+           <span className="capital-command-arrow" aria-hidden="true">›</span>
+@@ -609,7 +610,7 @@
+       {interactiveRegions.map((id)=>{const r=REGIONS.find(x=>x.id===id)!;const open=!!game.regionAccess[id as keyof typeof game.regionAccess];const isCurrent=game.currentRegion===id;const isTracked=trackedStoryRegion(game)===id;return <button key={id} className={`map-hotspot ${!open?"locked":""} ${isCurrent?"current-location":""} ${isTracked?"quest-target-region":""}`} style={REGION_COORDS[id]} onClick={()=>{if(open)setSelectedRegion(id); else setLockedRegion(id as RegionId)}} title={open?(isCurrent?`${r.name} · jelenlegi helyed`:isTracked?`Követett történet · ${r.name}`:r.name):`${r.name} — ${r.lockText??"Régió még nem elérhető"}`} aria-label={open?`${r.name}${isCurrent?", jelenlegi helyed":""}${isTracked?", követett történet célpontja":""}`:`${r.name} — lezárva`}><img className="map-hotspot-art" src={REGION_ART[id]} alt="" draggable={false} loading="lazy" decoding="async"/><span className="map-hotspot-label"><i>{isCurrent?"●":!open?"⌑":isTracked?"✦":"✧"}</i>{r.name}{isCurrent?<small>ITT VAGY</small>:!open?<small>LEZÁRVA</small>:isTracked?<small>TÖRTÉNETI CÉLPONT</small>:null}</span></button>})}
+       {trackedStorySideQuest(game)?.blueprint.region && <div className="quest-map-target-note"><span>MELLÉKTÖRTÉNET · KÖVETKEZŐ ÁLLOMÁS</span><strong>{regionName(trackedStorySideQuest(game)!.blueprint.region)}</strong><small>A követett történet célpontja. Az utazásról te döntesz.</small></div>}
+       {!trackedStorySideQuest(game) && trackedMainQuest(game)?.region && <div className="quest-map-target-note"><span>FŐ KÜLDETÉS · KÖVETKEZŐ ÁLLOMÁS</span><strong>{regionName(trackedMainQuest(game)!.region)}</strong><small>{regionGateStatus(game,trackedMainQuest(game)!.region).unlocked?"Válaszd ki a térképen, ha folytatni szeretnéd.":`Lezárva: ${regionGateStatus(game,trackedMainQuest(game)!.region).reason}`}</small></div>}
+-      <div className="map-eye" title="A Szem figyeli a várost." aria-label="A Szem figyeli a várost."><img src="/assets/eye-emblem-v2.webp" alt="A Szem emblémája"/></div>
++      <div className="map-eye" title="A Szem figyeli a várost."><EyeEntity mode="compact" label="A Szem figyeli a várost"/></div>
+     </div>
+     <aside className="capital-map-sidebar"><div className="capital-current-place"><span className="capital-panel-kicker">JELENLEGI TARTÓZKODÁSI HELY</span><h3>{currentRegion?.name??regionName(game.currentRegion)}</h3><p>{currentRegion?.description??"A világ állapota alapján nyilvántartott helyed."}</p><div className="capital-state-line"><span>Világidő</span><strong>{worldTime.shortLabel} · {worldTime.phase}</strong></div><div className="capital-state-line"><span>Jelen lévő ismert NPC-k</span><strong>{visibleNpcs.length}</strong></div>{tracked&&<div className="capital-tracked"><small>KÖVETETT TÖRTÉNET</small><b>{tracked.name}</b><span>{tracked.district??tracked.region}</span></div>}</div>
+       <div className="capital-place-list"><div className="capital-list-heading"><span>VÁROSRÉSZEK</span><small>{interactiveRegions.filter(id=>game.regionAccess[id as keyof typeof game.regionAccess]).length} / {interactiveRegions.length} elérhető</small></div>{interactiveRegions.map(id=>{const r=REGIONS.find(x=>x.id===id)!;const open=!!game.regionAccess[id as keyof typeof game.regionAccess];return <button key={`capital-list-${id}`} className={`capital-place-row ${!open?"locked":""} ${game.currentRegion===id?"current":""}`} onClick={()=>{if(open)setSelectedRegion(id);else setLockedRegion(id as RegionId)}}><span className="capital-place-icon"><img src={REGION_ART[id]} alt="" loading="lazy" decoding="async"/><i>{r.icon}</i></span><span className="capital-place-copy"><b>{r.name}</b><small>{game.currentRegion===id?"Jelenlegi helyed":open?"Megtekintés és utazási lehetőségek":"Lezárva · történeti feltétel"}</small></span><span className="capital-place-arrow">{open?"›":"⌑"}</span></button>})}</div>
+@@ -1079,29 +1080,6 @@
+ 
+ type EyeViewId = "world" | "memories" | "visions" | "events";
+ 
+-/** Animated visible magical pupil layered over the blue observatory orb. The source art is a flat image, so this is an added iris layer, not the original artwork's own iris. */
+-function EyeGazeOverlay() {
+-  const [gaze, setGaze] = useState({ x: 0, y: 0, duration: 1.15 });
+-  useEffect(() => {
+-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+-    if (media.matches) return;
+-    let timer: ReturnType<typeof setTimeout> | undefined;
+-    let cancelled = false;
+-    const schedule = () => {
+-      timer = window.setTimeout(() => {
+-        if (cancelled) return;
+-        const choices = [{x:-17,y:0},{x:15,y:-4},{x:2,y:12},{x:-4,y:-12},{x:9,y:5},{x:0,y:0},{x:-10,y:4},{x:4,y:-2}];
+-        const target = choices[Math.floor(Math.random()*choices.length)];
+-        setGaze({ ...target, duration: 0.48 + Math.random()*0.82 });
+-        schedule();
+-      }, 750 + Math.random()*2300);
+-    };
+-    schedule();
+-    return () => { cancelled = true; if (timer) clearTimeout(timer); };
+-  }, []);
+-  return <span className="eye-gaze-overlay" aria-hidden="true" style={{ "--gaze-x": `${gaze.x}px`, "--gaze-y": `${gaze.y}px`, "--gaze-duration": `${gaze.duration}s` } as React.CSSProperties}><span className="eye-gaze-iris"><span className="eye-gaze-pupil" /></span></span>;
+-}
+-
+ function GameMaster({ game, reputation, onOpenCalendar, onAskAI, aiLoading, aiResult, aiError }: { game: GameState; reputation: number; onOpenCalendar: () => void; onAskAI: () => void; aiLoading: boolean; aiResult: { title: string; body: string; actionHint: string; tone: "personal" | "world" | "warning"; model?: string } | null; aiError: string | null }) {
+   const [eyeView, setEyeView] = useState<EyeViewId>("world");
+   const worldTime = getWorldTime();
+@@ -1115,7 +1093,7 @@
+     { id: "visions", label: "Látomások", description: "Kifejezetten látomásként megjelölt dinamikus események." },
+     { id: "events", label: "Események", description: "A dinamikus világ eseményei és a királysági naptár." },
+   ];
+-  return <><SectionTitle eyebrow="HÁTTÉRBEN MŰKÖDŐ RENDSZER" title="A Szem" text="A Szem a meglévő világállapotot olvassa és értelmezi. Ez a felület nem írja át a Canon vagy a Dynamic Layer adatait."/><div className="gm-hero gm-hero-illustrated"><div className="gm-hero-copy"><span>VILÁGMEGFIGYELŐ · VAROTH</span><h2>A Szem figyel.</h2><p>Az ősi megfigyelőrelikvia a világ jelenét, a mentett emlékeket, a ténylegesen rögzített látomásjelzéseket és az eseményeket követi. A Szem nem avatkozik be a világ állapotába.</p></div><div className="gm-hero-art-wrap"><img className="gm-hero-art" src="/assets/world/eye-observation.webp" alt="Ősi obszervatórium és mágikus megfigyelőrelikvia"/><EyeGazeOverlay /></div></div><nav className="eye-view-tabs" aria-label="A Szem nézetei" role="tablist">{eyeTabs.map((tab, index) => <button key={tab.id} type="button" role="tab" id={`eye-tab-${tab.id}`} tabIndex={eyeView === tab.id ? 0 : -1} aria-selected={eyeView === tab.id} aria-controls="eye-view-panel" className={eyeView === tab.id ? "selected" : ""} onClick={() => setEyeView(tab.id)} onKeyDown={event => { if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return; event.preventDefault(); const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? eyeTabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + eyeTabs.length) % eyeTabs.length; const nextTab = eyeTabs[nextIndex]; setEyeView(nextTab.id); document.getElementById(`eye-tab-${nextTab.id}`)?.focus(); }}>{tab.label}</button>)}</nav><section className="eye-view-panel" id="eye-view-panel" role="tabpanel" aria-labelledby={`eye-tab-${eyeView}`}>
++  return <><SectionTitle eyebrow="HÁTTÉRBEN MŰKÖDŐ RENDSZER" title="A Szem" text="A Szem a meglévő világállapotot olvassa és értelmezi. Ez a felület nem írja át a Canon vagy a Dynamic Layer adatait."/><div className="gm-hero gm-hero-illustrated"><div className="gm-hero-copy"><span>VILÁGMEGFIGYELŐ · VAROTH</span><h2>A Szem figyel.</h2><p>Az ősi megfigyelőrelikvia a világ jelenét, a mentett emlékeket, a ténylegesen rögzített látomásjelzéseket és az eseményeket követi. A Szem nem avatkozik be a világ állapotába.</p></div><div className="gm-hero-art-wrap"><EyeEntity mode="scene" label="A Szem élő megfigyelőrelikviája" /></div></div><nav className="eye-view-tabs" aria-label="A Szem nézetei" role="tablist">{eyeTabs.map((tab, index) => <button key={tab.id} type="button" role="tab" id={`eye-tab-${tab.id}`} tabIndex={eyeView === tab.id ? 0 : -1} aria-selected={eyeView === tab.id} aria-controls="eye-view-panel" className={eyeView === tab.id ? "selected" : ""} onClick={() => setEyeView(tab.id)} onKeyDown={event => { if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return; event.preventDefault(); const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? eyeTabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + eyeTabs.length) % eyeTabs.length; const nextTab = eyeTabs[nextIndex]; setEyeView(nextTab.id); document.getElementById(`eye-tab-${nextTab.id}`)?.focus(); }}>{tab.label}</button>)}</nav><section className="eye-view-panel" id="eye-view-panel" role="tabpanel" aria-labelledby={`eye-tab-${eyeView}`}>
+     {eyeView === "world" && <><div className="eye-view-heading"><span>AKTUÁLIS ADATOK</span><h3>Világállapot</h3><p>{worldTime.label} · {worldTime.phase} · a játék jelenlegi mentéséből</p></div><div className="eye-fact-grid"><article><small>Világidő</small><strong>{worldTime.shortLabel}</strong><span>{worldTime.year}. év · {worldTime.dayOfYear}. nap</span></article><article><small>Aktív régió</small><strong>{regionName(game.currentRegion)}</strong><span>A játékos jelenlegi tartózkodási helye</span></article><article><small>Hírnév</small><strong>{reputation.toLocaleString("hu-HU")}</strong><span>Meglévő hírnévpontszám</span></article><article><small>Küldetések</small><strong>{Object.values(game.questStatus).filter(status => status === "completed").length} teljesített</strong><span>{Object.values(game.questStatus).filter(status => status === "active").length} aktív küldetés</span></article><article><small>Világesemények</small><strong>{activeEvents.length} aktív</strong><span>A Dynamic Layer eseménynaplója alapján</span></article><article><small>Mentett emlékek</small><strong>{memories.length}</strong><span>A játékmentésben szereplő emlékek</span></article></div><div className="eye-view-actions"><button className="outline-button" onClick={onOpenCalendar}>Királysági naptár megnyitása</button></div></>}
+     {eyeView === "memories" && <><div className="eye-view-heading"><span>MENTETT JÁTÉKADAT</span><h3>Emlékek</h3><p>Forrás: game.worldMemories · legújabb bejegyzés elöl.</p></div>{memories.length ? <div className="eye-record-list">{memories.map(memory => <article key={memory.id}><div className="eye-record-meta"><span>{memory.kind}</span><time>{memory.at}</time></div><h4>{memory.title}</h4><p>{memory.text}</p><div className="eye-record-tags">{memory.tags.map(tag => <span key={tag}>{tag}</span>)}</div></article>)}</div> : <div className="eye-empty-state"><strong>Még nincs mentett emlék.</strong><p>Amint a játékban történik emléket rögzítő esemény, itt a mentés tényleges adata jelenik meg.</p></div>}</>}
+     {eyeView === "visions" && <><div className="eye-view-heading"><span>ADATFORRÁS-ELLENŐRZÉS</span><h3>Látomások</h3><p>Csak a Dynamic Layerben kifejezetten „vision” vagy „látomás” címkével rögzített eseményeket mutatjuk.</p></div>{visionSignals.length ? <div className="eye-record-list">{visionSignals.map(signal => <article key={signal.id}><div className="eye-record-meta"><span>{signal.type}</span><time>{new Date(signal.at).toLocaleString("hu-HU")}</time></div><h4>{signal.summary}</h4><p>{signal.tags.join(" · ")}</p></article>)}</div> : <div className="eye-empty-state"><strong>Nincs rögzített látomás.</strong><p>A jelenlegi mentésben nincs látomásként megjelölt dinamikus esemény. A Szem nem helyettesíti ezt kitalált tartalommal.</p></div>}</>}
+--- alpha24/src/app/globals.css
++++ alpha25/src/app/globals.css
+@@ -1622,3 +1622,65 @@
+ @media(max-width:1250px){.topbar{flex-wrap:wrap;}.topbar .brand{flex:1 1 220px}.topbar .top-stats{order:3;flex:1 1 100%;}.topbar .server-tower-clock{flex:0 0 205px;}}
+ @media(max-width:640px){.topbar .server-tower-clock{flex:1 1 100%;width:100%!important;}.topbar .top-stats{grid-template-columns:repeat(2,minmax(0,1fr));}.eye-gaze-overlay{width:clamp(58px,18vw,92px);}}
+ @media(prefers-reduced-motion:reduce){.eye-gaze-overlay{transition:none!important;transform:translate(-50%,-50%)!important;}}
++
++/* alpha.25 — one canonical Eye identity reused on map, overview and Eye hub. */
++.eye-entity{position:relative;display:block;isolation:isolate;overflow:hidden;aspect-ratio:3/2;min-width:0;background:#070d15;border:1px solid rgba(118,85,47,.8);box-shadow:0 5px 18px #0008,0 0 16px #3c8fe822;}
++.eye-entity-art{position:absolute!important;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;border-radius:0!important;filter:saturate(.98) contrast(1.04)!important;mix-blend-mode:normal!important;}
++.eye-entity-gaze{position:absolute;left:52.6%;top:45.7%;width:6.2%;height:24%;transform:translate(calc(-50% + var(--eye-x,0px)),calc(-50% + var(--eye-y,0px)));transition:transform var(--eye-duration,.8s) cubic-bezier(.2,.76,.2,1);border-radius:48% 48% 52% 52%;background:radial-gradient(ellipse at 50% 45%,#020713 0 38%,#071a32 58%,#3c8fe8 70%,#68b8f5aa 79%,transparent 100%);box-shadow:0 0 5px #3c8fe8,0 0 11px #3c8fe866;pointer-events:none;z-index:2;}
++.eye-entity-iris{position:absolute;inset:-16% -28%;display:block;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,#031021 0 27%,#1675b8 34%,#53bdf5aa 42%,transparent 69%);opacity:.78;}
++.eye-entity-pupil{position:absolute;left:50%;top:50%;width:38%;height:82%;transform:translate(-50%,-50%);border-radius:50%;background:linear-gradient(90deg,#06152a,#01050b 48%,#09233c);box-shadow:0 0 4px #000,0 0 3px #65c7ff;}
++.eye-entity--scene{width:100%;height:auto;min-height:0;border-color:rgba(212,175,106,.58);}
++.eye-entity--compact{width:clamp(100px,10vw,150px);flex:0 0 auto;aspect-ratio:3/2;border-radius:3px;}
++.eye-mark{display:block;width:25px;height:18px;color:#68b8f5;filter:drop-shadow(0 0 4px #3c8fe888);}
++.nav-icon-eye{display:grid!important;place-items:center;padding:3px;}
++.nav-icon-eye .eye-mark{width:27px;height:19px;}
++.map-eye{width:clamp(100px,10vw,150px)!important;height:auto!important;aspect-ratio:3/2!important;padding:0!important;border-radius:3px!important;overflow:hidden!important;border:1px solid #76552f!important;background:#0b0f14!important;box-shadow:0 6px 20px #000b,0 0 18px #3c8fe833!important;}
++.map-eye .eye-entity--compact{width:100%;height:100%;border:0;}
++.capital-world-hero-seal .eye-entity--compact{width:74px;height:50px;}
++.overview-eye{grid-template-columns:minmax(100px,150px) minmax(0,1fr)!important;}
++.overview-eye .eye-entity--compact{width:100%;height:auto;}
++.gm-hero-illustrated .gm-hero-art-wrap{width:100%;min-width:0;}
++.gm-hero-illustrated .eye-entity--scene{width:100%;height:auto;aspect-ratio:3/2;}
++@media(max-width:1250px){
++ .topbar{flex-wrap:nowrap!important;gap:8px!important;padding:8px 10px!important;}
++ .topbar .brand{flex:0 1 185px!important;min-width:145px!important;}
++ .topbar .brand strong{font-size:clamp(15px,1.6vw,21px)!important;letter-spacing:1px!important;}
++ .topbar .brand small{font-size:8px!important;letter-spacing:.6px!important;}
++ .topbar .top-avatar{width:38px!important;height:38px!important;flex:0 0 38px!important;}
++ .topbar .top-stats{order:0!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;grid-template-columns:repeat(4,minmax(45px,.8fr)) minmax(70px,1fr)!important;}
++ .topbar .top-stat{padding:4px 4px!important;}
++ .topbar .top-stat strong{font-size:clamp(10px,1vw,13px)!important;}
++ .topbar .server-tower-clock{order:0!important;flex:0 0 170px!important;width:170px!important;min-width:0!important;height:52px!important;min-height:52px!important;padding:4px 6px!important;gap:5px!important;}
++ .topbar .server-tower-clock .clock-tower-body{width:38px!important;height:38px!important;flex:0 0 38px!important;}
++ .topbar .server-tower-clock .clock-face{width:32px!important;height:32px!important;}
++ .topbar .server-tower-copy strong{font-size:14px!important;}
++ .topbar .server-tower-copy span{font-size:7px!important;}
++}
++@media(max-width:900px){
++ .topbar{display:grid!important;grid-template-columns:minmax(130px,1fr) auto auto;align-items:center!important;}
++ .topbar .brand{grid-column:1;min-width:0!important;}
++ .topbar .top-avatar{grid-column:2;}
++ .topbar .server-tower-clock{grid-column:3;flex:0 0 160px!important;width:160px!important;}
++ .topbar .top-stats{grid-column:1/-1;grid-row:2;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important;}
++ .topbar .top-stat small{font-size:7px!important;letter-spacing:0!important;}
++ .topbar .top-stat strong{font-size:11px!important;}
++ .map-eye{right:10px!important;top:10px!important;width:104px!important;}
++ .eye-entity--compact{width:104px;}
++}
++@media(max-width:640px){
++ .topbar{grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;}
++ .topbar .brand{grid-column:1;}
++ .topbar .top-avatar{display:none!important;}
++ .topbar .server-tower-clock{grid-column:2;grid-row:1;flex:0 0 145px!important;width:145px!important;height:48px!important;min-height:48px!important;}
++ .topbar .server-tower-clock .clock-tower-body{width:34px!important;height:34px!important;flex-basis:34px!important;}
++ .topbar .server-tower-clock .clock-face{width:29px!important;height:29px!important;}
++ .topbar .server-tower-copy small{font-size:6px!important;}
++ .topbar .server-tower-copy strong{font-size:13px!important;}
++ .topbar .server-tower-copy span{font-size:6px!important;}
++ .topbar .top-stats{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr))!important;}
++ .topbar .top-stat.wide{display:block!important;}
++ .map-eye{width:86px!important;}
++ .overview-eye{grid-template-columns:100px minmax(0,1fr)!important;gap:10px!important;}
++ .capital-world-hero-seal .eye-entity--compact{width:60px;height:40px;}
++}
++@media(prefers-reduced-motion:reduce){.eye-entity-gaze{transition:none!important;transform:translate(-50%,-50%)!important}.eye-entity-pupil{box-shadow:none!important}}
+--- alpha24/package.json
++++ alpha25/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "aimorpg-black-coin",
+-  "version": "2.0.0-alpha.24",
++  "version": "2.0.0-alpha.25",
+   "private": true,
+   "engines": {
+     "node": ">=22.0.0"
+--- alpha24/package-lock.json
++++ alpha25/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "aimorpg-black-coin",
+-  "version": "2.0.0-alpha.24",
++  "version": "2.0.0-alpha.25",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "aimorpg-black-coin",
+-      "version": "2.0.0-alpha.24",
++      "version": "2.0.0-alpha.25",
+       "engines": {
+         "node": ">=22.0.0"
+       },
+--- alpha24/scripts/smoke-test.cjs
++++ alpha25/scripts/smoke-test.cjs
+@@ -42,11 +42,13 @@
+   const contentOut = path.join(temp, "content.js");
+   const gameClientOut = path.join(temp, "GameClient.js");
+   const accountPanelOut = path.join(temp, "AccountPanel.js");
++  const eyeEntityOut = path.join(temp, "EyeEntity.js");
+   const appPageOut = path.join(temp, "app-page.js");
+   const appLayoutOut = path.join(temp, "app-layout.js");
+   // Parse/transpile actual UI TSX without pretending this is a dependency-complete typecheck.
+   compile(path.join(root, "src/components/GameClient.tsx"), gameClientOut);
+   compile(path.join(root, "src/components/AccountPanel.tsx"), accountPanelOut);
++  compile(path.join(root, "src/components/EyeEntity.tsx"), eyeEntityOut);
+   compile(path.join(root, "src/app/page.tsx"), appPageOut);
+   compile(path.join(root, "src/app/layout.tsx"), appLayoutOut);
+   const expansionItemsOut = path.join(temp, "expansionItems.js");
+@@ -85,6 +87,7 @@
+   compile(path.join(root, "src/lib/store.ts"), path.join(temp, "store-syntax.js"));
+   compile(path.join(root, "src/components/GameClient.tsx"), path.join(temp, "GameClient-syntax.js"));
+   compile(path.join(root, "src/components/AccountPanel.tsx"), path.join(temp, "AccountPanel-syntax.js"));
++  compile(path.join(root, "src/components/EyeEntity.tsx"), path.join(temp, "EyeEntity-syntax.js"));
+   compile(path.join(root, "src/app/page.tsx"), path.join(temp, "page-syntax.js"));
+   compile(path.join(root, "src/app/layout.tsx"), path.join(temp, "layout-syntax.js"));
+   for (const source of walkFiles(path.join(root, "server/src")).filter(file => file.endsWith(".ts"))) {
+@@ -330,7 +333,7 @@
+ 
+   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+   assert.equal(packageJson.scripts.test, "node scripts/smoke-test.cjs && node scripts/security-smoke.cjs && node scripts/visual-assets-smoke.cjs && node scripts/visual-ui-smoke.cjs");
+-  assert.equal(packageJson.version, "2.0.0-alpha.24");
++  assert.equal(packageJson.version, "2.0.0-alpha.25");
+   const packageLock = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
+   assert.equal(packageLock.version, packageJson.version, "package-lock root version should match package.json.");
+   assert.equal(packageLock.packages[""].version, packageJson.version, "package-lock root package version should match package.json.");
+@@ -491,7 +494,7 @@
+   for (const ref of assetRefs) assert.ok(assets.has(ref), `Missing asset: ${ref}`);
+ 
+   console.log("AImorpg core gameplay/content smoke test: PASS");
+-  console.log("TSX syntax/transpile smoke test: PASS (GameClient, AccountPanel, app page and layout; not a full semantic TypeScript check)");
++  console.log("TSX syntax/transpile smoke test: PASS (GameClient, AccountPanel, EyeEntity, app page and layout; not a full semantic TypeScript check)");
+   console.log(`Validated ${content.ITEMS.length} items (${itemUniqueArt} unique images, ${itemFamilyFallbackArt} explicit family illustrations, ${itemSlotFallbackArt} equipment-slot fallbacks, ${itemCategoryFallbackArt} category fallbacks), ${content.EQUIPMENT_SETS.length} sets, ${content.NPCS.length} NPCs, ${content.QUESTS.length} quests, ${content.REGION_DISTRICTS.length} region districts, ${assetRefs.size} asset references.`);
+ } finally {
+   fs.rmSync(temp, { recursive: true, force: true });
+--- alpha24/scripts/visual-ui-smoke.cjs
++++ alpha25/scripts/visual-ui-smoke.cjs
+@@ -17,7 +17,7 @@
+ }
+ 
+ try {
+-  assert.match(gameClient, /V2\.0 alpha\.24/, "Visible application header must match the package checkpoint version.");
++  assert.match(gameClient, /V2\.0 alpha\.25/, "Visible application header must match the package checkpoint version.");
+   assert.match(gameClient, /const navGroups:[\s\S]*?label: "A királyság"[\s\S]*?label: "A hős"[\s\S]*?label: "Történet és kapcsolatok"[\s\S]*?label: "A világ megfigyelője"[\s\S]*?label: "Rendszer"/, "Primary navigation must provide all five requested functional groups.");
+   assert.match(gameClient, /role="tablist"[\s\S]*?Világállapot[\s\S]*?Emlékek[\s\S]*?Látomások[\s\S]*?Események/, "The Eye must expose four distinct view tabs.");
+   assert.match(gameClient, /tabIndex=\{eyeView === tab\.id \? 0 : -1\}[\s\S]*?ArrowLeft[\s\S]*?ArrowRight/, "The Eye tabs must support keyboard arrow navigation and roving focus.");
+@@ -50,13 +50,13 @@
+   assert.match(css, /world\/eye-observation\.webp/, "The Eye illustration must point to an existing high-resolution world asset.");
+   assert.match(css, /server-tower-clock\{position:relative!important;inset:auto!important/, "The world clock must occupy a non-overlapping layout row.");
+   assert.match(css, /--aim-magic-blue:#3C8FE8/, "The alpha.19/alpha.23 theme must expose the specified magic-blue focus token.");
+-  assert.match(gameClient, /className="eye-gaze-overlay"/, "The Eye must render a visible animated gaze layer.");
++  assert.match(fs.readFileSync(path.join(root, "src/components/EyeEntity.tsx"), "utf8"), /className="eye-entity-gaze"/, "The shared Eye must render a visible animated gaze layer.");
+   assert.match(css, /\.topbar \.server-tower-clock/, "The world clock must be styled inside the top status header.");
+-  assert.match(css, /\.nav-icon-eye img/, "The main Eye navigation icon must use the Eye artwork asset.");
+-  assert.match(css, /prefers-reduced-motion:reduce.*eye-gaze-overlay/s, "The gaze overlay must respect reduced-motion preferences.");
+-  assert.match(gameClient, /function EyeGazeOverlay/, "The Eye must use an independent gaze overlay.");
+-  assert.match(gameClient, /prefers-reduced-motion: reduce/, "The Eye must respect reduced-motion preferences.");
+-  assert.match(css, /\.eye-gaze-overlay/, "The Eye gaze overlay must have a dedicated style.");
++  assert.match(css, /\.nav-icon-eye \.eye-mark/, "The main Eye navigation icon must use the canonical Eye mark.");
++  assert.match(css, /prefers-reduced-motion:reduce.*eye-entity-gaze/s, "The shared gaze must respect reduced-motion preferences.");
++  assert.ok(gameClient.includes("<EyeEntity mode=\"scene\""), "The Eye hub must use the shared canonical Eye component.");
++  assert.match(fs.readFileSync(path.join(root, "src/components/EyeEntity.tsx"), "utf8"), /prefers-reduced-motion: reduce/, "The shared Eye must respect reduced-motion preferences.");
++  assert.match(css, /\.eye-entity-gaze/, "The shared Eye gaze layer must have a dedicated style.");
+   assert.match(css, /:focus-visible\{outline:2px solid var\(--aim-magic-blue\)/, "Keyboard focus must have a visible magic-blue outline.");
+   assert.match(gameClient, /setView\("quests"\)/, "Capital hero quest action must navigate to the real quest view.");
+   const localQaScript = fs.readFileSync(path.join(root, "scripts/windows-local-qa.ps1"), "utf8");
+@@ -106,9 +106,21 @@
+     assert.ok(fs.existsSync(path.join(root, "public", match[1].replace(/^\//, ""))), `Mapped region art file is absent: ${id} -> ${match[1]}`);
+   }
+ 
++  const eyeComponent = fs.readFileSync(path.join(root, "src/components/EyeEntity.tsx"), "utf8");
++  assert.ok(fs.existsSync(path.join(root, "public/assets/world/eye-canonical.webp")), "Reference-derived canonical Eye artwork must exist.");
++  assert.match(eyeComponent, /prefers-reduced-motion/ , "Shared Eye must honor reduced motion.");
++  assert.ok(gameClient.includes("<EyeEntity mode=\"compact\" label=\"A Szem figyeli a várost\"/>"), "Map must use the shared Eye entity.");
++  assert.ok(gameClient.includes("<EyeEntity mode=\"compact\" label=\"A Szem megfigyelőrelikviája\"/>"), "Overview must use the shared Eye entity.");
++  assert.ok(gameClient.includes("label=\"A Szem élő megfigyelőrelikviája\""), "Eye hub must use the shared Eye entity.");
++  assert.doesNotMatch(gameClient, /function EyeGazeOverlay/, "Obsolete one-off gaze overlay must be removed.");
++  assert.match(css, /topbar \.server-tower-clock\{order:0!important;flex:0 0 170px!important/, "World clock must remain compact in the top status bar at desktop widths.");
++
+   const manifestRows = manifest.trim().split(/\r?\n/).length - 1;
+   console.log("Visual UI smoke test: PASS");
+-  console.log(`Validated alpha.24 header, immersive capital hero with live character/resource/quest HUD, data-driven module command rail, inventory capacity indicators, quest/NPC/market summaries, local QA script and guide, resilient image fallback code paths, seven region-art files on map hotspots, preserved gate/travel wiring, responsive styling, and ${manifestRows} manifest records.`);
++  console.log(`Validated alpha.25 header, immersive capital hero with live character/resource/quest HUD, data-driven module command rail, inventory capacity indicators, quest/NPC/market summaries, local QA script and guide, resilient image fallback code paths, seven region-art files on map hotspots, preserved gate/travel wiring, responsive styling, and ${manifestRows} manifest records.`);
+ } catch (error) {
+   fail(error instanceof Error ? error.message : String(error));
+ }
++
++assert.ok(fs.existsSync(path.join(root, "src/components/EyeEntity.tsx")), "shared canonical Eye component exists");
++assert.ok(fs.readFileSync(path.join(root, "src/components/GameClient.tsx"), "utf8").includes("EyeEntity mode=\"scene\""), "Eye hub uses canonical Eye entity");

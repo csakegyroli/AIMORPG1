@@ -1,0 +1,195 @@
+{
+  "version": "2.0.0-alpha.16",
+  "base_checkpoint": "AIMORPG-v2.0.0-alpha.15-Concept-Integration-Checkpoint.zip",
+  "base_archive_sha256": "f7a4c39823a72fda7853038495aba5447bcb67d6e2357d1e85976808fdbb7587",
+  "pack03": {
+    "filename": "AIMORPG_Grafikai_Koncepcio_03(2).zip",
+    "bytes": 10107570,
+    "sha256": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073",
+    "zip_entries": 64,
+    "zip_integrity": "PASS",
+    "standalone_item_concepts": 48,
+    "standalone_region_concepts": 8,
+    "source_sheets": 2,
+    "contact_sheets": 2
+  },
+  "active_item_mapping_changes": [
+    {
+      "item_id": "streetMap",
+      "concept_id": "concept03-item-022",
+      "source_path": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03/items/concept03_item_22_kuldetesterkep.webp",
+      "runtime_path": "/assets/items/streetMap.webp",
+      "source_sha256": "a664cedf79eb56f9428b74c18dd45e191782ed346439e07488805ec5b6e8764f",
+      "output_sha256": "a664cedf79eb56f9428b74c18dd45e191782ed346439e07488805ec5b6e8764f",
+      "source_bytes": 48864,
+      "mapping_reason": "A tényleges képen térképes pergamen és útvonaljelölések látszanak. A cél-item leírása kifejezetten a sikátorok és rövidítések frissen firkált térképe; ez a meglévő azonosítóval ellenőrizhető tárgytípus-egyezés.",
+      "status": "SOURCE VERIFIED; LIVE RENDER NOT VERIFIED"
+    },
+    {
+      "item_id": "guildPermit",
+      "concept_id": "concept03-item-021",
+      "source_path": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03/items/concept03_item_21_cehokmany.webp",
+      "runtime_path": "/assets/items/guildPermit.webp",
+      "source_sha256": "458577e80b63c8ae35f87226c353598e5d7cfe6916acd105589e5fea9b83616b",
+      "output_sha256": "458577e80b63c8ae35f87226c353598e5d7cfe6916acd105589e5fea9b83616b",
+      "source_bytes": 52186,
+      "mapping_reason": "A kép céhesnek ható, viaszpecsétes hivatalos okmányt mutat; a cél-item ideiglenes céhes engedély, amely üzleti kapukat nyit meg. A megfelelés a dokumentum jellegén és a meglévő leíráson alapul, nem pusztán a fájlnéven.",
+      "status": "SOURCE VERIFIED; LIVE RENDER NOT VERIFIED"
+    },
+    {
+      "item_id": "tradeSilk",
+      "concept_id": "concept03-item-029",
+      "source_path": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03/items/concept03_item_29_finom_szovet.webp",
+      "runtime_path": "/assets/items/tradeSilk.webp",
+      "source_sha256": "6fbadc0151a67cc93e74d5575b00a47568e6e210f1b4bf524e866bfb0aac20a5",
+      "output_sha256": "6fbadc0151a67cc93e74d5575b00a47568e6e210f1b4bf524e866bfb0aac20a5",
+      "source_bytes": 37452,
+      "mapping_reason": "A képen szövettekercsek láthatók; a cél-item nagy értékű céhes selyemáru. A jelenlegi kesztyűképes family fallback a tárgy tényleges anyagát nem mutatja.",
+      "status": "SOURCE VERIFIED; LIVE RENDER NOT VERIFIED"
+    },
+    {
+      "item_id": "guildMeal",
+      "concept_id": "concept03-item-032",
+      "source_path": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03/items/concept03_item_32_sajt_es_kenyer.webp",
+      "runtime_path": "/assets/items/guildMeal.webp",
+      "source_sha256": "cd24be8649fda5fcd534ad324ba2cf47785d1127004a903ef33d44f7781517c1",
+      "output_sha256": "cd24be8649fda5fcd534ad324ba2cf47785d1127004a903ef33d44f7781517c1",
+      "source_bytes": 42830,
+      "mapping_reason": "A cél-item leírása kiadós étel egy hosszú tárgyalási nap után; a képen közvetlenül fogyasztható, laktató étel látható. Ez jobb tartalmi egyezés, mint az úti fejadag-csomag jelenlegi fallbackje.",
+      "status": "SOURCE VERIFIED; LIVE RENDER NOT VERIFIED"
+    },
+    {
+      "item_id": "sailcloth",
+      "concept_id": "concept03-item-035",
+      "source_path": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03/items/concept03_item_35_vitorlavaszon.webp",
+      "runtime_path": "/assets/items/sailcloth.webp",
+      "source_sha256": "cd16da485ef5857c40f6c33d3b7907c31ebab53aa4d7ca1a788377c9b114257b",
+      "output_sha256": "cd16da485ef5857c40f6c33d3b7907c31ebab53aa4d7ca1a788377c9b114257b",
+      "source_bytes": 44764,
+      "mapping_reason": "A koncepció pontosan vitorlavásznat mutat; a cél-item leírása hajójavításhoz és karavánfelszereléshez használt erős anyag. A jelenlegi selyemkesztyű-fallback tartalmilag nem megfelelő.",
+      "status": "SOURCE VERIFIED; LIVE RENDER NOT VERIFIED"
+    }
+  ],
+  "before_counts": {
+    "catalog_items": 187,
+    "unique_item_art": 68,
+    "item_family_fallbacks": 29,
+    "slot_fallback_items": 90,
+    "category_fallbacks": 12
+  },
+  "after_counts": {
+    "catalog_items": 187,
+    "unique_item_art": 73,
+    "item_family_fallbacks": 24,
+    "slot_fallback_items": 90,
+    "category_fallbacks": 12
+  },
+  "unchanged": {
+    "npc_definitions": 69,
+    "explicit_npc_portrait_mappings": 64,
+    "district_mappings": 28,
+    "region_mappings": 7,
+    "item_definitions_or_stats_modified": false,
+    "npc_or_quest_logic_modified": false
+  },
+  "pack03_mapping_status": {
+    "new_unique_items_integrated": 5,
+    "exact_alternate_item_concepts_not_used": 6,
+    "item_concepts_needs_review": 37,
+    "region_concepts_alternate_to_existing_mappings": 7,
+    "region_concepts_needs_review_no_canonical_id": 1
+  },
+  "test_status": {
+    "baseline_alpha15_npm_test": "PASS",
+    "alpha16_working_tree_npm_test": "PASS",
+    "alpha16_extracted_checkpoint_npm_test": "PASS on extracted project source; final archive-specific test confirmed by external companion verification JSON",
+    "lint": "BLOCKED: missing Next.js/React modules and types; see docs/QA_EVIDENCE/alpha16-lint.log",
+    "build": "BLOCKED: next: not found; see docs/QA_EVIDENCE/alpha16-build.log",
+    "npm_ci": "NOT RUN; prior EAI_AGAIN issue not retried",
+    "live_browser_qa": "NOT RUN",
+    "pack03_zip_integrity": "PASS",
+    "alpha15_base_zip_integrity": "PASS"
+  },
+  "critical_limit": "Source and image mapping are verified. No live desktop/mobile application QA has been performed; no asset is labelled VISUALLY VERIFIED.",
+  "counts_verification": {
+    "catalog_items": 187,
+    "unique_item_art": 73,
+    "item_family_fallbacks": 24,
+    "equipment_slot_fallback_items": 90,
+    "equipment_sets": 18,
+    "npc_records": 69,
+    "explicit_npc_portrait_mappings": 64,
+    "quest_records": 60,
+    "district_mappings": 28,
+    "canonical_region_art_mappings": 7,
+    "concept_manifest_records": 122,
+    "pack03_archive_manifest_records": 64,
+    "category_fallback_mapping_definitions": 12,
+    "catalog_items_currently_resolved_to_category_fallback": 0
+  },
+  "asset_integrity": {
+    "hardcoded_visual_asset_references_checked": 173,
+    "missing_hardcoded_asset_files": 0,
+    "new_integrated_items": 5,
+    "new_item_dimensions": "512x512 WebP",
+    "source_output_hash_equal_for_all_five": true,
+    "new_runtime_mappings_disjoint_from_family_fallbacks": true,
+    "npc_definitions_and_gameplay_content_changed": false
+  },
+  "preserved_concept_archives": [
+    {
+      "uploaded_archive": "AIMORPG_Grafikai_Koncepcio_01(1).zip",
+      "preserved_copy": "docs/artwork-sources/concept-pack-01/AIMORPG_Grafikai_Koncepcio_01_original.zip",
+      "bytes": 17717262,
+      "sha256": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+      "zip_entries": 41,
+      "integrity": "PASS",
+      "copy_hash_matches": "PASS"
+    },
+    {
+      "uploaded_archive": "AIMORPG_Grafikai_Koncepcio_02(2).zip",
+      "preserved_copy": "docs/artwork-sources/concept-pack-02/AIMORPG_Grafikai_Koncepcio_02_original.zip",
+      "bytes": 26294364,
+      "sha256": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+      "zip_entries": 110,
+      "integrity": "PASS",
+      "copy_hash_matches": "PASS"
+    },
+    {
+      "uploaded_archive": "AIMORPG_Grafikai_Koncepcio_03(2).zip",
+      "preserved_copy": "docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03_original.zip",
+      "bytes": 10107570,
+      "sha256": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073",
+      "zip_entries": 64,
+      "integrity": "PASS",
+      "copy_hash_matches": "PASS"
+    }
+  ],
+  "preserved_prior_checkpoints": [
+    {
+      "filename": "AIMORPG-v2.0.0-alpha.12-Stage2-Visual-Integration-Checkpoint.zip",
+      "path": "/mnt/data/aimorpg_alpha12_baseline/AIMORPG-v2.0.0-alpha.12-Stage2-Visual-Integration-Checkpoint.zip",
+      "sha256": "57358e75e0095299850f8298c96b9d56785d1d21212a79b2f43dfe14bbf3d53a",
+      "preservation": "ORIGINAL_UNMODIFIED"
+    },
+    {
+      "filename": "AIMORPG-v2.0.0-alpha.13-Stage2-Item-Art-Integration-Checkpoint.zip",
+      "path": "/mnt/data/aimorpg_alpha13_inputs/AIMORPG-v2.0.0-alpha.13-Stage2-Item-Art-Integration-Checkpoint.zip",
+      "sha256": "2e27555c5092845adad6072f2c1429b7444f6d131f8ecc4fe2d2db6cb57c364a",
+      "preservation": "ORIGINAL_UNMODIFIED"
+    },
+    {
+      "filename": "AIMORPG-v2.0.0-alpha.14-NPC-Portrait-Audit-Checkpoint.zip",
+      "path": "/mnt/data/AIMORPG-v2.0.0-alpha.14-NPC-Portrait-Audit-Checkpoint.zip",
+      "sha256": "43bdc5780796e73c363c7c481c10f906071f4f2e8f9322b052551b44bde593ab",
+      "preservation": "ORIGINAL_UNMODIFIED"
+    },
+    {
+      "filename": "AIMORPG-v2.0.0-alpha.15-Concept-Integration-Checkpoint.zip",
+      "path": "/mnt/data/AIMORPG-v2.0.0-alpha.15-Concept-Integration-Checkpoint.zip",
+      "sha256": "f7a4c39823a72fda7853038495aba5447bcb67d6e2357d1e85976808fdbb7587",
+      "preservation": "ORIGINAL_UNMODIFIED"
+    }
+  ],
+  "test_status_note": "A hivatkozott 12 category fallback mapping definícióból a jelenlegi 187 katalóguselem egyikét sem kell category fallbackkel kirajzolni; különösen nem ugyanaz a mérőszám, mint a 24 aktív családfallback."
+}

@@ -1,0 +1,48 @@
+{
+  "release": "2.0.0-alpha.25",
+  "reference_zip": {
+    "filename": "AIMORPG_UI_Arculat_01.zip",
+    "sha256": "364b861431ab7f3d2ebef71a253fa2631c214c579b294c32aae118617be422f9",
+    "integrity": "PASS",
+    "entries": 16
+  },
+  "assets": [
+    {
+      "path": "/assets/world/eye-canonical.webp",
+      "source": "AIMORPG_UI_Arculat_01/visuals/01_AIMORPG_Master_UI_Concept_Board.png crop (180,770)-(465,945), Lanczos upscale to 570x350",
+      "format": "WEBP",
+      "width": 570,
+      "height": 350,
+      "sha256": "4ac88d2e8db48e23ddda19f4b5c0be14198d6d1e4fb663a8c587d5d28163d043",
+      "status": "CONCEPT_DERIVED_ASSET_NOT_LAYERED_SOURCE"
+    }
+  ],
+  "component": "src/components/EyeEntity.tsx",
+  "integration_points": [
+    {
+      "surface": "map",
+      "component": "map-eye",
+      "variant": "compact",
+      "source_path": "src/components/GameClient.tsx"
+    },
+    {
+      "surface": "overview",
+      "component": "overview-eye",
+      "variant": "compact",
+      "source_path": "src/components/GameClient.tsx"
+    },
+    {
+      "surface": "eye-hub",
+      "component": "gm-hero-art-wrap",
+      "variant": "scene",
+      "source_path": "src/components/GameClient.tsx"
+    }
+  ],
+  "qa": {
+    "npm_test": "PASS",
+    "npm_ci_offline": "FAIL: ENOTCACHED",
+    "lint": "FAIL: dependencies/types missing",
+    "build": "FAIL: next not found",
+    "browser_qa": "NOT RUN"
+  }
+}

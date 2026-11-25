@@ -1,0 +1,18 @@
+node_modules/
+.next/
+.next-dev/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+server/.env
+server/dist/
+server/node_modules/
+server/prisma/dev.db
+.DS_Store
+
+# Local QA logs are generated outside the release/checkpoint package.
+.qa-logs/

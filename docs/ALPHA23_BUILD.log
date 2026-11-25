@@ -1,0 +1,4 @@
+Command: npm run build
+Result: EXIT 127
+Error: sh: 1: next: not found
+Status: BLOCKED; Next.js dependency unavailable.

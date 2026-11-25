@@ -1,0 +1,17 @@
+package.json
+package-lock.json
+src/components/GameClient.tsx
+src/components/EyeEntity.tsx
+src/app/globals.css
+scripts/smoke-test.cjs
+scripts/visual-ui-smoke.cjs
+RELEASE-v2.0.0-alpha.26.md
+docs/ALPHA26_VALIDATION_STATUS_HU.md
+docs/ALPHA26_DEPENDENCY_INSTALL.log
+docs/ALPHA26_BROWSER_QA.log
+docs/ALPHA26_NPM_TEST.log
+docs/ALPHA26_LINT.log
+docs/ALPHA26_BUILD.log
+docs/ALPHA26_NPM_CI.log
+docs/ALPHA26_CHANGED_FILES.txt
+docs/ALPHA25_TO_ALPHA26.patch

@@ -1,0 +1,3 @@
+Command: npm run lint
+Status: BLOCKED (exit 2)
+Observed: TypeScript reports missing type definition packages including chai, deep-eql, estree, node, react and react-dom. The dependency tree is incomplete.

@@ -1,0 +1,7 @@
+Node.js: v22.16.0
+npm: 10.9.2
+Package manager: npm; package.json + package-lock.json preserved.
+Command: npm ci --offline --no-audit --no-fund
+Result: FAIL (exit 1)
+Error: ENOTCACHED — https://registry.npmjs.org/why-is-node-running/-/why-is-node-running-2.3.0.tgz is not in the local npm cache.
+Online attempt: npm ci --no-audit --no-fund did not complete within the tool execution window; no successful install was observed, and no dependency tree was committed.

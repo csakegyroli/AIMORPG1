@@ -1,0 +1,31 @@
+AIMORPG v2.0.0-alpha.12 — environment verification evidence
+Date: 2026-10-19
+Worktree: isolated alpha.12 copy derived from the verified alpha.11 checkpoint
+
+Runtime
+- node --version: v22.16.0
+- npm --version: 10.9.2
+- Frontend node_modules: absent
+- Local npm cache: no usable Next.js package found
+- PowerShell: NOT RUN; neither `pwsh` nor `powershell` is installed
+- Chromium executable: /usr/bin/chromium (application QA still blocked because the app cannot start)
+- CSS parser check: PASS; 2361 top-level rules parsed, zero nested parse errors
+- package.json version == package-lock root version == package-lock packages[""].version: 2.0.0-alpha.12
+
+Registry probe
+Command: npm ping --fetch-retries=0 --fetch-timeout=5000
+Exit code: 1
+Observed error: EAI_AGAIN resolving registry.npmjs.org
+
+Lint
+Command: npm run lint
+Exit code: 1
+Status: BLOCKED because frontend dependencies are absent. Leading diagnostics include TS2307 for module `next`, TS2875 for `react/jsx-runtime`, TS7026 for missing JSX intrinsic elements, and later cascading type errors. This is not a dependency-complete semantic typecheck.
+
+Production build
+Command: npm run build
+Exit code: 127
+Observed error: sh: 1: next: not found
+
+Live browser QA
+Status: NOT RUN. No live Next.js server started; no actual app screenshots captured. Do not mark any asset RENDERED or VISUALLY_VERIFIED based on this evidence.

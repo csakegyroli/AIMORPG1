@@ -1,0 +1,5 @@
+Environment: Node v22.16.0, npm 10.9.2
+npm cache verify: 0 entries, 0 bytes
+npm ping --fetch-retries=0 --fetch-timeout=8000: FAIL; getaddrinfo EAI_AGAIN registry.npmjs.org
+npm ci --fetch-retries=0 --fetch-timeout=10000: BLOCKED; package tarball fetches fail with EAI_AGAIN; npm subsequently prints "Exit handler never called!".
+No lockfile regeneration performed.

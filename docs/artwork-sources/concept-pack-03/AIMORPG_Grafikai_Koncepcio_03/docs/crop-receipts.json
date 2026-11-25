@@ -1,0 +1,576 @@
+{
+  "pack": "AIMORPG Grafikai Koncepciócsomag 03",
+  "created_date": "2026-10-19",
+  "source_sheets": [
+    {
+      "path": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "sha256": "b5bc63fba73136e92abf34706dd9f177da9a3d4c264ab51d1b8dd6f736ce57fb"
+    },
+    {
+      "path": "sources/AIMORPG_03_8_varosresz.png",
+      "sha256": "9eee54a691df22ff6b01a70745e389b0f35c5a254e3ced533f76874994aa4d0a"
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "concept03-item-001",
+      "file": "items/concept03_item_01_nemesi_kard.webp",
+      "sha256": "dcad93bac94d2be5f5f317a3bca1fc1fe3f369208bc1a184e47577797b77d352",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=1",
+      "source_bbox_px": "9,443,130,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-002",
+      "file": "items/concept03_item_02_harcibard.webp",
+      "sha256": "c486c47f9852d19e310090429187a60f6a1f7d90ddc940d59026d72e3cddc50f",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=2",
+      "source_bbox_px": "136,443,257,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-003",
+      "file": "items/concept03_item_03_vadaszij.webp",
+      "sha256": "d43af64ff88c1033d58aecbc095184657cece582acb53d3bd3f34afe16367977",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=3",
+      "source_bbox_px": "263,443,384,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-004",
+      "file": "items/concept03_item_04_magusbot.webp",
+      "sha256": "8d069be974303cad0b71b3838edd774eb76a2ef368471c9d563a9cd10e848614",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=4",
+      "source_bbox_px": "390,443,511,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-005",
+      "file": "items/concept03_item_05_acelpajzs.webp",
+      "sha256": "d1e1a2901bd5b708ecfaf375f6b51384eab8bf75ed9f9f1cd44efaf634c361e9",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=5",
+      "source_bbox_px": "517,443,638,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-006",
+      "file": "items/concept03_item_06_toronypajzs.webp",
+      "sha256": "78cedfb9fb61b90191e4990adb948a409ab3d11e19be47f22d9e343dd697f285",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=6",
+      "source_bbox_px": "644,443,765,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-007",
+      "file": "items/concept03_item_07_sotet_pancel.webp",
+      "sha256": "bd5081a9579062e45654ecffe4009e6cd8426409e4bd0ee7683eb918257120a7",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=7",
+      "source_bbox_px": "771,443,892,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-008",
+      "file": "items/concept03_item_08_vandorkopeny.webp",
+      "sha256": "efdcf2899b73f6f547be1398075551454b340f0f4b12f0bdf56553730f74c042",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=8",
+      "source_bbox_px": "898,443,1019,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-009",
+      "file": "items/concept03_item_09_parbajkesztyu.webp",
+      "sha256": "b2e2993a02f3ab1d444c35e108f4e58a59feb78d4860e545feaf33b430f5a3fb",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=9",
+      "source_bbox_px": "1025,443,1146,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-010",
+      "file": "items/concept03_item_10_utazocsizma.webp",
+      "sha256": "a0e457a91c4811557f3386678b5c8511daea4f1f11b420c22d4c88b760812b48",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=10",
+      "source_bbox_px": "1152,443,1273,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-011",
+      "file": "items/concept03_item_11_nemesi_gyuru.webp",
+      "sha256": "df0abf88f4bd07311de8f2868ae73fe68cbf9c136c6e03567f8f993ee025ce0b",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=11",
+      "source_bbox_px": "1279,443,1400,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-012",
+      "file": "items/concept03_item_12_hos_amulet.webp",
+      "sha256": "716c713ca1e4988c35e5a30dfabc2e841c1fe22b539ed494f473eaa639679209",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=1;column=12",
+      "source_bbox_px": "1406,443,1527,563",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-013",
+      "file": "items/concept03_item_13_eletelixir.webp",
+      "sha256": "6855848e3a4bb8660f823cdce48a55e6166307174b20378013e00083ec1e4f8a",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=1",
+      "source_bbox_px": "9,591,130,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-014",
+      "file": "items/concept03_item_14_manapalack.webp",
+      "sha256": "cca1f5c5d09ccbc9f742acaf3395f2d12452ed1ae0608231e12f4cb48c4e9b57",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=2",
+      "source_bbox_px": "136,591,257,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-015",
+      "file": "items/concept03_item_15_mereg.webp",
+      "sha256": "42c19a78e37abcc3a899eadc065794dec08ea56089de29495fba1b93e8ba2380",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=3",
+      "source_bbox_px": "263,591,384,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-016",
+      "file": "items/concept03_item_16_gyogyfu.webp",
+      "sha256": "88f3beff4cf9bcef7ff9a5fc5771292f55f4280bf2a0620a61da509d4df2bad2",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=4",
+      "source_bbox_px": "390,591,511,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-017",
+      "file": "items/concept03_item_17_fekete_lotusz.webp",
+      "sha256": "982b9eae44bd5c1b66e093ccae0b20a52692f98992401b6c9ce7b6b114e39210",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=5",
+      "source_bbox_px": "517,591,638,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-018",
+      "file": "items/concept03_item_18_nyers_erc.webp",
+      "sha256": "303e2745059e14b94da9977d33978ed4dd83ab060ff5d06f84e343d2adea6b38",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=6",
+      "source_bbox_px": "644,591,765,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-019",
+      "file": "items/concept03_item_19_dragako.webp",
+      "sha256": "78660594033c69a1b8da2f31bde24dffbfd8bc59c4f61c0aa2722eea2da830b9",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=7",
+      "source_bbox_px": "771,591,892,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-020",
+      "file": "items/concept03_item_20_aranypenz.webp",
+      "sha256": "57a3c1f61c68458f4b55f82cd198763f7f9e3b39f388bf48ad525fdb34746fd1",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=8",
+      "source_bbox_px": "898,591,1019,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-021",
+      "file": "items/concept03_item_21_cehokmany.webp",
+      "sha256": "458577e80b63c8ae35f87226c353598e5d7cfe6916acd105589e5fea9b83616b",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=9",
+      "source_bbox_px": "1025,591,1146,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-022",
+      "file": "items/concept03_item_22_kuldetesterkep.webp",
+      "sha256": "a664cedf79eb56f9428b74c18dd45e191782ed346439e07488805ec5b6e8764f",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=10",
+      "source_bbox_px": "1152,591,1273,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-023",
+      "file": "items/concept03_item_23_kronikakonyv.webp",
+      "sha256": "c0f0da2578b9a53a1d19e148a6bf2614ae83833c7e9747726762356e897bef8d",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=11",
+      "source_bbox_px": "1279,591,1400,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-024",
+      "file": "items/concept03_item_24_csillagterkep.webp",
+      "sha256": "c9e1a8cd4308eaf98216acc4e1c6935e5672679c8db4a8c9abe35a782eb3bf07",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=2;column=12",
+      "source_bbox_px": "1406,591,1527,710",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-025",
+      "file": "items/concept03_item_25_vasrud.webp",
+      "sha256": "364a099c2fd43218ce1a747660086d1aa0e763f7ea85c83a156ccb06c57fd38e",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=1",
+      "source_bbox_px": "9,738,130,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-026",
+      "file": "items/concept03_item_26_ezusterc.webp",
+      "sha256": "9f4fe8a9cd159df2d40f3879f31427645039ef920c5a6a45a57d76263b08b0ee",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=2",
+      "source_bbox_px": "136,738,257,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-027",
+      "file": "items/concept03_item_27_aranyerc.webp",
+      "sha256": "538ebbeea0a2c91c257581c4a6233a81443f1107a275e20155e91bda5bdabb56",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=3",
+      "source_bbox_px": "263,738,384,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-028",
+      "file": "items/concept03_item_28_bortekercs.webp",
+      "sha256": "36dc9d418fb80d23a17c821df82d87199f49104e5778d6adb3618c69f171cb5a",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=4",
+      "source_bbox_px": "390,738,511,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-029",
+      "file": "items/concept03_item_29_finom_szovet.webp",
+      "sha256": "6fbadc0151a67cc93e74d5575b00a47568e6e210f1b4bf524e866bfb0aac20a5",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=5",
+      "source_bbox_px": "517,738,638,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-030",
+      "file": "items/concept03_item_30_fuszer_csomag.webp",
+      "sha256": "e6bd163cec29b892f52bb2c35b14f1da5ae39d45c4d9258a6d3afcaa6423815a",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=6",
+      "source_bbox_px": "644,738,765,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-031",
+      "file": "items/concept03_item_31_borpalack.webp",
+      "sha256": "fe7f8439551188aa0eda6367ce8389928a478fb78aa3ebb598bf2aa7424b79dc",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=7",
+      "source_bbox_px": "771,738,892,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-032",
+      "file": "items/concept03_item_32_sajt_es_kenyer.webp",
+      "sha256": "cd24be8649fda5fcd534ad324ba2cf47785d1127004a903ef33d44f7781517c1",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=8",
+      "source_bbox_px": "898,738,1019,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-033",
+      "file": "items/concept03_item_33_szaritott_hus.webp",
+      "sha256": "a6b7b3d7aaf655bf53c01bb2da13126eb387598c5f4ab638b6ee456adae7ea26",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=9",
+      "source_bbox_px": "1025,738,1146,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-034",
+      "file": "items/concept03_item_34_halaszszakmany.webp",
+      "sha256": "26c59107d4931782cf04e70f1e427de6031d4e126916d2f3083334091dab0d64",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=10",
+      "source_bbox_px": "1152,738,1273,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-035",
+      "file": "items/concept03_item_35_vitorlavaszon.webp",
+      "sha256": "cd16da485ef5857c40f6c33d3b7907c31ebab53aa4d7ca1a788377c9b114257b",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=11",
+      "source_bbox_px": "1279,738,1400,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-036",
+      "file": "items/concept03_item_36_karavanlada.webp",
+      "sha256": "0a9cb593867afad2978c0236a6f1c898162cdeff8c304f9ce8908e5282efd3f8",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=3;column=12",
+      "source_bbox_px": "1406,738,1527,847",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-037",
+      "file": "items/concept03_item_37_osi_relikvia.webp",
+      "sha256": "aab88634b7ab6d25384aee45539012c40e6ab06773d6099d5a0d6e9c17bcd845",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=1",
+      "source_bbox_px": "9,873,130,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-038",
+      "file": "items/concept03_item_38_ido_homok.webp",
+      "sha256": "483a25890be9c238e924887de4f4ac64cdb149a61f747053b5d73ac2ddffa1b2",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=2",
+      "source_bbox_px": "136,873,257,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-039",
+      "file": "items/concept03_item_39_szent_gyertya.webp",
+      "sha256": "22d1ed53ee3b0d6d1347115700044297d56121265b693bfcc7f0284e041af3cd",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=3",
+      "source_bbox_px": "263,873,384,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-040",
+      "file": "items/concept03_item_40_jelzoko.webp",
+      "sha256": "d2506a2fcacc16065af2f7e5d22c6f381293182587bb0fd13c7bbb76471e4f6c",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=4",
+      "source_bbox_px": "390,873,511,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-041",
+      "file": "items/concept03_item_41_kulcscsomo.webp",
+      "sha256": "cf11ec3837552455b663e16615fdfe7701c56884c61a6217f604d85cc3b38c91",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=5",
+      "source_bbox_px": "517,873,638,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-042",
+      "file": "items/concept03_item_42_tengeri_iranytu.webp",
+      "sha256": "ebd7e0b9ac59cf0850ec9e46378ddb3cf84783d746136fa98468896a1eeba902",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=6",
+      "source_bbox_px": "644,873,765,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-043",
+      "file": "items/concept03_item_43_viharcsomo.webp",
+      "sha256": "ead2eeb0210d9a69bca452398180c828e3e79d938a2e16c23b142c0d07896842",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=7",
+      "source_bbox_px": "771,873,892,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-044",
+      "file": "items/concept03_item_44_tanu_lencseje.webp",
+      "sha256": "2178b6243b06f09cb451aeebe3ecfc58045d10220dc5ebca6a16d9a3bb3f55e8",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=8",
+      "source_bbox_px": "898,873,1019,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-045",
+      "file": "items/concept03_item_45_tort_pecsetgyuru.webp",
+      "sha256": "fdfd929779836b9130920b0fedad815cb5df157f9b762749c6b55e0383df17da",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=9",
+      "source_bbox_px": "1025,873,1146,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-046",
+      "file": "items/concept03_item_46_csendes_harang.webp",
+      "sha256": "0525ab6db39e0de87651e862f3120aef8fd98fc4af2679acdd0fd2bd2894ae25",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=10",
+      "source_bbox_px": "1152,873,1273,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-047",
+      "file": "items/concept03_item_47_karavaniranytu.webp",
+      "sha256": "3ae884a203a973c6764eb51a64fa7ed5f9b979a0e3fea0b520df1d2354a9a5fb",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=11",
+      "source_bbox_px": "1279,873,1400,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-item-048",
+      "file": "items/concept03_item_48_tengereszkes.webp",
+      "sha256": "e61253bea2d83d866387a1b3a4e218ca93bf4f5c53746d85db827c6dfdaee1b4",
+      "source_sheet": "sources/AIMORPG_03_Targyok_es_4_varosresz.png",
+      "source_cell": "row=4;column=12",
+      "source_bbox_px": "1406,873,1527,989",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "CROPPED_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-001",
+      "file": "districts/concept03_district_01_palotanegyed.webp",
+      "sha256": "92f2033a0434a68477ad2cd27840b01576fc6a3a565a07e60bce7090b8464c98",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=1;column=1",
+      "source_bbox_px": "4,48,380,190",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-002",
+      "file": "districts/concept03_district_02_kereskedelmi_kozpont.webp",
+      "sha256": "fc2abbfe82175036078c0880a43dc68418588f49e4c2aebcb726e3df234d7f7c",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=1;column=2",
+      "source_bbox_px": "388,48,764,190",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-003",
+      "file": "districts/concept03_district_03_kikoto.webp",
+      "sha256": "f11560a47fa6ffeee4ee1be2cc3da19414911cd30315e4878606ee6532519edb",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=1;column=3",
+      "source_bbox_px": "772,48,1148,190",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-004",
+      "file": "districts/concept03_district_04_arena.webp",
+      "sha256": "3f47c23aa805a41eb47604cca9482df3a83bb482d984c8eab2da4d8d2ea1c682",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=1;column=4",
+      "source_bbox_px": "1156,48,1532,190",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-005",
+      "file": "districts/concept03_district_05_belvaros.webp",
+      "sha256": "3fa7ce6a084b781ff1ab874a971a3814c36f337342f1a22a4de7698a888331ec",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=2;column=1",
+      "source_bbox_px": "4,329,380,446",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-006",
+      "file": "districts/concept03_district_06_kulvaros.webp",
+      "sha256": "05012665c3233f0313e6f2cdb6ddd9e3bf2772f8f69348b35285a0506af7440a",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=2;column=2",
+      "source_bbox_px": "388,329,764,446",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-007",
+      "file": "districts/concept03_district_07_erdovidek.webp",
+      "sha256": "9a8a4446d1f64c24e38a055c12a14716b40de4ffeb17cc3716631da6f847cd76",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=2;column=3",
+      "source_bbox_px": "772,329,1148,446",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    },
+    {
+      "asset_id": "concept03-district-008",
+      "file": "districts/concept03_district_08_hegyvidek.webp",
+      "sha256": "c710863570a0eefcdf85537360d35f3f6e2bc4e4deca2f33581aa9dd9a800b90",
+      "source_sheet": "sources/AIMORPG_03_8_varosresz.png",
+      "source_cell": "row=2;column=4",
+      "source_bbox_px": "1156,329,1532,446",
+      "status": "CONCEPT_ONLY_STAGING",
+      "visual_status": "SCENE_CROP_FROM_CONCEPT_SHEET; NOT LIVE-RENDER-VERIFIED"
+    }
+  ]
+}

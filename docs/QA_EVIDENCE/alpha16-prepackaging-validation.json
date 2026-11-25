@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0-alpha.16",
+  "status": "PASS for pre-packaging source checks; the exact final ZIP SHA-256, CRC test and extracted-project npm test are recorded in AIMORPG_ALPHA16_CHECKPOINT_VERIFICATION.json alongside the archive.",
+  "checks": [
+    {
+      "name": "Alpha.15 base archive integrity and hash",
+      "status": "PASS",
+      "sha256": "f7a4c39823a72fda7853038495aba5447bcb67d6e2357d1e85976808fdbb7587"
+    },
+    {
+      "name": "Pack03 source archive integrity and preserved-copy hash",
+      "status": "PASS",
+      "sha256": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073"
+    },
+    {
+      "name": "All hard-coded image paths",
+      "status": "PASS",
+      "checked": 173,
+      "missing": 0
+    },
+    {
+      "name": "New item receipt/output SHA checks",
+      "status": "PASS",
+      "checked": 5
+    },
+    {
+      "name": "Pack03 archive inventory",
+      "status": "PASS",
+      "rows": 64
+    },
+    {
+      "name": "Cumulative art concept manifest",
+      "status": "PASS",
+      "rows": 122
+    },
+    {
+      "name": "Evidence-based development backlog",
+      "status": "PASS",
+      "rows": 20
+    },
+    {
+      "name": "Original graphic Pack01/02/03 ZIP copies",
+      "status": "PASS",
+      "count": 3,
+      "zip_integrity": "PASS",
+      "copied_sha_matches_upload": true
+    },
+    {
+      "name": "npm test in working tree",
+      "status": "PASS"
+    },
+    {
+      "name": "lint",
+      "status": "BLOCKED",
+      "reason": "Next.js/React dependencies and type definitions are not installed; npm install was not retried"
+    },
+    {
+      "name": "build",
+      "status": "BLOCKED",
+      "reason": "next: not found"
+    },
+    {
+      "name": "live browser QA",
+      "status": "NOT RUN"
+    }
+  ]
+}

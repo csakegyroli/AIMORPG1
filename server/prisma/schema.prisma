@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(cuid())
+  email           String            @unique @db.VarChar(254)
+  passwordHash    String            @db.VarChar(255)
+  displayName     String            @db.VarChar(22)
+  emailVerifiedAt DateTime?
+  disabledAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  profile         PlayerProfile?
+  sessions        Session[]
+  saves           GameSave[]
+  aiInteractions  AiInteraction[]
+  securityEvents  SecurityEvent[]
+
+  @@index([createdAt])
+}
+
+model PlayerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  preferredAvatar String   @default("vagabond") @db.VarChar(32)
+  publicProfile   Boolean  @default(false)
+  settings        Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id              String    @id @default(cuid())
+  userId          String
+  tokenHash       String    @unique @db.Char(64)
+  createdAt       DateTime  @default(now())
+  lastSeenAt      DateTime  @default(now())
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  userAgent       String?   @db.VarChar(240)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt, expiresAt])
+  @@index([expiresAt])
+}
+
+model GameSave {
+  id            String   @id @default(cuid())
+  ownerId       String
+  label         String   @db.VarChar(70)
+  schemaVersion Int
+  payload       Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, updatedAt])
+}
+
+model AiInteraction {
+  id          String   @id @default(cuid())
+  userId      String
+  purpose     String   @db.VarChar(40)
+  model       String   @db.VarChar(80)
+  inputDigest String   @db.Char(64)
+  outputJson  Json
+  latencyMs   Int
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model SecurityEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  eventType  String   @db.VarChar(60)
+  ipDigest   String?  @db.Char(64)
+  userAgent  String?  @db.VarChar(240)
+  detail     Json     @default("{}")
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+}

@@ -1,0 +1,3 @@
+Status: NOT RUN / BLOCKED
+Reason: Next.js and React dependencies are absent; npm registry DNS resolution fails with EAI_AGAIN. `npm run build` exits 127 (`next: not found`). Chromium is installed but there is no running application to inspect.
+No application screenshots or animation recording are claimed or included.

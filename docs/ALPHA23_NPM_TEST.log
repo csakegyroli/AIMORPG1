@@ -1,0 +1,10 @@
+> aimorpg-black-coin@2.0.0-alpha.23 test
+> node scripts/smoke-test.cjs && node scripts/security-smoke.cjs && node scripts/visual-assets-smoke.cjs && node scripts/visual-ui-smoke.cjs
+
+AImorpg core gameplay/content smoke test: PASS
+TSX syntax/transpile smoke test: PASS (not a full semantic TypeScript check)
+Validated 187 items, 18 sets, 69 NPCs, 60 quests, 28 region districts, 27 asset references.
+AImorpg password-hashing runtime test: PASS
+Visual asset smoke test: PASS
+Visual UI smoke test: PASS
+Validated alpha.23 header and gaze overlay assertions.

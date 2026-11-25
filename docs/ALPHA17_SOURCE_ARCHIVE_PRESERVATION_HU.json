@@ -1,0 +1,91 @@
+{
+  "version": "2.0.0-alpha.17",
+  "protected_checkpoints": [
+    {
+      "version": "alpha.12",
+      "path": "/mnt/data/aimorpg_alpha12_baseline/AIMORPG-v2.0.0-alpha.12-Stage2-Visual-Integration-Checkpoint.zip",
+      "bytes": 90219616,
+      "sha256": "57358e75e0095299850f8298c96b9d56785d1d21212a79b2f43dfe14bbf3d53a",
+      "zip_integrity": "PASS"
+    },
+    {
+      "version": "alpha.13",
+      "path": "/mnt/data/aimorpg_alpha13_inputs/AIMORPG-v2.0.0-alpha.13-Stage2-Item-Art-Integration-Checkpoint.zip",
+      "bytes": 94549946,
+      "sha256": "2e27555c5092845adad6072f2c1429b7444f6d131f8ecc4fe2d2db6cb57c364a",
+      "zip_integrity": "PASS"
+    },
+    {
+      "version": "alpha.14",
+      "path": "/mnt/data/AIMORPG-v2.0.0-alpha.14-NPC-Portrait-Audit-Checkpoint.zip",
+      "bytes": 96153463,
+      "sha256": "43bdc5780796e73c363c7c481c10f906071f4f2e8f9322b052551b44bde593ab",
+      "zip_integrity": "PASS"
+    },
+    {
+      "version": "alpha.15",
+      "path": "/mnt/data/AIMORPG-v2.0.0-alpha.15-Concept-Integration-Checkpoint.zip",
+      "bytes": 141707118,
+      "sha256": "f7a4c39823a72fda7853038495aba5447bcb67d6e2357d1e85976808fdbb7587",
+      "zip_integrity": "PASS"
+    },
+    {
+      "version": "alpha.16",
+      "path": "/mnt/data/AIMORPG-v2.0.0-alpha.16-Concept-Integration-Checkpoint.zip",
+      "bytes": 206982730,
+      "sha256": "966cdc4c0b9b6d37ae2888154d404db40023bc1dcf3cf7be0515e6d4d433aac2",
+      "zip_integrity": "PASS"
+    }
+  ],
+  "protected_graphic_archives": [
+    {
+      "pack": "Pack01",
+      "path": "/mnt/data/AIMORPG_Grafikai_Koncepcio_01(1).zip",
+      "bytes": 17717262,
+      "sha256": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+      "sha256_expected": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+      "hash_matches_expected": true,
+      "zip_integrity": "PASS"
+    },
+    {
+      "pack": "Pack02",
+      "path": "/mnt/data/AIMORPG_Grafikai_Koncepcio_02(2).zip",
+      "bytes": 26294364,
+      "sha256": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+      "sha256_expected": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+      "hash_matches_expected": true,
+      "zip_integrity": "PASS"
+    },
+    {
+      "pack": "Pack03",
+      "path": "/mnt/data/AIMORPG_Grafikai_Koncepcio_03(2).zip",
+      "bytes": 10107570,
+      "sha256": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073",
+      "sha256_expected": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073",
+      "hash_matches_expected": true,
+      "zip_integrity": "PASS"
+    }
+  ],
+  "original_pack_copies_inside_project": [
+    {
+      "pack": "Pack01",
+      "path": "/mnt/data/aimorpg-alpha17-work/docs/artwork-sources/concept-pack-01/AIMORPG_Grafikai_Koncepcio_01_original.zip",
+      "sha256": "5f33714e62095918e5aa2e872d868aea235b27ed4552c684484dadafddcf30de",
+      "sha256_matches_root_original": true
+    },
+    {
+      "pack": "Pack02",
+      "path": "/mnt/data/aimorpg-alpha17-work/docs/artwork-sources/concept-pack-02/AIMORPG_Grafikai_Koncepcio_02_original.zip",
+      "sha256": "f6b2261e6f13d5be6336d8fff7c18ee1aaa901a10f6138daf9b2e1bb6545b390",
+      "sha256_matches_root_original": true
+    },
+    {
+      "pack": "Pack03",
+      "path": "/mnt/data/aimorpg-alpha17-work/docs/artwork-sources/concept-pack-03/AIMORPG_Grafikai_Koncepcio_03_original.zip",
+      "sha256": "10c7229a201b022b42e45ea9b9d4c029d44ba91aead37e2f9d32266c576ce073",
+      "sha256_matches_root_original": true
+    }
+  ],
+  "alpha17_working_copy": "/mnt/data/aimorpg-alpha17-work",
+  "preservation_statement": "Alpha.12-alpha.16 original checkpoint ZIP files and Pack01-Pack03 original ZIPs were not overwritten. Alpha17 is built in a separate working copy. Previous checkpoint ZIPs are not nested inside the new checkpoint. The original Pack01-Pack03 ZIP copies already present inside docs/artwork-sources were verified byte-for-byte against the root originals."
+}

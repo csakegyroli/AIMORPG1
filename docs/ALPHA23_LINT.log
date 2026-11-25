@@ -1,0 +1,4 @@
+Command: npm run lint
+Result: EXIT 2
+TypeScript reports missing type definitions in incomplete node_modules: estree, node, react, react-dom.
+Status: BLOCKED; full semantic type check not completed.

@@ -1,0 +1,13 @@
+AIMORPG v2.0.0-alpha.13 local execution evidence
+Date: 2026-10-19
+Working tree: isolated alpha.13 worktree derived from alpha.12 checkpoint.
+
+npm test exit code: 0
+npm run lint exit code: 1
+npm run build exit code: 127
+
+Interpretation:
+- npm test must pass all four smoke scripts; see alpha13-npm-test.log.
+- lint is blocked by missing frontend dependency/type packages (not a dependency-complete semantic typecheck).
+- build is blocked when Next.js is not installed (next: not found).
+- live browser QA is NOT RUN because the actual app could not be started without installed dependencies.

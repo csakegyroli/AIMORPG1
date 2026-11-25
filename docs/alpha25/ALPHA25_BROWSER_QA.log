@@ -1,0 +1,3 @@
+Status: NOT RUN
+Reason: Next.js/React dependencies were not installed. `npm run build` exits 127 (`next: not found`), so the actual app could not be started for Chromium QA.
+No live browser screenshots or animation recording were produced. Static source checks and asset inspection are not represented as browser evidence.

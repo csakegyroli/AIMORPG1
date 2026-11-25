@@ -1,0 +1,12 @@
+
+> aimorpg-black-coin@2.0.0-alpha.26 test
+> node scripts/smoke-test.cjs && node scripts/security-smoke.cjs && node scripts/visual-assets-smoke.cjs && node scripts/visual-ui-smoke.cjs
+
+AImorpg core gameplay/content smoke test: PASS
+TSX syntax/transpile smoke test: PASS (GameClient, AccountPanel, EyeEntity, app page and layout; not a full semantic TypeScript check)
+Validated 187 items (74 unique images, 23 explicit family illustrations, 90 equipment-slot fallbacks, 0 category fallbacks), 18 sets, 69 NPCs, 60 quests, 28 region districts, 27 asset references.
+AImorpg password-hashing runtime test: PASS
+Visual asset smoke test: PASS
+Validated 19 clean world paintings, 74 unique item-ID artworks, 23 item-specific family fallbacks, 12 semantic category fallbacks, 64 explicit NPC portrait mappings, 10 distinct directly-authored NPC avatarSrc assets, 69 NPC records, 28 district artwork mappings, 9 preserved concept boards and 19 archived legacy world files.
+Visual UI smoke test: PASS
+Validated alpha.26 header, immersive capital hero with live character/resource/quest HUD, data-driven module command rail, inventory capacity indicators, quest/NPC/market summaries, local QA script and guide, resilient image fallback code paths, seven region-art files on map hotspots, preserved gate/travel wiring, responsive styling, and 344 manifest records.

@@ -1,0 +1,7 @@
+Command: npm run build
+Status: BLOCKED (exit 127)
+Observed: sh: 1: next: not found
+Dependency restoration attempt: npm ci --offline
+Status: BLOCKED (exit 1)
+Observed: npm error ENOTCACHED; package why-is-node-running@2.3.0 was not available in local npm cache. Network/DNS access is not available in this environment.
+Browser QA: NOT RUN because Next.js is not installed and the app cannot be launched. Chromium binary exists, but project app bundle cannot be served without dependencies.

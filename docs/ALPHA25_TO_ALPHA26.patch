@@ -1,0 +1,213 @@
+--- alpha.25/package.json
++++ alpha.26/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "aimorpg-black-coin",
+-  "version": "2.0.0-alpha.25",
++  "version": "2.0.0-alpha.26",
+   "private": true,
+   "engines": {
+     "node": ">=22.0.0"
+
+--- alpha.25/package-lock.json
++++ alpha.26/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "aimorpg-black-coin",
+-  "version": "2.0.0-alpha.25",
++  "version": "2.0.0-alpha.26",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "aimorpg-black-coin",
+-      "version": "2.0.0-alpha.25",
++      "version": "2.0.0-alpha.26",
+       "engines": {
+         "node": ">=22.0.0"
+       },
+
+--- alpha.25/src/components/GameClient.tsx
++++ alpha.26/src/components/GameClient.tsx
+@@ -238,7 +238,7 @@
+ 
+   return <main className="game-shell">
+     <header className="topbar">
+-      <div className="brand"><span className="brand-mark">✦</span><div><strong>AImorpg</strong><small>A Királyság 327. éve · élő város · V2.0 alpha.25</small></div></div>
++      <div className="brand"><span className="brand-mark">✦</span><div><strong>AImorpg</strong><small>A Királyság 327. éve · élő város · V2.0 alpha.26</small></div></div>
+       <div className="top-avatar"><img src={AVATARS.find((a) => a.id === game.avatarId)?.src ?? AVATARS[0].src} alt="" /></div>
+       <div className="top-stats">
+         <TopStat label="Arany" value={`${game.gold} 🪙`} /><TopStat label="Gyémánt" value={`${game.diamonds} 💎`} /><TopStat label="Szint" value={game.level} /><TopStat label="Hírnév" value={reputation.toLocaleString("hu-HU")} /><TopStat label="Tartózkodás" value={regionName(game.currentRegion)} wide />
+
+--- alpha.25/src/components/EyeEntity.tsx
++++ alpha.26/src/components/EyeEntity.tsx
+@@ -10,39 +10,50 @@
+   const [gaze, setGaze] = useState<Gaze>({ x: 0, y: 0, duration: 0.8 });
+   useEffect(() => {
+     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+-    if (media.matches) return;
+     let timer: number | undefined;
+     let disposed = false;
++
++    const clearTimer = () => {
++      if (timer !== undefined) {
++        window.clearTimeout(timer);
++        timer = undefined;
++      }
++    };
++
+     const schedule = () => {
+-      if (disposed) return;
++      clearTimer();
++      if (disposed || media.matches) return;
+       timer = window.setTimeout(() => {
+-        if (disposed) return;
+-        // Small, bounded gaze changes with irregular pauses and occasional return glances.
++        if (disposed || media.matches) return;
++        // Irregular, bounded gaze targets with occasional returns to the resting focus.
+         const choices = [
+-          { x: -5, y: 0 }, { x: 4, y: -3 }, { x: 1, y: 4 }, { x: -2, y: -4 },
+-          { x: 3, y: 2 }, { x: 0, y: 0 }, { x: -3, y: 2 }, { x: 2, y: -1 },
++          { x: -5, y: 0 }, { x: 5, y: -3 }, { x: 1, y: 4 }, { x: -2, y: -4 },
++          { x: 4, y: 2 }, { x: 0, y: 0 }, { x: -4, y: 2 }, { x: 2, y: -1 },
+         ];
+         const target = choices[Math.floor(Math.random() * choices.length)];
+-        const scale = mode === "scene" ? 1 : 0.32;
+-        setGaze({ x: target.x * scale, y: target.y * scale, duration: 0.42 + Math.random() * 0.76 });
++        const scale = mode === "scene" ? 1 : 0.8;
++        setGaze({ x: target.x * scale, y: target.y * scale, duration: 0.48 + Math.random() * 0.72 });
+         schedule();
+-      }, 900 + Math.random() * 2400);
++      }, 850 + Math.random() * 2250);
+     };
+-    schedule();
+-    const stopForReducedMotion = (event: MediaQueryListEvent) => {
+-      if (event.matches) {
+-        disposed = true;
+-        if (timer !== undefined) window.clearTimeout(timer);
++
++    const onMotionPreferenceChange = () => {
++      clearTimer();
++      if (media.matches) {
+         setGaze({ x: 0, y: 0, duration: 0 });
++      } else {
++        schedule();
+       }
+     };
+-    media.addEventListener("change", stopForReducedMotion);
++
++    if (!media.matches) schedule();
++    media.addEventListener("change", onMotionPreferenceChange);
+     return () => {
+       disposed = true;
+-      if (timer !== undefined) window.clearTimeout(timer);
+-      media.removeEventListener("change", stopForReducedMotion);
++      clearTimer();
++      media.removeEventListener("change", onMotionPreferenceChange);
+     };
+-  }, []);
++  }, [mode]);
+ 
+   return <span className={`eye-entity eye-entity--${mode} ${className}`} role="img" aria-label={label}>
+     <img className="eye-entity-art" src="/assets/world/eye-canonical.webp" alt="" draggable={false} />
+
+--- alpha.25/src/app/globals.css
++++ alpha.26/src/app/globals.css
+@@ -1164,7 +1164,7 @@
+ .overview-stats{border-top:1px solid rgba(197,160,97,.18);padding-top:12px}
+ .overview-stats b{font:600 21px Cinzel,Georgia,serif;color:#ebd093}.overview-stats small{font:9px Inter,sans-serif;color:#9c927e}
+ .overview-journal>div{border-bottom-color:rgba(197,160,97,.15)}.overview-journal b{color:#dfd0ae}.overview-journal small{color:#9c9585;line-height:1.5}
+-.overview-eye{background:linear-gradient(120deg,rgba(19,20,17,.97),rgba(26,21,17,.95)),url('/assets/world/eye-observation.webp');background-size:cover;background-position:center;grid-template-columns:104px minmax(0,1fr);align-items:center}
++.overview-eye{background:linear-gradient(120deg,rgba(7,13,21,.98),rgba(17,27,38,.96));grid-template-columns:104px minmax(0,1fr);align-items:center}
+ .overview-eye:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(6,7,6,.65));pointer-events:none}
+ .overview-eye img,.overview-eye>div{position:relative;z-index:1}
+ .overview-eye img{filter:drop-shadow(0 0 20px #a17a3f44)}
+@@ -1299,7 +1299,7 @@
+ .chronicle-layout{padding:15px;gap:15px;background:linear-gradient(130deg,rgba(24,25,19,.97),rgba(9,11,9,.98)),url('/assets/world/dialogue-scene.webp');background-size:cover;background-position:center}
+ .chronicle-story{gap:12px}.chronicle-story>article{border:1px solid rgba(190,151,84,.18);background:linear-gradient(135deg,#202118ed,#0c0e0bee);padding:22px}.chronicle-story>article>span{font-size:8px;letter-spacing:1.8px;color:#c1a06a}.chronicle-story h2{font:600 22px Cinzel;color:#e9d7b4}.chronicle-story p{font-size:11px;line-height:1.8;color:#b8ad97}.chronicle-prologue-card{background:linear-gradient(90deg,#171811f7,#171811d6),url('/assets/world/eye-observation.webp')!important;background-size:cover!important;background-position:center!important}
+ .timeline{border:1px solid var(--world-line);background:#0b0d0a;padding:18px}.timeline h3{font:600 16px Cinzel;color:#e1d1ad}.timeline-item{border-left-color:#8a6d3c}.timeline-item span{font-size:8px;color:#ae9465}.timeline-item strong{font-size:11px;color:#ddcfad}.timeline-item p{font-size:10px;line-height:1.65;color:#a29a87}
+-.gm-hero{overflow:hidden;position:relative;min-height:220px;padding:28px;background:linear-gradient(90deg,#0b0d0beF 0%,#0b0d0bd9 48%,#0b0d0b43 100%),url('/assets/world/eye-observation.webp');background-size:cover;background-position:center 47%;border-color:rgba(172,139,91,.48)}
++.gm-hero{overflow:hidden;position:relative;min-height:220px;padding:28px;background:linear-gradient(110deg,#0b0f14 0%,#111b26 58%,#0b0f14 100%);border-color:rgba(172,139,91,.48)}
+ .gm-hero:after{content:"";position:absolute;right:0;top:0;bottom:0;width:43%;background:linear-gradient(90deg,transparent,rgba(7,8,7,.1));pointer-events:none}
+ .gm-hero>div{position:relative;z-index:1;max-width:690px}.gm-hero>div>span{font-size:8px;letter-spacing:2px;color:#c3a56e}.gm-hero h2{font:600 clamp(26px,2.6vw,36px) Cinzel;color:#e9d6b2;line-height:1.1}.gm-hero p{font-size:11px;line-height:1.75;color:#b7ad98;max-width:650px}.gm-hero img{position:relative;z-index:1;width:112px;height:130px;object-fit:contain;filter:drop-shadow(0 0 20px #d1ad6340)}
+ .eye-ai-card{border:1px solid rgba(183,150,93,.39);border-radius:4px;background:linear-gradient(120deg,#242219,#0d0f0c);box-shadow:0 17px 36px #0005;padding:21px}
+@@ -1563,7 +1563,7 @@
+ 
+ 
+ /* alpha.21 — high-resolution Eye illustration and non-overlapping world clock */
+-.gm-hero-illustrated{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(240px,.8fr) minmax(300px,1.2fr);gap:22px;align-items:center;min-height:280px;overflow:hidden;padding:clamp(18px,3vw,34px);border-color:rgba(83,151,210,.55);background:linear-gradient(90deg,rgba(6,11,16,.98) 0%,rgba(6,11,16,.88) 38%,rgba(6,11,16,.22) 100%),url('/assets/world/eye-observation.webp') center/cover no-repeat,linear-gradient(145deg,#111b26,#080b10);}
++.gm-hero-illustrated{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(240px,.8fr) minmax(300px,1.2fr);gap:22px;align-items:center;min-height:280px;overflow:hidden;padding:clamp(18px,3vw,34px);border-color:rgba(83,151,210,.55);background:linear-gradient(110deg,rgba(6,11,16,.98) 0%,rgba(6,11,16,.9) 38%,rgba(17,27,38,.55) 100%),linear-gradient(145deg,#111b26,#080b10);}
+ .gm-hero-illustrated:after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 72% 45%,rgba(49,117,181,.17),transparent 42%);pointer-events:none}
+ .gm-hero-illustrated .gm-hero-copy{position:relative;z-index:2;max-width:510px}
+ .gm-hero-illustrated .gm-hero-art{width:100%;height:clamp(190px,24vw,310px);max-height:310px;object-fit:cover;object-position:center 42%;border:1px solid rgba(212,175,106,.55);box-shadow:0 14px 38px #000b,0 0 28px rgba(60,143,232,.16);filter:saturate(.92) contrast(1.04)}
+@@ -1620,13 +1620,13 @@
+ .eye-gaze-iris{position:relative;width:76%;height:76%;border-radius:50%;border:2px solid rgba(166,231,255,.94);background:repeating-conic-gradient(from 6deg,#b2eeff99 0deg 2deg,#197ce4 3deg 6deg,#48baffaa 7deg 9deg);box-shadow:inset 0 0 12px #d3f5ff,0 0 9px #4fbaff;display:grid;place-items:center;}
+ .eye-gaze-pupil{width:24%;height:46%;border-radius:50%;background:radial-gradient(ellipse at 35% 25%,#122b43,#02070e 68%);box-shadow:0 0 8px #02070e,0 0 7px #5bd0ff;}
+ @media(max-width:1250px){.topbar{flex-wrap:wrap;}.topbar .brand{flex:1 1 220px}.topbar .top-stats{order:3;flex:1 1 100%;}.topbar .server-tower-clock{flex:0 0 205px;}}
+-@media(max-width:640px){.topbar .server-tower-clock{flex:1 1 100%;width:100%!important;}.topbar .top-stats{grid-template-columns:repeat(2,minmax(0,1fr));}.eye-gaze-overlay{width:clamp(58px,18vw,92px);}}
++@media(max-width:640px){.topbar{flex-wrap:wrap!important;}.topbar .server-tower-clock{order:4;flex:1 1 100%;width:100%!important;}.topbar .top-stats{grid-template-columns:repeat(2,minmax(0,1fr));}.eye-gaze-overlay{width:clamp(58px,18vw,92px);}}
+ @media(prefers-reduced-motion:reduce){.eye-gaze-overlay{transition:none!important;transform:translate(-50%,-50%)!important;}}
+ 
+ /* alpha.25 — one canonical Eye identity reused on map, overview and Eye hub. */
+ .eye-entity{position:relative;display:block;isolation:isolate;overflow:hidden;aspect-ratio:3/2;min-width:0;background:#070d15;border:1px solid rgba(118,85,47,.8);box-shadow:0 5px 18px #0008,0 0 16px #3c8fe822;}
+ .eye-entity-art{position:absolute!important;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;border-radius:0!important;filter:saturate(.98) contrast(1.04)!important;mix-blend-mode:normal!important;}
+-.eye-entity-gaze{position:absolute;left:52.6%;top:45.7%;width:6.2%;height:24%;transform:translate(calc(-50% + var(--eye-x,0px)),calc(-50% + var(--eye-y,0px)));transition:transform var(--eye-duration,.8s) cubic-bezier(.2,.76,.2,1);border-radius:48% 48% 52% 52%;background:radial-gradient(ellipse at 50% 45%,#020713 0 38%,#071a32 58%,#3c8fe8 70%,#68b8f5aa 79%,transparent 100%);box-shadow:0 0 5px #3c8fe8,0 0 11px #3c8fe866;pointer-events:none;z-index:2;}
++.eye-entity-gaze{position:absolute;left:50.1%;top:42.1%;width:8.2%;height:26%;transform:translate(calc(-50% + var(--eye-x,0px)),calc(-50% + var(--eye-y,0px)));transition:transform var(--eye-duration,.8s) cubic-bezier(.2,.76,.2,1);border-radius:48% 48% 52% 52%;background:radial-gradient(ellipse at 50% 45%,#020713 0 31%,#071a32 48%,#1675b8cc 61%,#3c8fe8aa 72%,#68b8f544 82%,transparent 100%);box-shadow:0 0 5px #3c8fe8,0 0 11px #3c8fe866;pointer-events:none;z-index:2;}
+ .eye-entity-iris{position:absolute;inset:-16% -28%;display:block;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,#031021 0 27%,#1675b8 34%,#53bdf5aa 42%,transparent 69%);opacity:.78;}
+ .eye-entity-pupil{position:absolute;left:50%;top:50%;width:38%;height:82%;transform:translate(-50%,-50%);border-radius:50%;background:linear-gradient(90deg,#06152a,#01050b 48%,#09233c);box-shadow:0 0 4px #000,0 0 3px #65c7ff;}
+ .eye-entity--scene{width:100%;height:auto;min-height:0;border-color:rgba(212,175,106,.58);}
+@@ -1642,7 +1642,9 @@
+ .gm-hero-illustrated .gm-hero-art-wrap{width:100%;min-width:0;}
+ .gm-hero-illustrated .eye-entity--scene{width:100%;height:auto;aspect-ratio:3/2;}
+ @media(max-width:1250px){
+- .topbar{flex-wrap:nowrap!important;gap:8px!important;padding:8px 10px!important;}
++ .topbar{flex-wrap:wrap!important;gap:8px!important;padding:8px 10px!important;}
++ .topbar .top-stats{order:3;flex:1 1 100%;}
++ .topbar .server-tower-clock{order:4;}
+  .topbar .brand{flex:0 1 185px!important;min-width:145px!important;}
+  .topbar .brand strong{font-size:clamp(15px,1.6vw,21px)!important;letter-spacing:1px!important;}
+  .topbar .brand small{font-size:8px!important;letter-spacing:.6px!important;}
+
+--- alpha.25/scripts/smoke-test.cjs
++++ alpha.26/scripts/smoke-test.cjs
+@@ -333,7 +333,7 @@
+ 
+   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+   assert.equal(packageJson.scripts.test, "node scripts/smoke-test.cjs && node scripts/security-smoke.cjs && node scripts/visual-assets-smoke.cjs && node scripts/visual-ui-smoke.cjs");
+-  assert.equal(packageJson.version, "2.0.0-alpha.25");
++  assert.equal(packageJson.version, "2.0.0-alpha.26");
+   const packageLock = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
+   assert.equal(packageLock.version, packageJson.version, "package-lock root version should match package.json.");
+   assert.equal(packageLock.packages[""].version, packageJson.version, "package-lock root package version should match package.json.");
+
+--- alpha.25/scripts/visual-ui-smoke.cjs
++++ alpha.26/scripts/visual-ui-smoke.cjs
+@@ -17,7 +17,7 @@
+ }
+ 
+ try {
+-  assert.match(gameClient, /V2\.0 alpha\.25/, "Visible application header must match the package checkpoint version.");
++  assert.match(gameClient, /V2\.0 alpha\.26/, "Visible application header must match the package checkpoint version.");
+   assert.match(gameClient, /const navGroups:[\s\S]*?label: "A királyság"[\s\S]*?label: "A hős"[\s\S]*?label: "Történet és kapcsolatok"[\s\S]*?label: "A világ megfigyelője"[\s\S]*?label: "Rendszer"/, "Primary navigation must provide all five requested functional groups.");
+   assert.match(gameClient, /role="tablist"[\s\S]*?Világállapot[\s\S]*?Emlékek[\s\S]*?Látomások[\s\S]*?Események/, "The Eye must expose four distinct view tabs.");
+   assert.match(gameClient, /tabIndex=\{eyeView === tab\.id \? 0 : -1\}[\s\S]*?ArrowLeft[\s\S]*?ArrowRight/, "The Eye tabs must support keyboard arrow navigation and roving focus.");
+@@ -47,7 +47,9 @@
+   assert.match(css, /prefers-reduced-motion:reduce/, "Visual transitions must respect reduced-motion preferences.");
+   assert.match(css, /--aim-bg-raised:#222B34/, "The alpha.19/alpha.23 theme must expose the specified raised-panel token.");
+   assert.match(css, /gm-hero-illustrated/, "The Eye must use the illustrated hero presentation.");
+-  assert.match(css, /world\/eye-observation\.webp/, "The Eye illustration must point to an existing high-resolution world asset.");
++  assert.match(fs.readFileSync(path.join(root, "src/components/EyeEntity.tsx"), "utf8"), /assets\/world\/eye-canonical\.webp/, "The canonical Eye component must load the canonical artwork.");
++  assert.doesNotMatch(css, /\.overview-eye\{[^}]*eye-observation\.webp/, "Overview Eye panel must not retain the obsolete observatory background.");
++  assert.doesNotMatch(css, /\.gm-hero-illustrated\{[^}]*eye-observation\.webp/, "Eye hub must not retain the obsolete observatory background.");
+   assert.match(css, /server-tower-clock\{position:relative!important;inset:auto!important/, "The world clock must occupy a non-overlapping layout row.");
+   assert.match(css, /--aim-magic-blue:#3C8FE8/, "The alpha.19/alpha.23 theme must expose the specified magic-blue focus token.");
+   assert.match(fs.readFileSync(path.join(root, "src/components/EyeEntity.tsx"), "utf8"), /className="eye-entity-gaze"/, "The shared Eye must render a visible animated gaze layer.");
+@@ -117,7 +119,7 @@
+ 
+   const manifestRows = manifest.trim().split(/\r?\n/).length - 1;
+   console.log("Visual UI smoke test: PASS");
+-  console.log(`Validated alpha.25 header, immersive capital hero with live character/resource/quest HUD, data-driven module command rail, inventory capacity indicators, quest/NPC/market summaries, local QA script and guide, resilient image fallback code paths, seven region-art files on map hotspots, preserved gate/travel wiring, responsive styling, and ${manifestRows} manifest records.`);
++  console.log(`Validated alpha.26 header, immersive capital hero with live character/resource/quest HUD, data-driven module command rail, inventory capacity indicators, quest/NPC/market summaries, local QA script and guide, resilient image fallback code paths, seven region-art files on map hotspots, preserved gate/travel wiring, responsive styling, and ${manifestRows} manifest records.`);
+ } catch (error) {
+   fail(error instanceof Error ? error.message : String(error));
+ }

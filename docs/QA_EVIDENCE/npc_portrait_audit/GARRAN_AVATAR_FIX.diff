@@ -1,0 +1,5 @@
+--- a/src/lib/content.ts
++++ b/src/lib/content.ts
+@@
+-  { id: "garran", name: "Borin Vasmarok", role: "Fegyverkovács", region: "outskirts", district: "workshops", location: "Vasmarok Műhely", service: "Fegyverjavítás, kovácsmesterség", routine: "Pirkadattól estig a kemence mellett áll; este csak a vas marad ébren.", startHour: 6, endHour: 20, short: "A vasat és az embert is a szikráknál ismeri meg.", color: "#935336", avatarSrc: "/assets/npc-borin.webp" },
++  { id: "garran", name: "Borin Vasmarok", role: "Fegyverkovács", region: "outskirts", district: "workshops", location: "Vasmarok Műhely", service: "Fegyverjavítás, kovácsmesterség", routine: "Pirkadattól estig a kemence mellett áll; este csak a vas marad ébren.", startHour: 6, endHour: 20, short: "A vasat és az embert is a szikráknál ismeri meg.", color: "#935336", avatarSrc: "/assets/npc-borin-clean.webp" },

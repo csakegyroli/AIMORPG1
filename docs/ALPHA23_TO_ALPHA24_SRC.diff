@@ -1,0 +1,97 @@
+diff -ru '--exclude=node_modules' '--exclude=.next' /mnt/data/alpha23-work/src/app/globals.css /mnt/data/alpha24-work/src/app/globals.css
+--- /mnt/data/alpha23-work/src/app/globals.css	2026-10-20 17:59:15.920958367 +0000
++++ /mnt/data/alpha24-work/src/app/globals.css	2026-10-20 18:20:47.167040250 +0000
+@@ -1595,3 +1595,30 @@
+ .eye-gaze-pupil{width:34%;height:45%;border-radius:50%;background:radial-gradient(ellipse at 35% 25%,#122b43,#02070e 68%);box-shadow:0 0 5px #02070e,0 0 4px #5bd0ff;}
+ @media(prefers-reduced-motion:reduce){.eye-gaze-overlay{transition:none;transform:none!important;display:none}}
+ @media(max-width:900px){.eye-gaze-overlay{width:clamp(24px,7vw,38px)}}
++
++
++/* alpha.24 — fix the visible status header and observer icon/gaze layer */
++.topbar{display:flex;align-items:center;gap:12px;min-height:82px;height:auto;padding:10px 16px;flex-wrap:nowrap;}
++.topbar .brand{flex:0 0 230px;min-width:190px;}
++.topbar .top-avatar{flex:0 0 46px;width:46px;height:46px;}
++.topbar .top-stats{flex:1 1 auto;min-width:0;grid-template-columns:repeat(4,minmax(64px,.8fr)) minmax(94px,1.15fr);gap:3px;}
++.topbar .top-stat{padding:6px 7px;min-width:0;}
++.topbar .top-stat strong{font-size:clamp(11px,1.05vw,15px);overflow-wrap:anywhere;}
++.topbar .top-stat small{font-size:8px;letter-spacing:.7px;}
++.topbar .server-tower-clock{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;transform:none!important;flex:0 0 205px;width:205px!important;min-height:56px!important;height:56px;padding:5px 8px!important;margin:0!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;border:1px solid var(--aim-bronze-patina)!important;border-radius:3px;background:linear-gradient(110deg,#0b1118,#172638)!important;box-shadow:inset 0 0 0 1px #d4af6a14!important;}
++.topbar .server-tower-clock .clock-tower-body{width:44px!important;height:44px!important;flex:0 0 44px!important;}
++.topbar .server-tower-clock .clock-face{width:38px!important;height:38px!important;margin:2px!important;}
++.topbar .server-tower-copy{min-width:0;max-width:none;text-align:left!important;}
++.topbar .server-tower-copy small{font-size:7px;letter-spacing:.5px;white-space:nowrap;}
++.topbar .server-tower-copy strong{display:block;font-size:16px;line-height:1.15;}
++.topbar .server-tower-copy span{display:block;font-size:8px;line-height:1.2;white-space:normal;}
++.nav-icon-eye{display:grid!important;place-items:center;padding:3px;}
++.nav-icon-eye img{display:block;width:24px;height:24px;object-fit:contain;filter:drop-shadow(0 0 5px #3c8fe888);}
++.gm-hero-art-wrap{position:relative;isolation:isolate;min-width:0;width:100%;}
++.gm-hero-art-wrap .gm-hero-art{display:block;width:100%;height:clamp(240px,29vw,380px);object-fit:contain;}
++.eye-gaze-overlay{position:absolute;left:61.5%;top:26.5%;width:clamp(86px,12vw,132px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;pointer-events:none;transform:translate(calc(-50% + var(--gaze-x,0px)),calc(-50% + var(--gaze-y,0px)));transition:transform var(--gaze-duration,1s) cubic-bezier(.18,.72,.2,1);background:radial-gradient(circle,#8de7ff 0 3%,#40b9ff 9%,#1680e7 20%,#064579 48%,rgba(5,32,63,.84) 65%,transparent 74%);box-shadow:0 0 12px #2999ffcc,0 0 28px #1675d988,inset 0 0 12px #a5e8ff99;mix-blend-mode:screen;}
++.eye-gaze-iris{position:relative;width:76%;height:76%;border-radius:50%;border:2px solid rgba(166,231,255,.94);background:repeating-conic-gradient(from 6deg,#b2eeff99 0deg 2deg,#197ce4 3deg 6deg,#48baffaa 7deg 9deg);box-shadow:inset 0 0 12px #d3f5ff,0 0 9px #4fbaff;display:grid;place-items:center;}
++.eye-gaze-pupil{width:24%;height:46%;border-radius:50%;background:radial-gradient(ellipse at 35% 25%,#122b43,#02070e 68%);box-shadow:0 0 8px #02070e,0 0 7px #5bd0ff;}
++@media(max-width:1250px){.topbar{flex-wrap:wrap;}.topbar .brand{flex:1 1 220px}.topbar .top-stats{order:3;flex:1 1 100%;}.topbar .server-tower-clock{flex:0 0 205px;}}
++@media(max-width:640px){.topbar .server-tower-clock{flex:1 1 100%;width:100%!important;}.topbar .top-stats{grid-template-columns:repeat(2,minmax(0,1fr));}.eye-gaze-overlay{width:clamp(58px,18vw,92px);}}
++@media(prefers-reduced-motion:reduce){.eye-gaze-overlay{transition:none!important;transform:translate(-50%,-50%)!important;}}
+diff -ru '--exclude=node_modules' '--exclude=.next' /mnt/data/alpha23-work/src/components/GameClient.tsx /mnt/data/alpha24-work/src/components/GameClient.tsx
+--- /mnt/data/alpha23-work/src/components/GameClient.tsx	2026-10-20 17:59:15.590918805 +0000
++++ /mnt/data/alpha24-work/src/components/GameClient.tsx	2026-10-20 18:20:47.166432814 +0000
+@@ -36,7 +36,7 @@
+     { id: "chronicle", icon: "☷", label: "Világkrónika" },
+   ] },
+   { id: "observer", label: "A világ megfigyelője", items: [
+-    { id: "gm", icon: "✧", label: "A Szem" },
++    { id: "gm", icon: "eye", label: "A Szem" },
+   ] },
+   { id: "system", label: "Rendszer", items: [
+     { id: "profile", icon: "⚙", label: "Fiók és mentések" },
+@@ -237,15 +237,15 @@
+ 
+   return <main className="game-shell">
+     <header className="topbar">
+-      <div className="brand"><span className="brand-mark">✦</span><div><strong>AImorpg</strong><small>A Királyság 327. éve · élő város · V2.0 alpha.23</small></div></div>
++      <div className="brand"><span className="brand-mark">✦</span><div><strong>AImorpg</strong><small>A Királyság 327. éve · élő város · V2.0 alpha.24</small></div></div>
+       <div className="top-avatar"><img src={AVATARS.find((a) => a.id === game.avatarId)?.src ?? AVATARS[0].src} alt="" /></div>
+       <div className="top-stats">
+         <TopStat label="Arany" value={`${game.gold} 🪙`} /><TopStat label="Gyémánt" value={`${game.diamonds} 💎`} /><TopStat label="Szint" value={game.level} /><TopStat label="Hírnév" value={reputation.toLocaleString("hu-HU")} /><TopStat label="Tartózkodás" value={regionName(game.currentRegion)} wide />
+       </div>
++      <ServerTowerClock />
+     </header>
+-    <ServerTowerClock />
+     <div className="game-layout">
+-      <aside className="sidebar"><div className="side-ribbon">VÁROS ÉS SORS</div><nav className="nav-list" aria-label="Fő navigáció">{navGroups.map((group) => <section className="nav-group" key={group.id} aria-labelledby={`nav-group-${group.id}`}><h2 className="nav-group-title" id={`nav-group-${group.id}`}>{group.label}</h2>{group.items.map((item) => <button type="button" key={item.id} aria-current={view === item.id ? "page" : undefined} className={`nav-button ${view === item.id ? "active" : ""}`} onClick={() => go(item.id)}><span className="nav-icon" aria-hidden="true">{item.icon}</span>{item.label}{item.id === "gm" && unread > 0 && <span className="nav-badge" aria-label={`${unread} olvasatlan megfigyelés`}>{unread}</span>}</button>)}</section>)}</nav></aside>
++      <aside className="sidebar"><div className="side-ribbon">VÁROS ÉS SORS</div><nav className="nav-list" aria-label="Fő navigáció">{navGroups.map((group) => <section className="nav-group" key={group.id} aria-labelledby={`nav-group-${group.id}`}><h2 className="nav-group-title" id={`nav-group-${group.id}`}>{group.label}</h2>{group.items.map((item) => <button type="button" key={item.id} aria-current={view === item.id ? "page" : undefined} className={`nav-button ${view === item.id ? "active" : ""}`} onClick={() => go(item.id)}><span className={`nav-icon ${item.id === "gm" ? "nav-icon-eye" : ""}`} aria-hidden="true">{item.id === "gm" ? <img src="/assets/eye-emblem-v2.webp" alt="" /> : item.icon}</span>{item.label}{item.id === "gm" && unread > 0 && <span className="nav-badge" aria-label={`${unread} olvasatlan megfigyelés`}>{unread}</span>}</button>)}</section>)}</nav></aside>
+       <section className="main-panel" data-view={view}>
+         {view === "overview" && <Overview game={game} reputation={reputation} setView={go} setShowPrologue={setShowPrologue} onOpenCalendar={() => setShowCalendar(true)} />}
+         {view === "character" && <Character game={game} effectiveStats={effectiveStats} notify={notify} />}
+@@ -1079,24 +1079,22 @@
+ 
+ type EyeViewId = "world" | "memories" | "visions" | "events";
+ 
+-/** A restrained, independently moving magical iris overlay. The underlying observatory artwork remains a flat image. */
++/** Animated visible magical pupil layered over the blue observatory orb. The source art is a flat image, so this is an added iris layer, not the original artwork's own iris. */
+ function EyeGazeOverlay() {
+-  const [gaze, setGaze] = useState({ x: 0, y: 0, duration: 1.8 });
++  const [gaze, setGaze] = useState({ x: 0, y: 0, duration: 1.15 });
+   useEffect(() => {
+     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+     if (media.matches) return;
+     let timer: ReturnType<typeof setTimeout> | undefined;
+     let cancelled = false;
+     const schedule = () => {
+-      const pause = 900 + Math.random() * 2600;
+-      timer = setTimeout(() => {
++      timer = window.setTimeout(() => {
+         if (cancelled) return;
+-        // Short, bounded saccades in several directions, occasionally returning near center.
+-        const x = Math.random() < 0.16 ? (Math.random() - 0.5) * 2 : (Math.random() - 0.5) * 12;
+-        const y = Math.random() < 0.16 ? (Math.random() - 0.5) * 2 : (Math.random() - 0.5) * 8;
+-        setGaze({ x, y, duration: 0.55 + Math.random() * 1.15 });
++        const choices = [{x:-17,y:0},{x:15,y:-4},{x:2,y:12},{x:-4,y:-12},{x:9,y:5},{x:0,y:0},{x:-10,y:4},{x:4,y:-2}];
++        const target = choices[Math.floor(Math.random()*choices.length)];
++        setGaze({ ...target, duration: 0.48 + Math.random()*0.82 });
+         schedule();
+-      }, pause);
++      }, 750 + Math.random()*2300);
+     };
+     schedule();
+     return () => { cancelled = true; if (timer) clearTimeout(timer); };

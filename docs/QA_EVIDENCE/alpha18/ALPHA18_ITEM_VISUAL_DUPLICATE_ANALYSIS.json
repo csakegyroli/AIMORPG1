@@ -1,0 +1,111 @@
+{
+  "method": "Perceptual hash based on 32x32 grayscale DCT, low-frequency 8x8 coefficient comparison (excluding DC); Hamming distance. Used as triage, not sole semantic proof.",
+  "image_count": 74,
+  "pairwise_comparisons": 2701,
+  "threshold_manual_review": 10,
+  "pairs_distance_le_10": [
+    {
+      "hamming_distance": 8,
+      "item_a": "ashweaveCoat",
+      "item_b": "harborCoat",
+      "disposition": "MANUALLY_CONFIRMED_DUPLICATE"
+    },
+    {
+      "hamming_distance": 8,
+      "item_a": "sealedLetter",
+      "item_b": "courtInvitation",
+      "disposition": "MANUALLY_CONFIRMED_DUPLICATE"
+    },
+    {
+      "hamming_distance": 10,
+      "item_a": "archiveMantle",
+      "item_b": "echoThreadCloak",
+      "disposition": "MANUALLY_CONFIRMED_DUPLICATE"
+    }
+  ],
+  "pairs_distance_11_to_14": [
+    {
+      "hamming_distance": 12,
+      "item_a": "firstWitnessLens",
+      "item_b": "sealedLedger",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 12,
+      "item_a": "paddedArmor",
+      "item_b": "brineproofScale",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "blackCoin",
+      "item_b": "diplomaticToken",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "canalKnife",
+      "item_b": "championRibbon",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "guildPermit",
+      "item_b": "sealedLedger",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "royalArchiveCopy",
+      "item_b": "firstWitnessLens",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "royalArchiveCopy",
+      "item_b": "sealedLedger",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "sealedLetter",
+      "item_b": "rareAmber",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    },
+    {
+      "hamming_distance": 14,
+      "item_a": "tannersWax",
+      "item_b": "blackCoin",
+      "disposition": "NEAR_VISUAL_STYLE_SIMILARITY_ONLY; distinct subject after contact-sheet inspection"
+    }
+  ],
+  "checked_contact_sheets": [
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-1.jpg",
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-2.jpg",
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-3.jpg",
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-4.jpg",
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-5.jpg",
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-6.jpg",
+    "docs/QA_EVIDENCE/alpha18/item-unique-contact-sheet-7.jpg"
+  ],
+  "manual_duplicate_decisions": [
+    {
+      "item_id": "courtInvitation",
+      "duplicate_of": "sealedLetter",
+      "evidence": "docs/QA_EVIDENCE/alpha18/compare-sealedLetter-courtInvitation.jpg",
+      "distance": 8
+    },
+    {
+      "item_id": "echoThreadCloak",
+      "duplicate_of": "archiveMantle",
+      "evidence": "docs/QA_EVIDENCE/alpha18/compare-archiveMantle-echoThreadCloak.jpg",
+      "distance": 10
+    },
+    {
+      "item_id": "harborCoat",
+      "duplicate_of": "ashweaveCoat",
+      "evidence": "docs/QA_EVIDENCE/alpha18/compare-ashweaveCoat-harborCoat.jpg",
+      "distance": 8
+    }
+  ]
+}
