@@ -768,7 +768,7 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
   const availableTargets = game.inventory.filter(inv=>canNpcCraftItem(npc.id,getItem(inv.itemId)));
   const regionItems = regionalMarketItems(npc.region).filter(item => isMarketEligible(item));
   const shopItems = fn.itemIds?.length ? fn.itemIds.map(id=>getItem(id)).filter(Boolean) : regionItems;
-  const forgeCraftables = ITEMS.filter(item => canNpcCraftItem(npc.id,item) && (item.regions?.includes(npc.region) || item.setId?.startsWith(`${npc.region}_`) || (!item.regions?.length && npc.region === "outskirts")) && item.rarity === "Közönséges").slice(0,8);
+  const forgeCraftables = ITEMS.filter(item => canNpcCraftItem(npc.id,item) && (item.regions?.includes(npc.region) || item.setId?.startsWith(`${npc.region}_`) || (!item.regions?.length && npc.region === "outskirts")) && (npc.id === "nara" || item.rarity === "Közönséges")).slice(0,8);
   const activeShop = shopItems.find(item=>item?.id===shopItem) ?? null;
   const activeFood = shopItems.find(item=>item?.id===shopItem && itemCategory(item)==="consumable") ?? null;
   const selectedCraft = forgeTarget.startsWith("craft:") ? ITEMS.find(i=>i.id===forgeTarget.slice(6)) : null;
