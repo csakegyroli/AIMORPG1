@@ -5,7 +5,7 @@ import { INITIAL_STATS, ITEMS, NPCS, NPC_FUNCTIONS, QUESTS } from "./content";
 import { getEffectiveStats, getItem, makeInventoryItem, marketPrice, reputationScore, sellingPrice, XP_FOR_LEVEL } from "./rules";
 import { rollReward, explainRewardRoll, nextRewardPity, type RewardPityState, type RewardRoll } from "./rewardEconomy";
 import { getWorldTime } from "./worldTime";
-import { craftRecipeForItem, dismantleYieldsForItem } from "./itemSystem";
+import { canNpcCraftItem, craftRecipeForItem, dismantleYieldsForItem } from "./itemSystem";
 import { isMarketEligible, isSellable, itemAvailableInRegion, itemLegalStatus, itemSourceLabel, itemCategory } from "./itemSystem";
 import type { AvatarId, EquipmentSlot, GmMessage, InventoryItem, ItemId, JournalEntry, NpcId, QuestChoice, QuestDefinition, QuestId, QuestStatus, RegionId, ReputationBreakdown, Stats, TemporaryItemBuff, TemporaryStatBuff, StatId } from "./types";
 import { addMemory, applyFacetDelta, createFacetDelta, createInitialNpcRuntime, createInitialPlayerIdentity, createInitialRelationshipFacets, identityDeltaForChoice, mergeIdentity, relationshipAggregate, stateForRelationship, npcIsPresent as npcRuntimePresent, type NpcRuntimeMap, type PlayerIdentityState, type RelationshipFacetMap, type WorldMemory } from "./simulation";
@@ -642,14 +642,14 @@ export function useGameStore(): GameState {
         }
         case "forge": case "leatherwork": {
           if(targetId?.startsWith("craft:")){
-            const recipeId=targetId.slice(6); const crafted=itemById(recipeId); if(!crafted||!crafted.slot||crafted.sideQuestOnly||crafted.category==="relic"||crafted.marketEligible===false){result={success:false,message:"Ez a történeti vagy egyedi tárgy nem készíthető ebben a műhelyben."};return s;}
+            const recipeId=targetId.slice(6); const crafted=itemById(recipeId); if(!crafted||!crafted.slot||crafted.sideQuestOnly||crafted.category==="relic"||crafted.marketEligible===false){result={success:false,message:"Ez a történeti vagy egyedi tárgy nem készíthető ebben a műhelyben."};return s;} if(!canNpcCraftItem(npc.id,crafted)){result={success:false,message:`${npc.name} nem készít ilyen felszerelést. Keresd a megfelelő mestert a Műhelynegyedben.`};return s;}
             const recipeNeed=craftRecipeForItem(crafted, npc.region); const counts=new Map<string,number>(); next.inventory.forEach(inv=>counts.set(inv.itemId,(counts.get(inv.itemId)??0)+1)); const missing=recipeNeed.find(req=>(counts.get(req.id)??0)<req.count);
             if(missing){result={success:false,message:`Nincs elég anyagod. Szükséges: ${recipeNeed.map(req=>`${itemById(req.id)?.name??req.id} × ${req.count}`).join(", ")}.`};return s;}
             let inv=[...next.inventory]; for(const req of recipeNeed){let left=req.count;inv=inv.filter(x=>{if(left<=0||x.itemId!==req.id)return true;left--;return false;});} inv.push(makeInventoryItem(crafted.id)); next={...next,inventory:inv}; used(); result={success:true,message:`Elkészült: ${crafted.name}.`}; break;
           }
           if(targetId){
             const idx=next.inventory.findIndex(i=>i.instanceId===targetId); if(idx<0){result={success:false,message:"A kiválasztott tárgy nincs a táskádban."};return s;}
-            const owned=next.inventory[idx]; const item=getItem(owned.itemId); if(!item.slot){result={success:false,message:"Ezt a tárgyat a műhelyben nem lehet szétszerelni."};return s;}
+            const owned=next.inventory[idx]; const item=getItem(owned.itemId); if(!item.slot){result={success:false,message:"Ezt a tárgyat a műhelyben nem lehet szétszerelni."};return s;} if(!canNpcCraftItem(npc.id,item)){result={success:false,message:`${npc.name} nem bont ilyen felszerelést. Keresd a megfelelő mestert a Műhelynegyedben.`};return s;}
             const yields=dismantleYieldsForItem(item);
             next={...next,inventory:next.inventory.filter((_,i)=>i!==idx).concat(yields.flatMap(req=>Array.from({length:req.count},()=>makeInventoryItem(req.id))))}; used(); result={success:true,message:`${item.name} szétszerelve. ${yields.map(y=>`${getItem(y.id).name} × ${y.count}`).join(", ")} került vissza.`}; break;
           }
