@@ -166,3 +166,12 @@ State:
 
 ## Műhelyszintű elfogadás
 A négy NPC külön funkciójú, de ugyanazt az item/recipe/transaction szerződést használja. Durability, repair, +1…+9 és mastery nem tekinthető implementálhatónak a közös adatmodell és save migration központi jóváhagyása nélkül.
+
+
+## 11. Alpha.26 runtime verification — central review
+
+**Verified source:** `src/lib/content.ts` blob `27206c65e37c5cc3b47d0257d91b1654f8971b95`; `src/lib/types.ts` blob `443f69f61193917131c1c52784c2056c25f9cd3d`; `src/lib/store.ts` blob `60fc472f8eeefd940aa25e226e3a1aa3a20b1aba`; `src/lib/itemSystem.ts` contains `craftRecipeForItem` and `dismantleYieldsForItem`.
+
+Verified: `InventoryItem={instanceId,itemId}`; `fn-garran` forge, `fn-velka` forge, `fn-nara` leatherwork, `fn-tomen` apprentice (15 gold). Forge/leatherwork has a recipe-based craft path and dismantling path; apprentice currently shares a generic training handler that increases the global smithing stat (capped at 50) and trade affinity, not a profession mastery track. No durability field or +1…+9 enhancement field is present in the verified InventoryItem shape. Alchemy/repair/enhancement details cannot be inferred from the branch candidate.
+
+**Required follow-up:** compare the 11-commit candidate against main at function level, reconcile its recipe filtering, then specify durability/repair/enhancement/mastery only as central proposals. All four NPCs remain IN PROGRESS.
