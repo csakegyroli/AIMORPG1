@@ -26,6 +26,7 @@ try {
   assert.equal(getInnRestPreview(125, 125, 1000).reason, "full-health", "Full HP must block and never charge.");
   assert.equal(getInnRestPreview(100, 125, 59).reason, "insufficient-gold");
   assert.equal(getInnRestPreview(100, 125, 60).price, 60);
+  assert.equal(getInnRestPreview(0, 125, 60).restoredHealth, 13);
 
   const content = fs.readFileSync(path.join(root, "src/lib/content.ts"), "utf8");
   const stewMatch = content.match(/\{ id: "heartyStew"[^\n]*effects: \{ healPercent: (\d+) \}/);
@@ -39,6 +40,8 @@ try {
   assert.equal(getInnFoodPreview(rations, 125, 100, 100, 10).healingAmount, 0, "Rations must not gain an invented healing effect.");
   assert.equal(getInnFoodPreview(stew, 125, 100, 23, 10).reason, "insufficient-gold");
   assert.equal(getInnFoodPreview(stew, 125, 100, 100, 80).reason, "inventory-full");
+  assert.equal(getInnFoodPreview({ ...stew, basePrice: -1 }, 125, 100, 100, 10).reason, "invalid-item");
+  assert.equal(getInnFoodPreview({ ...stew, type: "weapon" }, 125, 100, 100, 10).reason, "invalid-item");
 
   const store = fs.readFileSync(path.join(root, "src/lib/store.ts"), "utf8");
   assert.match(store, /targetId!==undefined && targetId!=="rest"/);
