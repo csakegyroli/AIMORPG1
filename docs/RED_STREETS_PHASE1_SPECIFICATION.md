@@ -165,3 +165,12 @@ State:
 **Loop:** célajtó megtekintése → jogosultság (credential/intro/relationship) ellenőrzése → kérés → beengedés / feltételes beengedés / elutasítás. 20 gold csak akkor fizetendő, ha a kapu díjköteles és az access flag nem áll fenn.
 **Szabály:** a gold nem vásárolhat quest/Canon tiltást felülíró hozzáférést. Siker = valid flag; partial = időben korlátozott, authored visit flag; failure = elutasítás, díj nélkül. A Tosk által adott belépő nem lehet átruházható item.
 **Teszt:** no credential; valid intro; fee; duplicate access; locked story gate; reload; expired visit; invalid target; payment rollback; no tradable access token.
+
+
+## 11. Alpha.26 runtime verification — central review
+
+**Verified source:** `src/lib/content.ts` blob `27206c65e37c5cc3b47d0257d91b1654f8971b95`; `src/lib/store.ts` blob `60fc472f8eeefd940aa25e226e3a1aa3a20b1aba`.
+
+Verified functions: `fn-havel/gamble` (35 gold), `fn-brenka/odds` (25 gold), `fn-silas/information` (30 gold), `fn-tosk/doorGuard` (20 gold), `fn-miri/rumor`. Store's `gamble/odds` handler debits the cost, uses `Math.random()<0.45`, and on win credits `cost*2`; this is not Havel's authored strategy game and is not acceptable as a final odds contract. Other named kinds are currently routed through a generic service/item purchase branch. The store is client-side, so cash stakes and payouts are blocked pending authority/idempotency design.
+
+**Required follow-up:** define Havel's card interaction as a pure deterministic session resolver; separate Brenka odds from Havel gameplay; do not reuse the generic 45% gamble outcome. All five NPCs remain IN PROGRESS.
