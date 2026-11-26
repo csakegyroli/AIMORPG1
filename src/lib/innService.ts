@@ -30,7 +30,7 @@ export function getInnRestPreview(currentHealth: number, maxHealth: number, gold
 export function getInnFoodPreview(item: ItemDefinition, maxHealth: number, currentHealth: number, gold: number, inventoryCount: number, inventoryLimit = 80): InnFoodPreview {
   const safeMax = Number.isFinite(maxHealth) ? Math.max(0, Math.floor(maxHealth)) : 0;
   const safeCurrent = Number.isFinite(currentHealth) ? Math.max(0, Math.min(safeMax, Math.floor(currentHealth))) : 0;
-  const price = Number.isFinite(item.basePrice) ? Math.max(0, Math.floor(item.basePrice)) : -1;
+  const price = Number.isFinite(item.basePrice) && item.basePrice >= 0 ? Math.floor(item.basePrice) : -1;
   const effects = item.effects;
   const healingAmount = Math.max(0, Math.ceil(safeMax * (effects?.healPercent ?? 0) / 100) + (effects?.heal ?? 0));
   const restoredHealth = Math.min(Math.max(0, safeMax - safeCurrent), healingAmount);
