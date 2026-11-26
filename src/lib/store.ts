@@ -5,6 +5,7 @@ import { INITIAL_STATS, ITEMS, NPCS, NPC_FUNCTIONS, QUESTS } from "./content";
 import { getEffectiveStats, getItem, makeInventoryItem, marketPrice, reputationScore, sellingPrice, XP_FOR_LEVEL } from "./rules";
 import { rollReward, explainRewardRoll, nextRewardPity, type RewardPityState, type RewardRoll } from "./rewardEconomy";
 import { getWorldTime } from "./worldTime";
+import { getInnFoodPreview, getInnRestPreview } from "./innService";
 import { craftRecipeForItem, dismantleYieldsForItem } from "./itemSystem";
 import { isMarketEligible, isSellable, itemAvailableInRegion, itemLegalStatus, itemSourceLabel, itemCategory } from "./itemSystem";
 import type { AvatarId, EquipmentSlot, GmMessage, InventoryItem, ItemId, JournalEntry, NpcId, QuestChoice, QuestDefinition, QuestId, QuestStatus, RegionId, ReputationBreakdown, Stats, TemporaryItemBuff, TemporaryStatBuff, StatId } from "./types";
@@ -593,27 +594,36 @@ export function useGameStore(): GameState {
       };
       switch(fn.kind){
         case "inn": {
-          // The inn has two mutually exclusive actions: buy food OR rest.
-          // A food purchase is explicitly tagged with `buy:` so it can never
-          // accidentally fall through to the sleep path.
+          // Alma's authored service is one hour for 60 gold and 10% max HP.
+          // Keep the existing food allow-list; item effects remain defined by content.ts.
           if(targetId?.startsWith("buy:")){
             const selectedId=targetId.slice(4);
             const itemId=fn.itemIds?.includes(selectedId as ItemId) ? selectedId : undefined;
             const item=itemId?itemById(itemId):undefined;
-            const cost=item?.basePrice ?? 24;
-            if(!item){result={success:false,message:"A kiválasztott étel jelenleg nem érhető el."};return s;}
-            if(!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};return s;}
-            if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};return s;}
-            next={...next,gold:next.gold-cost,inventory:[...next.inventory,makeInventoryItem(item.id)]};
+            if(!item || item.type!=="consumable"){result={success:false,message:"A kiválasztott étel jelenleg nem érhető el."};return s;}
+            const preview=getInnFoodPreview(item,max,s.health,s.gold,next.inventory.length);
+            if(!preview.canPurchase){
+              result={success:false,message:preview.reason==="inventory-full"?"A táskád megtelt (80/80).":preview.reason==="insufficient-gold"?`Ehhez ${preview.price} arany szükséges.`:"A kiválasztott étel nem vásárolható meg."};
+              return s;
+            }
+            next={...next,gold:next.gold-preview.price,inventory:[...next.inventory,makeInventoryItem(item.id)]};
             used();
-            result={success:true,message:`Megvetted: ${item.name}. Az étel bekerült a táskádba.`};
+            result={success:true,message:`Megvetted: ${item.name} · ${preview.price} arany. Az étel bekerült a táskádba.`};
             break;
           }
-          const hours=Math.max(1,Math.min(8,Number((targetId??"1").replace("hours:",""))||1));
-          const cost=(fn.cost??60)*hours; if(!setGold(cost)){result={success:false,message:`A választott ${hours} óra szállás ára ${cost} arany.`};return s;}
-          if(s.health>=max){result={success:false,message:"Teljes az életerőd, nincs szükséged alvásra."};return s;}
-          const restored=Math.min(max-s.health,Math.max(1,Math.ceil(max*0.10*hours)));
-          next={...next,gold:next.gold-cost,health:Math.min(max,next.health+restored)}; used(); result={success:true,message:`${hours} óra alvás: +${restored} életerő. Szállás: ${cost} arany.`}; break;
+          if(targetId!==undefined && targetId!=="rest" && targetId!=="hours:1" && targetId!=="1"){
+            result={success:false,message:"Almánál egyórás pihenés foglalható."};
+            return s;
+          }
+          const preview=getInnRestPreview(s.health,max,s.gold,fn.cost??60);
+          if(!preview.canRest){
+            result={success:false,message:preview.reason==="full-health"?"Teljes az életerőd, nincs szükséged alvásra.":preview.reason==="insufficient-gold"?`A pihenés ára ${preview.price} arany.`:"A pihenés jelenleg nem elérhető."};
+            return s;
+          }
+          next={...next,gold:next.gold-preview.price,health:s.health+preview.restoredHealth};
+          used();
+          result={success:true,message:`Egy óra pihenés: +${preview.restoredHealth} életerő. Szállás: ${preview.price} arany.`};
+          break;
         }
         case "foodTrade": case "food": {
           const selectedId = targetId?.startsWith("buy:") ? targetId.slice(4) : fn.itemIds?.[0];
