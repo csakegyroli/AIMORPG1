@@ -90,6 +90,9 @@ try {
   assert.match(gameClient, /className="map-hotspot-art" src=\{REGION_ART\[id\]\}/, "Main map hotspots must render the selected region's actual art.");
   assert.match(gameClient, /className="capital-place-icon"><img src=\{REGION_ART\[id\]\}/, "The region list must use the selected region's artwork as well.");
   assert.match(gameClient, /className="function-item-icon"><ItemArtwork itemId=\{item\.id\} fallback=\{item\.icon\}/, "NPC shops, forge and service lists must use item art rather than only Unicode icons.");
+  assert.match(gameClient, /\["forge","leatherwork"\]\.includes\(fn\.kind\)/, "Nara must open the dedicated leatherwork workbench.");
+  assert.match(gameClient, /craftRecipeForNpcItem\(selectedCraft, npc\.region, npc\.id\)/, "NPC workbenches must display their own material recipes.");
+  assert.match(gameClient, /canNpcCraftItem\(npc\.id,item\)/, "Workshop craft lists must enforce NPC specialties.");
   assert.match(gameClient, /<SafeArtImage src=\{portrait\} alt=\{displayName\}/, "NPC detail portraits must use resilient image loading.");
   assert.match(gameClient, /<div className="npc-directory-avatar"><SafeArtImage src=\{portrait\} alt=\{displayName\}/, "NPC directory modal portraits must also use resilient image loading.");
   assert.doesNotMatch(gameClient, /<div className="npc-directory-avatar"><img src=\{portrait\}/, "NPC directory modal must not keep a raw, unprotected image element.");
