@@ -142,7 +142,7 @@ State:
 ### Alma Varg — Fogadó és szállás
 **Forrásállapot:** `fn-alma`, kind `inn`; jelenlegi leírás: 60 goldért egy óra alvás a max HP 10%-át tölti vissza; étel is kapható (`heartyStew`, `gateRations`). Ezt a már létező szabályt nem írjuk felül.
 **Loop/döntés:** szoba kiválasztása → ár és várható gyógyulás előnézete → fizetés és pihenés; alternatíva az ételvásárlás, illetve távozás. Nincs kötelező időzár vagy offline várakozás.
-**Feloldás és eredmény:** 60 gold, csak ha HP hiányzik; heal = min(hiányzó HP, floor(maxHP×0.10)). Ha teljes HP-n van a játékos, a pihenés nem vonhat le pénzt. Az étel az item saját effect mezőjét használja; a leírt `heartyStew` 20% gyógyítást ad.
+**Feloldás és eredmény:** 60 gold, csak ha HP hiányzik; heal = min(hiányzó HP, ceil(maxHP×0.10)). Ha teljes HP-n van a játékos, a pihenés nem vonhat le pénzt. Az étel az item saját effect mezőjét használja; a leírt `heartyStew` 20% gyógyítást ad.
 **Kapcsolat:** tisztességes fizetés és visszatérő látogatás csak narratív relationship eventet indíthat, nem adhat automatikus statot. **SHARED DEPENDENCY:** világóra (12 real hours = 1 in-game day), HP, item effect, tranzakció.
 **UI/mentés/teszt:** ár/gyógyulás előnézet; confirm/cancel; tranzakció egyszeri. Tesztek: exact 10% heal; HP cap; full HP no charge; insufficient gold; stew effect; double click; reload; cancel; item stock; save round-trip. Alma: **IN PROGRESS**, mert a jelenlegi runtime és a szállás-állapot pontos save hatása még ellenőrzendő.
 
@@ -337,3 +337,33 @@ NPC_FUNCTIONS contains `fn-damar/warehouse`, `fn-alma/inn`, `fn-petar/transport`
 - Jarek — IN PROGRESS; CENTRAL DECISION REQUIRED: route graph/discovery/save.
 
 No source implementation for Damar, Petar, Vera or Jarek is authorized by this document.
+
+
+## 13. Alma Varg — PHASE 2 branch implementation source map
+
+**Status: IMPLEMENTED ON WORKING BRANCH / PENDING CENTRAL REVIEW. Not ACCEPTED.**
+
+Working branch: gate-city/phase-2-alma  
+Active issue: #9  
+Central tracker: #10
+
+### Verified implementation references
+- src/lib/content.ts — Alma NPC identity; fn-alma (kind inn, cost 60, item allow-list heartyStew and gateRations).
+- src/lib/store.ts — useNpcFunction / inn handler. Rest is restricted to one hour; invalid rest duration is rejected. Food selection is validated against fn.itemIds and consumable type. Price, inventory capacity and current gold are checked before state mutation.
+- src/lib/innService.ts — pure rest and food preview calculations. Rest restores ceil(10% max HP), capped to missing HP. Food preview reads the existing ItemDefinition effects.
+- src/components/GameClient.tsx — NpcFunctionPanel. Shows one-hour rest price and HP preview; food cards and selected-food preview; pending action lock; disabled invalid purchase/rest controls; cancellation and aria-live result feedback.
+- scripts/alma-inn-smoke.cjs — focused helper/source contract tests added and wired into npm test.
+- package.json — test script now runs the focused Alma test before the existing smoke suites.
+
+### Preserved content and persistence
+- Rest: 60 gold, one hour, 10% maximum HP; no charge at full HP or when funds are insufficient.
+- heartyStew: original healPercent 20 retained.
+- gateRations: no healing effect exists in the current item definition; no effect was invented. UI states that it has no direct HP effect.
+- InventoryItem remains instanceId/itemId.
+- Save key remains aimorpg-final-demo-v1-29; saveVersion remains 6. No new persisted fields or migration added.
+- 60 main quests and NPC Canon were not edited.
+
+### Review caveats
+- UI double-submit protection is a short-lived in-flight lock for the current client interaction. The existing store remains client-side and is not server-authoritative.
+- Focused test file is committed but not executed in this environment because the repository could not be cloned into the local runtime (GitHub host DNS resolution failed). Full npm test, npm run lint and npm run build are therefore **NOT RUN**; no pass is claimed.
+- Central review must inspect the diff and run checks in a dependency-complete checkout before accepting Alma.
