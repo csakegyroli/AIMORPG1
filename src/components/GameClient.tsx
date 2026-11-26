@@ -6,6 +6,7 @@ import { ITEMS, NPCS, QUESTS, REGIONS, STAT_DEFINITIONS, OUTSKIRTS_DISTRICTS, RE
 import { getEffectiveStats, getItem, getActiveEquipmentSetProgress, groupScore, marketPrice, sellingPrice, XP_FOR_LEVEL } from "@/lib/rules";
 import { ITEM_CATEGORY_LABELS, ITEM_LEGAL_LABELS, itemCategory, itemLegalStatus, regionalMarketItems, REGIONAL_MARKET_NAMES, isMarketEligible, getEquipmentSet, getEquipmentSetCollectionProgress, craftRecipeForItem, dismantleYieldsForItem } from "@/lib/itemSystem";
 import { getReputation, useGameStore } from "@/lib/store";
+import { getInnFoodPreview, getInnRestPreview } from "@/lib/innService";
 import { buildNarrativeContext, getAvailableDialogueTopics, evaluateSideQuestChoice } from "@/lib/narrative";
 import { rewardPreview } from "@/lib/rewardEconomy";
 import { chapterCompletedCount, chapterIsMastered, chapterProgress, regionGateStatus } from "@/lib/campaign";
@@ -764,13 +765,30 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
   const [open, setOpen] = useState(false);
   const [forgeTarget, setForgeTarget] = useState<string>("");
   const [shopItem, setShopItem] = useState<string|null>(null);
-  const [restHours, setRestHours] = useState(1);
+  const [innPending, setInnPending] = useState(false);
+  const [innStatus, setInnStatus] = useState<string | null>(null);
+  const innActionLock = useRef(false);
   const availableTargets = game.inventory.filter(inv=>Boolean(getItem(inv.itemId).slot));
   const regionItems = regionalMarketItems(npc.region).filter(item => isMarketEligible(item));
   const shopItems = fn.itemIds?.length ? fn.itemIds.map(id=>getItem(id)).filter(Boolean) : regionItems;
   const forgeCraftables = ITEMS.filter(item => item.slot && (item.regions?.includes(npc.region) || item.setId?.startsWith(`${npc.region}_`)) && item.rarity === "Közönséges").slice(0,8);
   const activeShop = shopItems.find(item=>item?.id===shopItem) ?? null;
   const activeFood = shopItems.find(item=>item?.id===shopItem && itemCategory(item)==="consumable") ?? null;
+  const innStats = getEffectiveStats(game.baseStats, game.equipment, game.temporaryStatBuffs, game.temporaryItemBuffs);
+  const innMaxHealth = 100 + Math.max(0, innStats.endurance) * 5;
+  const innRestPreview = fn.kind === "inn" ? getInnRestPreview(game.health, innMaxHealth, game.gold, fn.cost ?? 60) : null;
+  const innFoodPreview = activeFood ? getInnFoodPreview(activeFood, innMaxHealth, game.health, game.gold, game.inventory.length) : null;
+  const runInnAction = (targetId: string) => {
+    if (innActionLock.current || innPending) return;
+    innActionLock.current = true;
+    setInnPending(true);
+    setInnStatus("A művelet feldolgozása…");
+    const result = game.useNpcFunction(npc.id, fn.id, targetId);
+    notify(result.message);
+    setInnStatus(result.message);
+    if (!result.success) { innActionLock.current = false; setInnPending(false); return; }
+    window.setTimeout(() => { innActionLock.current = false; setInnPending(false); }, 500);
+  };
   const selectedCraft = forgeTarget.startsWith("craft:") ? ITEMS.find(i=>i.id===forgeTarget.slice(6)) : null;
   const craftMaterials = selectedCraft ? craftRecipeForItem(selectedCraft, npc.region) : [];
   const materialCounts = new Map<string,number>(); game.inventory.forEach(inv=>materialCounts.set(inv.itemId,(materialCounts.get(inv.itemId)??0)+1));
@@ -803,13 +821,28 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
         {activeShop?.id==="runeInfusion"&&<div className="function-item-grid">{Object.values(game.equipment).filter(Boolean).map(inv=>{const item=getItem(inv!.itemId); const active=game.temporaryItemBuffs.some(b=>b.instanceId===inv!.instanceId&&b.expiresAt>Date.now()); return <button type="button" key={inv!.instanceId} className={`function-item-card compact ${active?"selected":""}`} disabled={active} onClick={()=>{const r=game.useNpcFunction(npc.id,fn.id,`infuse:${inv!.instanceId}`);notify(r.message)}}><span className="function-item-icon"><ItemArtwork itemId={item.id} fallback={item.icon} /></span><b>{item.name}</b><small>{active?"Már erősítve":"+1 Erő · 1 óra"}</small><em>{itemStatsText(item)}</em></button>})}</div>}
       </>}
       {fn.kind==="inn"&&<>
-        <div className="function-section-head"><div><span>SZÁLLÁS</span><strong>Mennyi időt pihensz?</strong></div><small>1 óra = +10% maximális HP.</small></div>
-        <div className="rest-options">{[1,2,4,8].map(h=><button key={h} className={restHours===h?"selected":""} onClick={()=>setRestHours(h)}><b>{h} óra</b><span>+{h*10}% HP</span><small>{(fn.cost??60)*h} arany</small></button>)}</div>
-        <div className="function-action-row"><button className="gold-button" onClick={()=>{const r=game.useNpcFunction(npc.id,fn.id,`hours:${restHours}`);notify(r.message)}}>Szobát foglalok · {String((fn.cost??60)*restHours)} arany</button></div>
-        <div className="function-section-head"><div><span>ÉTEL</span><strong>Válassz ételt</strong></div><small>Az étel azonnal gyógyít. A saját készletedben fogyaszthatod el.</small></div>
-        <div className="function-item-grid">{shopItems.filter(item=>itemCategory(item)==="consumable").map(item=><button type="button" key={item.id} className={`function-item-card compact ${shopItem===item.id?"selected":""}`} onClick={()=>setShopItem(item.id)}><span className="function-item-icon"><ItemArtwork itemId={item.id} fallback={item.icon} /></span><b>{item.name}</b><small>{item.effects?.healPercent?`+${item.effects.healPercent}% max HP`:item.effects?.heal?`+${item.effects.heal} HP`:"Étkezés"}</small><strong>{item.basePrice} arany</strong></button>)}</div>
-        {activeFood&&<div className="function-item-detail food-detail"><div className="function-item-icon big"><ItemArtwork itemId={activeFood.id} fallback={activeFood.icon} /></div><div><span>ÉTEL · {activeFood.rarity}</span><h4>{activeFood.name}</h4><p>{activeFood.description}</p><small>{activeFood.effects?.healPercent?`+${activeFood.effects.healPercent}% maximális életerő`:activeFood.effects?.heal?`+${activeFood.effects.heal} életerő`:"Étkezési tárgy"}</small></div><button className="gold-button" onClick={()=>{const r=game.useNpcFunction(npc.id,fn.id,`buy:${activeFood.id}`);notify(r.message)}}>Megveszem · {activeFood.basePrice} arany</button></div>}
-        <div className="inn-rest-note"><span>🍲</span><div><b>Az étel külön, fogyasztható tárgyként működik.</b><small>A fogadó az alvás idejét és a szállást kezeli; az ételt a készletből vagy a kereskedőktől választod.</small></div></div>
+        <div className="function-section-head"><div><span>SZÁLLÁS</span><strong>Egyórás pihenés</strong></div><small>Az eredeti szabály változatlan: 60 arany · +10% maximális HP.</small></div>
+        <div className="function-item-detail rest-detail">
+          <div className="function-item-icon big">⌂</div>
+          <div><span>PIHENÉSI ELŐNÉZET</span><h4>{innRestPreview?.restoredHealth ?? 0} HP visszatöltése</h4><p>Jelenlegi életerő: {game.health}/{innMaxHealth} HP. A gyógyítás nem lépheti túl a maximális életerőt.</p><small>Ár: {fn.cost ?? 60} arany · Időtartam: 1 óra</small></div>
+          <button className="gold-button" disabled={!innRestPreview?.canRest || innPending} onClick={()=>runInnAction("rest")}>{innPending?"Folyamatban…":`Pihenek · ${fn.cost ?? 60} arany`}</button>
+        </div>
+        {innRestPreview?.reason==="full-health"&&<p className="inn-rest-note" role="status">Teljes az életerőd. A pihenés nem von le aranyat.</p>}
+        {innRestPreview?.reason==="insufficient-gold"&&<p className="inn-rest-note" role="status">Nincs elég aranyad a pihenéshez. Szükséges: {innRestPreview.price} arany.</p>}
+        <div className="function-section-head"><div><span>ÉTELVÁSÁRLÁS</span><strong>Alma fogadói kínálata</strong></div><small>Csak a két, már engedélyezett étel vásárolható meg.</small></div>
+        <div className="function-item-grid">{shopItems.filter(item=>itemCategory(item)==="consumable").map(item=>{
+          const preview=getInnFoodPreview(item,innMaxHealth,game.health,game.gold,game.inventory.length);
+          const effect=preview.healingAmount>0?`+${preview.healingAmount} HP az aktuális maximumból`:"Nincs közvetlen HP-hatása";
+          return <button type="button" key={item.id} className={`function-item-card compact ${shopItem===item.id?"selected":""}`} onClick={()=>setShopItem(item.id)}><span className="function-item-icon"><ItemArtwork itemId={item.id} fallback={item.icon} /></span><b>{item.name}</b><small>{effect}</small><strong>{item.basePrice} arany</strong></button>;
+        })}</div>
+        {activeFood&&innFoodPreview&&<div className="function-item-detail food-detail">
+          <div className="function-item-icon big"><ItemArtwork itemId={activeFood.id} fallback={activeFood.icon} /></div>
+          <div><span>ÉTEL · {activeFood.rarity}</span><h4>{activeFood.name}</h4><p>{activeFood.description}</p><small>{innFoodPreview.healingAmount>0?`Várható gyógyítás most: +${innFoodPreview.restoredHealth} HP · eredeti hatás: ${activeFood.effects?.healPercent?`+${activeFood.effects.healPercent}% max HP`:`+${activeFood.effects?.heal ?? 0} HP`}`:"Az item jelenlegi definíciója nem tartalmaz közvetlen gyógyító hatást."} · Ár: {innFoodPreview.price} arany</small></div>
+          <button className="gold-button" disabled={!innFoodPreview.canPurchase || innPending} onClick={()=>runInnAction(`buy:${activeFood.id}`)}>{innPending?"Folyamatban…":`Megveszem · ${innFoodPreview.price} arany`}</button>
+          <button className="outline-button" disabled={innPending} onClick={()=>{setShopItem(null);setInnStatus("A kiválasztás megszakítva.");}}>Mégsem</button>
+        </div>}
+        {innStatus&&<p className="inn-rest-note" role="status" aria-live="polite">{innStatus}</p>}
+        <div className="inn-rest-note"><span>🍲</span><div><b>A vásárlás nem fogyasztja el az ételt.</b><small>A tárgy a táskádba kerül. A saját itemdefiníciója és későbbi felhasználási szabálya változatlan marad.</small></div></div>
       </>}
       {!( ["forge","inn","alchemy","trade","rareTrade","food","foodTrade","spiceTrade","market","streetMarket"].includes(fn.kind))&&<div className={`special-function-card ${linkedQuest?"quest-linked-function":""}`}><div className="special-function-icon">{icon}</div><div><strong>{fn.title}</strong>{linkedQuest&&<span className="quest-function-badge">A fő történet ehhez a funkcióhoz kötődik</span>}<p>{fn.description}</p><small>Ez a funkció a karaktered kapcsolatára, státuszára és a világ állapotára is hathat.</small></div><button className="outline-button" onClick={()=>{const r=game.useNpcFunction(npc.id,fn.id);notify(r.message)}}>{fn.actionLabel}</button></div>}
     </div>}
