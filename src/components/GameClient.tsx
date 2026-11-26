@@ -826,6 +826,7 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
           <div className="function-item-icon big">⌂</div>
           <div><span>PIHENÉSI ELŐNÉZET</span><h4>{innRestPreview?.restoredHealth ?? 0} HP visszatöltése</h4><p>Jelenlegi életerő: {game.health}/{innMaxHealth} HP. A gyógyítás nem lépheti túl a maximális életerőt.</p><small>Ár: {fn.cost ?? 60} arany · Időtartam: 1 óra</small></div>
           <button className="gold-button" disabled={!innRestPreview?.canRest || innPending} onClick={()=>runInnAction("rest")}>{innPending?"Folyamatban…":`Pihenek · ${fn.cost ?? 60} arany`}</button>
+          <button className="outline-button" disabled={innPending} onClick={()=>setInnStatus("A pihenés megszakítva.")}>Mégsem</button>
         </div>
         {innRestPreview?.reason==="full-health"&&<p className="inn-rest-note" role="status">Teljes az életerőd. A pihenés nem von le aranyat.</p>}
         {innRestPreview?.reason==="insufficient-gold"&&<p className="inn-rest-note" role="status">Nincs elég aranyad a pihenéshez. Szükséges: {innRestPreview.price} arany.</p>}
