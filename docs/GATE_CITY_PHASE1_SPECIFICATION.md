@@ -177,3 +177,163 @@ State:
 NPC_FUNCTIONS contains `fn-damar/warehouse`, `fn-alma/inn`, `fn-petar/transport`, `fn-vera/currency`, `fn-jarek/map`. The store groups warehouse, transport, currency and map into a generic item/service purchase branch (selected item, cost, inventory add or gold debit), not a shipment ledger, transport route resolver, coin-authentication minigame or discovery graph. Alma's authored function explicitly describes 60 gold / one hour / 10% max HP and `heartyStew` / `gateRations`; the exact runtime handler must be inspected in full before final acceptance. This is why the new mechanics remain proposals, not claims about existing behavior.
 
 **Required follow-up:** source-map each NPC's complete runtime branch; identify existing route/discovery/document state before freezing persistence. All five NPCs remain IN PROGRESS.
+## 12. PHASE 2 előkészítési csomagok — forrásalapú részletezés (v0.3)
+
+**Státusz:** Alma fejlesztése külön PHASE 2 ágon aktív; Damar, Petar, Vera és Jarek továbbra is **IN PROGRESS / SPECIFICATION ONLY**. A jelen fejezet nem engedélyez kódmódosítást ezen a négy NPC-nél.
+
+### 12.1 Damar — raktári árumozgás és ellenőrzés
+**Canon:** Damar, raktárőr; Rakparti mérlegház; NPCS.id=damar, NPC_FUNCTIONS.id=fn-damar, kind=warehouse. A szerep raktári hozzáférést és árumozgás-ismeretet ad, nem hatalmazza fel a játékost szabad készletmozgatásra.
+
+**VERIFIED runtime (alpha.26):**
+- src/lib/content.ts: fn-damar, warehouse; nincs cost és nincs itemIds.
+- src/lib/store.ts: a warehouse a generikus szolgáltatás/vásárlás case-csoportba kerül. targetId alapján csak fn.itemIds allow-listből lehet tárgyat választani; Damar funkciójánál ilyen lista nincs. Így a jelenlegi hívás nem olvas le szállítmányt, nem vizsgál plombát és nem vezet készletet; a generikus used() naplózza a funkciót és meglévő kapcsolat/aktivitás értékeket módosít.
+- src/lib/store.ts: useGameStore localStorage mentést végez a aimorpg-final-demo-v1-29 kulccsal; payload saveVersion: 6. A normalizáló útvonal nem tartalmaz raktári manifest/custody objektumot.
+- **Nincs VERIFIED szállítmány-, mérleg-, plomba- vagy raktárkészlet-adatmodell.**
+
+**Célélmény és teljes loop (LOCAL GAMEPLAY PROPOSAL):**
+1. Damar szolgáltatásának megnyitása.
+2. A játékos a számára már engedélyezett, authored átvételi megbízások közül választ.
+3. A rendszer megmutatja a megbízás azonosítóját, a rakomány megnevezését, a plombajelzést, a dokumentált darabszámot és a dokumentált tömeget.
+4. A játékos vizsgálati módot választ: gyors szemrevételezés, teljes ellenőrzés, vagy eltérés miatti zárolási javaslat.
+5. Az ellenőrzés mezőnként felfedi a hiteles adatot; a játékos egyezteti a dokumentumot a rögzített megfigyeléssel.
+6. A játékos dönt: átveszi, vitatja/zárolja, vagy elutasítja a tételt.
+7. A rendszer visszaadja az eredményt és a következő jogszerű lépést; a játékos kiléphet anélkül, hogy bármilyen állapotot megváltoztatna.
+
+**Játékosi döntések és determinisztikus szabályok (LOCAL PROPOSAL):**
+- Szemrevételezés: csak a plombajel és a látható sérülés státusza látszik.
+- Teljes audit: a plombajel, a dokumentált darabszám és tömeg összevethető.
+- Átvétel: csak akkor lehet teljes siker, ha minden ellenőrzött mező egyezik.
+- Zárolás: legalább egy eltérés esetén a játékos megőrizheti a vitatott tétel változatlan állapotát és jelentést kérhet.
+- Elutasítás: a tétel nem kerülhet a játékos inventoryjába; a döntés a megbízás eredményét zárja le.
+- Nincs kockadobás, nincs rejtett százalékos siker. A hibás adat elfogadása nem alakítható jutalmazott sikerré.
+- A darabszám és tömeg toleranciája csak akkor állítható be, ha a központi content owner authored mértékegységet és toleranciát ad. Alapértelmezésben pontos egyezés szükséges.
+
+**Erőforrás és gazdaság:**
+- A jelenlegi fn-damar ingyenes; az alpha.26 nem határoz meg auditdíjat.
+- A korábbi v0.2-ben szereplő 5 gold / tétel auditdíj **NEM JÓVÁHAGYOTT**, nem tekinthető követelménynek.
+- Nincs arany- vagy tárgyjutalom pusztán ellenőrzésért. Jutalom csak meglévő, egyszeri authored quest/contract forrásból érkezhet.
+- Készlet nem másolható, és a raktárból semmilyen item nem kerülhet a játékoshoz pusztán egy ellenőrzési eredmény miatt.
+
+**Állapotok és mentés:**
+- Tervezett UI állapotok: idle → selected → inspecting → decision → resolved; megszakítás: selected/inspecting → cancelled.
+- **CENTRAL DECISION REQUIRED:** létezik-e és hogyan tárolható a szállítmány-azonosító, manifest, plombastátusz, tömegmérés, custody és lezárt átvételi eredmény.
+- A jelenlegi save v6-ba nem írható be saját, körzeti shipment store. Addig Damar csak statikus, nem jutalmazó UI-prototípusként vagy meglévő quest-állapothoz kötött, központilag jóváhagyott tartalomként specifikálható.
+- A mainQuestAudit 60 csomópontját és a Black Coin raktári nyomait ez a funkció nem írhatja át.
+
+**UI és hibakezelés:** megbízáslista; részletes manifest-panel; eltérés kiemelése; három egyértelmű döntési gomb; megerősítő dialógus átvétel/elutasítás előtt; üres lista, jogosulatlan manifest, lezárt ügy, hiányzó mező, hibás mértékegység és már beküldött döntés esetére külön hibaállapot. Mobilon a döntési gombok egymás alatt, az eltérések szövegesen is jelenjenek meg.
+
+**Exploitvédelem:** idegen manifest ID nem fogadható el; lezárt ügy nem küldhető újra; negatív vagy nem véges mennyiség elutasítandó; ugyanaz a manifest nem adhat kétszer jutalmat; újratöltés után a lezárt állapot nem nyílhat újra; quest item vagy más NPC custody alatt álló tárgy nem mozgatható.
+
+**Tesztelhető elfogadás:** exact match; seal mismatch; darabszám-eltérés; tömeg-eltérés; több eltérés; zárolás; elutasítás; hibás elfogadás blokkolása; jogosulatlan manifest; lezárt manifest; duplicate submit; reload; hiányzó mező; invalid number; quest item védelem; nulla jutalom puszta vizsgálatért. A teszt fixture és a tartós állapot-szerződés a központi döntés után véglegesíthető.
+
+**Függőségek:** központi tranzakció/idempotency szerződés; raktári custody adatmodell; authored szállítmánytartalom; későbbi Cador (könyvelés), Vera (hitelesítés) és Rovan (nyomozás) csak jóváhagyott, közös dokumentum-/bizonyíték-azonosítón keresztül kapcsolódhat.
+
+**Státusz: IN PROGRESS — CENTRAL DECISION REQUIRED a tartós shipment/manifest/custody állapotra. Következő Gate City előkészítési prioritás.**
+
+### 12.2 Petar — személyes fuvar és kézbesítés
+**Canon:** Petar, fuvarosmester; Külső kapu szekérállása; fn-petar, kind=transport, cost=25.
+
+**VERIFIED runtime (alpha.26):**
+- src/lib/content.ts: fn-petar 25 gold költséggel, itemIds nélkül.
+- src/lib/store.ts: a transport generikus szolgáltatáságon fut; a jelenlegi hívás a 25 goldot levonja és lefuttatja a közös used() mellékhatásait. Nem találtam célállomás-választást, route resolver-t, kézbesítési eseményt, cargo custody-t vagy fuvarállapotot.
+- src/lib/store.ts: save v6 normalizálásban nincs Petar fuvar-/kézbesítési rekord.
+
+**Cél és loop (LOCAL GAMEPLAY PROPOSAL):** elérhető célpont kiválasztása → fuvar céljának meghatározása (játékos / csomag / tárgy) → útvonal és 25 gold díj előnézete → indulás megerősítése → fuvar állapotának követése → kézbesítés vagy biztonságos visszavonás → bizonylat és eredmény. A gyalogos alternatíva mindig elérhető, ha a helyszín már normál módon elérhető.
+
+**Döntések és szabályok:**
+- Normál fuvar: meglévő 25 gold alapköltség; további expressz/óvatos felár nincs jóváhagyva.
+- Csak már feloldott, authored célpont választható; zárt régió vagy quest gate nem kerülhető meg.
+- A szolgáltatás nem teleportálhat a régiók között, ha a meglévő travel rendszer ezt nem engedi.
+- Siker: a célpont elérhető és a kézbesítés a megbízás szabályai szerint igazolható.
+- Részleges: csak akkor definiálható, ha authored útvonal-esemény létezik; nincs random veszteség.
+- Kudarc: invalid destination, hozzáférésvesztés vagy hiányzó jogosultság esetén a díj levonása előtt elutasítás; indulás utáni kudarc csak jóváhagyott útvonalállapot esetén.
+- Quest item, evidence vagy más NPC-hez kötött tárgy nem adható át automatikusan.
+
+**Erőforrás/gazdaság:** 25 gold jelenlegi díj; további költség vagy jutalom nincs forrásban. Kézbesítési jutalom kizárólag meglévő quest/contract jutalom lehet, egyszeri claimmel. A fuvar önmagában nem teremthet goldot vagy itemet.
+
+**Állapot/UI:** quote → confirmed → inTransit → delivered vagy cancelled/failed; minden állapotnál cél, költség és következő lépés látszik. A játékos megerősítés előtt díjmentesen visszaléphet. A fuvar közben újratöltés után ugyanazt az állapotot kell visszaállítani, nem indíthat új díjfizetést.
+
+**CENTRAL DECISION REQUIRED:** route graph / destination IDs, world travel integration, delivery receipt, item custody/transfer, save-state, idempotency. A jelenlegi currentRegion és regionAccess nem bizonyít városon belüli útvonalhálót; nem készülhet helyi route-state vagy teleport logika.
+
+**Exploitvédelem:** egyetlen díjlevonás fuvaronként; ugyanaz a csomag nem kézbesíthető kétszer; item ownership és quest flags ellenőrzése; célpont nem manipulálható kliensoldali szöveggel; cancel indulás után csak authored szabály szerint.
+
+**Tesztelhető elfogadás:** 25 gold quote; insufficient gold; locked destination; valid destination; confirm/cancel; duplicate confirm; reload in transit; deliver once; duplicate receipt; ownership changed; quest item; invalid destination; failed validation no charge; no region gate bypass; no currency/item duplication.
+
+**Függőségek:** központi route/travel szerződés, item custody, transaction idempotency, quest reward claim. Csomag- és szállítmánykezelés Damarhoz csak közös, központilag jóváhagyott azonosítóval kapcsolódhat.
+
+**Státusz: IN PROGRESS — CENTRAL DECISION REQUIRED route graph, delivery és custody állapotra.**
+
+### 12.3 Vera Noll — érmevizsgálat és hiteles bizonyíték
+**Canon:** Vera Noll, pénzváltó; Kapu melletti pénzváltó; fn-vera, kind=currency, nincs authored díj és nincs itemIds.
+
+**VERIFIED runtime (alpha.26):**
+- src/lib/content.ts: fn-vera leírása az érme eredetét és megbízhatóságát említi.
+- src/lib/store.ts: currency generikus szolgáltatáság; a jelenlegi hívás nem kér be érme-instance-t, nem vizsgál metaadatot és nem állít elő hitelesítési eredményt. A used() általános NPC-funkció mellékhatásai futnak.
+- A globális item shape tartalmaz origin, legalStatus, tags, questItem mezőket, de nincs önálló érme- vagy hitelesítési rekord. A Black Coin történeti tartalma védett.
+
+**Cél és loop (LOCAL PROPOSAL):** vizsgálható, játékosnál lévő item kiválasztása → Vera megmutatja a ténylegesen létező itemdefiníció vizsgálható mezőit → a játékos kiválasztja, mely jegyeket szeretné ellenőrizni → a rendszer csak a forrásban szereplő adatot hasonlítja össze → eredmény: „adatok egyeznek”, „ellentmondás látható”, „nincs elegendő adat”. A vizsgálat nem módosítja az itemet.
+
+**Szabályok:**
+- Nincs olyan eredet/érmejellemző kitalálva, amely nem szerepel az item definícióban.
+- Nincs aranyváltás vagy új pénznem; a gold nem reprezentál vizsgálható inventory itemet.
+- legalStatus, origin, tags csak megjelenített forrásadat, nem bizonyíték arra, hogy a tárgy történetileg hamis/valódi, hacsak authored tartalom ezt explicit nem rögzíti.
+- Alap adatlap olvasása ingyenes. Szakvéleménydíj nincs jóváhagyva.
+- Nincs siker/kudarc RNG. Ha a forrás nem elegendő, az eredmény „nem eldönthető”.
+
+**Hiteles bizonyíték:** a vizsgálat eredményének hiteles, más NPC által elfogadható bizonyítékká alakítása **CENTRAL DECISION REQUIRED**. Közös evidence ID, eredet, custody, hitelességi szint és ügyhöz kapcsolás nélkül Vera nem bocsáthat ki új bizonyíték-itemet és nem írhat Rovan/Cador ügyállapotot.
+
+**UI/állapot:** itemSelected → fieldsReviewed → resultShown → closed; megszakítás bármikor, item és pénz nem változik. Üres inventory, nem vizsgálható tárgy, quest/evidence item és hiányzó metaadat külön állapotot kap.
+
+**Exploitvédelem:** csak meglévő inventory instance választható; másolt ID és nem birtokolt item elutasítandó; a vizsgálat nem módosítja a legalStatus-t; ismételt vizsgálat nem ad XP-t/aranyat/evidence itemet; Black Coin quest item és Canon szöveg nem tárható fel új flag nélkül.
+
+**Tesztelhető elfogadás:** item ownership; invalid instance; legal/restricted/evidence metadata megjelenítés; missing origin; missing tags; insufficient metadata; no mutation; no gold mint; no new currency; duplicate inspection no reward; reload; Black Coin guard; quest item preserved; fabricated metadata rejection.
+
+**Függőségek:** központi evidence/document szerződés; Cador ledger input; Rovan case evidence; Black Coin Canon védelem.
+
+**Státusz: IN PROGRESS — read-only appraisal lokálisan specifikálható; hiteles evidence kiadása CENTRAL DECISION REQUIRED.**
+
+### 12.4 Jarek — térképek és útvonal-felfedezés
+**Canon:** Jarek, térképkészítő; Kapuváros térképműhelye; fn-jarek, kind=map, cost=20.
+
+**VERIFIED runtime (alpha.26):**
+- src/lib/content.ts: fn-jarek 20 gold költséggel, item allow-list nélkül.
+- src/lib/store.ts: map generikus szolgáltatáság; a jelenlegi hívás 20 goldot levon és a generikus used() mellékhatásokat futtatja. Nem módosít útvonalat, nem nyit discovery flaget és nem frissít térkép-instance-t.
+- src/lib/types.ts: léteznek régió- és körzetdefiníciók; a GameData tartalmaz currentRegion és regionAccess adatokat. Per-route discovery state nem igazolt.
+- Save v6: nincs térkép-felfedezési rekord.
+
+**Cél és loop (LOCAL GAMEPLAY PROPOSAL):** térkép megnyitása → a játékos kiválaszt egy már ismert/feloldott helyet → Jarek megmutatja az oda vezető, már authored és engedélyezett útvonal információit → a játékos térképlapot vásárol 20 goldért vagy kilép → térkép megjelenik a játékos térképnézetében, amennyiben a meglévő UI ezt már támogatja.
+
+**Döntések és szabályok:**
+- A 20 gold a jelenlegi authored szolgáltatási díj; a vásárlás csak tényleges térképszolgáltatás esetén terhelhető.
+- A Jarek panel nem nyithat meg zárt régiót és nem írhatja át a regionAccess értékét.
+- A térkép csak a már ismert, authored adatot jelenítheti meg; ismeretlen útvonal/veszély nem generálható.
+- Navigation stat adhat részletesebb leírást csak akkor, ha ezt a központi stat-szabály jóváhagyja; jelenleg nincs hozzá Jarek-specifikus küszöb.
+
+**CENTRAL DECISION REQUIRED:** route graph és destination ID; discovery flag tulajdonosa; map item/instance vagy UI-only térkép; mentési séma; navigation stat hatása; cross-district map handoff Siven expedícióihoz. Új discoveredRoutes mező nem vezethető be lokálisan.
+
+**UI/állapot:** mapHome → destinationSelected → routePreview → purchaseConfirmed → mapUpdated; cancelled minden megerősítés előtti pontból. Előnézetben útvonal, hozzáférés, költség, ismert akadály és adatforrás látható. Ha nincs érvényes útvonal, nincs vásárlási gomb és nincs díjlevonás.
+
+**Exploitvédelem:** csak ismert célpont; nincs region gate bypass; 20 gold csak egyszer kerül levonásra; ugyanaz a térkép nem ad ismételt discovery XP-t; kliens által beküldött célpontot a canonical region/district listával kell validálni.
+
+**Tesztelhető elfogadás:** known route; unknown route; locked region; invalid destination; price 20; insufficient gold; cancel no charge; duplicate purchase; reload; map visibility; no discovery mutation; no XP farm; navigation threshold only if approved; route data missing; no Siven dungeon gate bypass.
+
+**Függőségek:** központi route graph/discovery; térkép UI; save contract; Siven expedíciók és a meglévő regionAccess rendszer.
+
+**Státusz: IN PROGRESS — read-only térképnézet részben specifikálható; persistent route discovery CENTRAL DECISION REQUIRED.**
+
+### 12.5 Kapuvárosi közös integrációs sorrend és stop gate
+1. Alma PR review és tulajdonosi elfogadás — implementációs stop gate.
+2. Damar részletes specifikáció véglegesítése, de shipment/custody modell nélkül nincs kódolás.
+3. Központi döntés a shipment/manifest és dokumentum/bizonyíték szerződésről.
+4. Petar fuvarállapot és Jarek route graph csak azonos központi útvonal- és custody szerződés alapján tervezhető tovább.
+5. Vera read-only item appraisal önállóan megvalósítható lehet, de hiteles bizonyíték nem.
+6. Minden NPC külön PR, külön review; közös store, types, save és quest fájlok módosítása csak explicit central change approval alapján.
+
+**NPC státuszok:**
+- Alma Varg — IMPLEMENTED ON gate-city/phase-2-alma BRANCH / PENDING CENTRAL REVIEW; nem ACCEPTED.
+- Damar — IN PROGRESS; CENTRAL DECISION REQUIRED: shipment/manifest/custody.
+- Petar — IN PROGRESS; CENTRAL DECISION REQUIRED: route/delivery/custody.
+- Vera Noll — IN PROGRESS; read-only appraisal proposal; evidence issuance CENTRAL DECISION REQUIRED.
+- Jarek — IN PROGRESS; CENTRAL DECISION REQUIRED: route graph/discovery/save.
+
+No source implementation for Damar, Petar, Vera or Jarek is authorized by this document.
