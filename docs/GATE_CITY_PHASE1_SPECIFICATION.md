@@ -123,3 +123,48 @@ State:
 - confirmation that no source code, shared documents, or other district branches were modified.
 
 **Stage 2 exit rule:** all assigned NPC sections are complete and testable; no Canon changes; no parallel global systems; shared conflicts are explicitly raised; no implementation has begun.
+
+
+## 10. Központi tervezési pass — NPC-szintű konkrét játékmenet (v0.2)
+
+**Állapot:** mind az öt NPC **IN PROGRESS**. Az alábbi számértékek LOCAL PROPOSAL-k, balansz-jóváhagyásra várnak; nem meglévő runtime-funkciók.
+
+### Damar — Raktári árumozgás
+**Forrásállapot:** `NPC_FUNCTIONS: fn-damar`, kind `warehouse`; NPC Canon: raktárőr a Rakparti mérlegházban. A jelenlegi függvény leírása jogosultsághoz kötött raktári árumozgást ígér, nem bizonyít teljes készletkezelő minijátékot.
+**Játékosciklus:** Damar → „Raktári ellenőrzés” → játékos kiválaszt egy aktív szállítmányt/átvételi megbízást → ellenőrzi a plombát, a tételszámot és a mérlegelt mennyiséget → egyeztet vagy eltérést jelent → kap egy hitelesített raktári eseményt.
+**Döntések:** gyors vizsgálat (1 ellenőrzési pont, nincs fogyóeszköz); teljes audit (3 ellenőrzési pont, több adat); vitatott tétel zárolása (nem vihető tovább, de megőrzi a bizonyítékot); hibás adat elfogadása (gyors továbbhaladás, későbbi bizalmi kockázat).
+**Szabály:** minden fuvarhoz 3 adatmező tartozik: seal, manifestCount, measuredCount. Egyező seal + azonos mennyiség = siker. Egyetlen eltérés = részleges siker, ha a játékos zárolja és jegyzőkönyvezi; ha átveszi, kudarc és későbbi Cador/Rovan ügyjelző. Két vagy több eltérés = teljes kudarc, a rakomány nem írható jóvá. Nincs random dobás.
+**Erőforrás/gazdaság:** a raktári szolgáltatás alapdíja 5 gold / tétel csak akkor, ha a játékos önként teljes auditot kér; nincs jutalom pusztán az ellenőrzésért. Sikeres szerződés jutalmát a szerződés adja, Damar nem generálhat végtelen goldot vagy árut.
+**Kapcsolat/fejlődés:** dokumentált, helyes eltérésjelentés +1 Damar-bizalom (javasolt cap 10); hamis vagy gondatlan átvétel −2. A logistics stat ellenőrzési küszöböt csökkenthet: 5–7 = 1 mező ingyenes előzetes megtekintése, 8+ = mindhárom mező teljes audit előtt látható. Új globális mastery nincs.
+**UI/állapot:** shipmentId → draft inspection → submitted → accepted / disputed / rejected; az eredményhez seal/count diff és reason code tartozik. Megszakítás a submit előtt ingyenes; utána ugyanaz az inspectionId nem küldhető be újra.
+**Exploit/test:** reload és duplakatt nem adhat második jutalmat; manipulált manifestId, negatív mennyiség, már lezárt fuvar, idegen szállítmány mind elutasítandó. Tesztek: exact match; seal mismatch; count mismatch; 2+ discrepancy; dispute locks cargo; accept mismatch triggers flag; cancel before submit; duplicate submit; reload after submit; unauthorized shipment; missing shipment; no gold reward for inspection-only.
+
+### Alma Varg — Fogadó és szállás
+**Forrásállapot:** `fn-alma`, kind `inn`; jelenlegi leírás: 60 goldért egy óra alvás a max HP 10%-át tölti vissza; étel is kapható (`heartyStew`, `gateRations`). Ezt a már létező szabályt nem írjuk felül.
+**Loop/döntés:** szoba kiválasztása → ár és várható gyógyulás előnézete → fizetés és pihenés; alternatíva az ételvásárlás, illetve távozás. Nincs kötelező időzár vagy offline várakozás.
+**Feloldás és eredmény:** 60 gold, csak ha HP hiányzik; heal = min(hiányzó HP, floor(maxHP×0.10)). Ha teljes HP-n van a játékos, a pihenés nem vonhat le pénzt. Az étel az item saját effect mezőjét használja; a leírt `heartyStew` 20% gyógyítást ad.
+**Kapcsolat:** tisztességes fizetés és visszatérő látogatás csak narratív relationship eventet indíthat, nem adhat automatikus statot. **SHARED DEPENDENCY:** világóra (12 real hours = 1 in-game day), HP, item effect, tranzakció.
+**UI/mentés/teszt:** ár/gyógyulás előnézet; confirm/cancel; tranzakció egyszeri. Tesztek: exact 10% heal; HP cap; full HP no charge; insufficient gold; stew effect; double click; reload; cancel; item stock; save round-trip. Alma: **IN PROGRESS**, mert a jelenlegi runtime és a szállás-állapot pontos save hatása még ellenőrzendő.
+
+### Petar — Személyes fuvar
+**Forrásállapot:** `fn-petar`, kind `transport`, 25 gold alapköltség. A leírás csomag/személy/tárgy városon belüli mozgatását ígéri.
+**Loop:** célpont kiválasztása a már feloldott városi helyszínekből → fuvar típus (személy/csomag/tárgy) → kapacitás és díj előnézete → elfogadás → célállomásra érkezés és kézbesítési bizonylat.
+**Döntések:** normál út (25 gold, alapidő); óvatos út (35 gold, alacsonyabb eseménykockázat); saját gyaloglás (ingyenes, nincs Petar szolgáltatás). Javasolt fuvar-kapacitás 1 küldemény / fuvar, quest item nem adható fel, ha a quest nem engedi.
+**Feloldás/siker:** mindkét végpontnak elérhetőnek kell lennie. A normál fuvar akkor sikeres, ha a célpont feloldott és az item továbbra is a játékos tulajdona. Nincs random elvesztés; a kockázat csak előre jelzett, authored route flagből jöhet. Sikertelen célvalidáció esetén díj nem vonható le.
+**Gazdaság:** 25/35 gold sink; kézbesítési jutalom kizárólag megbízásból. **CENTRAL DECISION REQUIRED:** tárgy-instance custody átadás és world travel state.
+**Állapot/teszt:** quoted → confirmed → inTransit → delivered / cancelled / failed; tranzakcióazonosító, nincs duplikált cargo. Tesztek: locked endpoint; insufficient funds; ownership changed; quest item; duplicate request; reload inTransit; deliver once; route flag; cancel pre-confirm; cancel after departure; no free teleport bypass.
+
+### Vera Noll — Érmevizsgálat
+**Forrásállapot:** `fn-vera`, kind `currency`; a leírás eredet/megbízhatóság vizsgálatát ígéri. Nem hozhat létre új pénznemet és nem írhatja át a Black Coin Canonját.
+**Loop:** játékos kiválaszt egy coin/document instance-t → Vera megmutatja a vizsgálható jegyeket → a játékos kiválasztja a két összevetendő jellemzőt → eredmény: egyező / gyanús / nem elegendő adat.
+**Szabály:** csak authored item metadata (origin, legalStatus, tags, quest/evidence flag) használható. Ha a játékos mindkét ellenőrzött jellemzőt helyesen választja, siker; egy helyes = részleges, további vizsgálatot kérhet; nulla helyes = sikertelen vizsgálat, de a tárgy nem semmisül meg. Nincs valódi coin item nélkül.
+**Költség/jutalom:** első alapvizsgálat ingyenes; hitelesített szakvélemény 10 gold (javaslat), de csak ha van vizsgálható instance. Nincs coin vagy gold reward. Appraisal 8+ esetén a lehetséges jegyek előre megjelennek, nem az eredmény.
+**Kapcsolat/függőség:** hiteles jelentés segíti Cador könyvelését és Rovan ügyét; hamis vád −2 bizalom. **CENTRAL DECISION REQUIRED:** evidence object és Black Coin story protection.
+**Teszt:** legal coin; restricted coin; evidence coin; no item; forged metadata; repeat same instance; no false Black Coin reveal; reload; duplicate report; correct/partial/failed selection; no item mutation.
+
+### Jarek — Térképműhely
+**Forrásállapot:** `fn-jarek`, kind `map`, 20 gold. A leírás térképfelfrissítést és rövidítések bemutatását ígéri.
+**Loop:** elérhető útvonalak áttekintése → játékos kiválaszt egy még nem ismert útvonalat → Jarek megmutatja a térkép hiányzó szakaszait → 20 goldért jegyzetelt térképlap / vagy ingyenes meglévő útvonal-olvasás → discovery flag.
+**Mechanika:** útvonal csak akkor nyílik meg, ha mindkét végpont Canon szerint elérhető. A térkép három információt mutat: távolságkategória, ismert akadály, szükséges hozzáférés. A játékos által még fel nem fedezett veszélyt nem fedi fel automatikusan.
+**Jutalom:** nincs XP pusztán vásárlásért; új útvonal felfedezése egyszeri exploration XP-t kaphat a központi jutalomrendszeren keresztül. 20 gold sink. **SHARED DEPENDENCY:** discovery flags, map item, navigation stat, world routing.
+**Teszt:** már ismert útvonal; locked endpoint; 20 gold; insufficient funds; repeat purchase; no duplicate discovery XP; hidden danger remains hidden; reload; map item consumed/retained per approved contract; invalid route; cancel.
