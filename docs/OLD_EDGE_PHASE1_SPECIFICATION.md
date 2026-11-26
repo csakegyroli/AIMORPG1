@@ -123,3 +123,33 @@ State:
 - confirmation that no source code, shared documents, or other district branches were modified.
 
 **Stage 2 exit rule:** all assigned NPC sections are complete and testable; no Canon changes; no parallel global systems; shared conflicts are explicitly raised; no implementation has begun.
+
+
+## 10. Központi tervezési pass — Régi Perem (v0.2)
+
+**Státusz:** Eldra, Siven, Maela: **IN PROGRESS**. A Szem megfigyelési réteg; nem oldhat meg feladványt, nem választhat eredményt, nem generálhat autonóm dungeon-tartalmat és nem írhat önállóan világállapotot.
+
+### Eldra — alkímiai labor
+**Forrás:** `fn-eldra`, kind `alchemy`; jelenlegi itemek között `moonleaf`, `emberRoot`, `strengthTonic`, `runeInfusion`. A tonic hatásai időlegesek és nem halmozhatók; rune infusion egy itemen egyszerre egy.
+**Loop:** összetevő kiválasztása → azonosítás → recept kiválasztása → mennyiségek ellenőrzése → keverési sorrend → főzet elkészítése → naplóbejegyzés.
+**Minijáték:** 3 lépéses laborprotokoll: alapoldószer → aktív összetevő → stabilizáló. A játékos három összetevőből választ sorrendet; a recept authored sorrendű. 3/3 helyes = siker; 2/3 = instabil, de nem jön létre consumable; 0–1 = kudarc, input elhasználódik csak akkor, ha a játékos a végső „reakció indítása” gombot megerősítette. Nincs random.
+**Erőforrás/jutalom:** csak meglévő vagy central-approved item output. A `strengthTonic` egy órára +1 strength, nem stackel; újabb adag az expiry-t frissíti. `runeInfusion` egy órára +1 stat egy felszerelt itemhez, itemenként egy buff. A receptek ára a közös itemSystem receptből és központi gold fee-ből jön. Nincs új rarity vagy helyi potion tier.
+**Fejlődés:** alchemy stat 5–7 esetén egy összetevő eredete látható; 8–9 esetén két összetevő; 10+ mindhárom. Ez csak információs előny, nem módosítja a statot vagy a recipe outputot. Mastery central.
+**Teszt:** all 6 permutations; 3/3; 2/3; 1/3; no consume before confirm; insufficient ingredients; duplicate craft; buff nonstack; refresh expiry; second rune infusion blocked; wrong equipped instance; reload; no Eye outcome generation.
+
+### Siven — romkutatás és expedíció
+**Forrás:** `fn-siven`, kind `ruins`, 40 gold; romkutatást és kockázatos expedíciót vezet.
+**Loop:** célpont kiválasztása → térkép/hozzáférés ellenőrzése → felkészülési csomag (étel, fényforrás, szerszám) → útvonal választása → két expedíciós szakasz → visszatérés és leltár.
+**Javasolt expedíció-állapot:** expeditionId, routeId, stageIndex, carriedInstanceIds, clueFlags, trapState, outcome, rewardClaimed. Ez új shared save state, ezért **CENTRAL DECISION REQUIRED**.
+**Útvonal:** biztonságos (több előkészítés, kisebb anyagjutalom); feltáró (egy extra elágazás); rövid (kevesebb előfeltétel, magasabb authored trap complexity). Minden útvonal előre jelzett veszélycímkét mutat.
+**Siker:** mindkét szakasz célfeladványa teljesítve és a játékos visszatér; részleges: egyik szakasz teljesült, a másikból biztonságosan visszavonul; kudarc: rossz csapdakezelés miatt egy nem-quest consumable elveszhet, de felszerelés/quest item soha. Random halál vagy tárgytörés nincs.
+**Gazdaság:** 40 gold vezetési díj; fogyóeszközök valódi inputok; jutalom egyszeri dungeon reward source-onként, központi `rewardEconomy` útvonalon. No infinite farm.
+**Teszt:** all routes; missing map; missing tool; cancel before depart; retreat stage1; full success; partial; trap failure; quest item protection; duplicate reward; reload mid-stage; tampered route; no forced wait.
+
+### Maela — Néma kút, logikai feladvány és relikvia-nyom
+**Forrás:** `fn-maela`, kind `well`; vizet ad és hozzáférést biztosít a kút körüli régi nyomokhoz; item `silentWellVial`.
+**Loop:** víz húzása → a játékos választ: csak víz, nyomvizsgálat, vagy relikvia-nyom elemzése → három jelből álló kút-rejtvény → eredmény.
+**Rejtvény:** 3 kőlap jelképeit kell párosítani három rövid, authored leírással (víz útja, régi őrség, csillagállás). A játékos három párt állít be; mindhárom helyes = teljes siker; kettő = részleges, egy újabb nyomot kap; 0–1 = sikertelen, de a feladvány resetelhető díj nélkül. Nincs időlimit, nincs random.
+**Szem-szabály:** A Szem kizárólag korábban authored megfigyelést jeleníthet meg a helyszínről; nem adhatja meg a helyes párosítást, nem generálhat új relikvia-állapotot és nem állíthatja, hogy a kút beszél.
+**Költség/jutalom:** víz ára 0 vagy a meglévő itemár; `silentWellVial` csak jóváhagyott, egyszeri discovery rewardként adható. A rejtvény jutalma discovery flag, nem ismételhető gold/item. **CENTRAL DECISION REQUIRED:** relic discovery state és Eye event schema.
+**Teszt:** 6 permutáció; 3/3; 2/3; 0/3; reset; no time pressure; repeated puzzle no reward; vial once; no Eye solution leak; reload; invalid symbol; main quest unaffected.
