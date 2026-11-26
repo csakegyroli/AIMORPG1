@@ -61,7 +61,8 @@ try {
   assert.doesNotMatch(ui, /\[1,2,4,8\]\.map\(h=>/);
 
   console.log("Alma Varg inn focused tests: PASS");
-  console.log("Covered: 60 gold / 10% max HP, HP cap, full HP, insufficient gold, existing stew effect, unchanged no-effect rations, inventory cap, allow-list, fixed one-hour rest, UI duplicate-click lock, cancellation feedback and unchanged save key/version.");
+  console.log("Covered by executable helper assertions: 60 gold / 10% max HP, HP cap, full HP, insufficient gold, stew effect, unchanged no-effect rations, inventory cap, invalid item and low-HP boundary.");
+  console.log("Covered by static source-contract assertions: inn allow-list, fixed one-hour rest, UI duplicate-click lock/cancel feedback, and unchanged save key/version. React interaction and full store integration are not dynamically exercised by this focused script.");
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
 }
