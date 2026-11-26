@@ -123,10 +123,22 @@ export function canNpcCraftItem(npcId: NpcId, item: ItemDefinition): boolean {
   const allowedSlots = specialties[npcId];
   if (!allowedSlots) return true;
   if (!item.slot || !allowedSlots.includes(item.slot)) return false;
-  if (npcId === "nara" && item.slot !== "boots") {
-    return /bőr|bőrvért|kesztyű|csizma/i.test(`${item.name} ${item.description}`);
-  }
+  if (npcId === "nara") return /bőr|bőrvért|kesztyű|csizma/i.test(item.name + " " + item.description);
   return true;
+}
+
+export function craftRecipeForNpcItem(item: ItemDefinition, region: RegionId, npcId: NpcId): CraftRequirement[] {
+  if (npcId !== "nara") return craftRecipeForItem(item, region);
+  if (!canNpcCraftItem(npcId, item) || item.sideQuestOnly || item.category === "relic" || item.marketEligible === false) return [];
+  if (item.slot === "boots") return [{ id: "tannersWax", count: 2 }];
+  if (item.slot === "armor") return [{ id: "tannersWax", count: 3 }];
+  if (item.slot === "accessory") return [{ id: "tannersWax", count: 2 }];
+  return [];
+}
+
+export function dismantleYieldsForNpcItem(item: ItemDefinition, region: RegionId, npcId: NpcId): CraftRequirement[] {
+  if (npcId !== "nara") return dismantleYieldsForItem(item);
+  return craftRecipeForNpcItem(item, region, npcId).map(req => ({ id: req.id, count: Math.max(1, Math.floor(req.count * 0.5)) }));
 }
 
 export type CraftRequirement = { id: ItemId; count: number };
