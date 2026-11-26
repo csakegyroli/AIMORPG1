@@ -1,5 +1,5 @@
 import { EQUIPMENT_SETS, ITEMS } from "./content";
-import type { EquipmentSetDefinition, EquipmentSlot, ItemDefinition, ItemId, ItemLegalStatus, RegionId } from "./types";
+import type { EquipmentSetDefinition, EquipmentSlot, ItemDefinition, ItemId, ItemLegalStatus, NpcId, RegionId } from "./types";
 
 export const ITEM_CATEGORY_LABELS: Record<string, string> = {
   equipment: "Felszerelés", consumable: "Fogyóeszköz", material: "Alapanyag", tradeGood: "Kereskedelmi áru", upgrade: "Fejlesztés",
@@ -108,6 +108,25 @@ export function regionPriceModifier(item: ItemDefinition, region: RegionId): num
 
 export function itemSourceLabel(item: ItemDefinition): string {
   return item.origin ?? (item.regions?.length ? item.regions.join(", ") : "Ismeretlen eredet");
+}
+
+/**
+ * Műhelynegyed specialist boundaries.
+ * Other forge NPCs retain the existing regional crafting behavior.
+ */
+export function canNpcCraftItem(npcId: NpcId, item: ItemDefinition): boolean {
+  const specialties: Partial<Record<NpcId, readonly EquipmentSlot[]>> = {
+    garran: ["weapon", "shield"],
+    velka: ["armor"],
+    nara: ["boots", "armor", "accessory"],
+  };
+  const allowedSlots = specialties[npcId];
+  if (!allowedSlots) return true;
+  if (!item.slot || !allowedSlots.includes(item.slot)) return false;
+  if (npcId === "nara" && item.slot !== "boots") {
+    return /bőr|bőrvért|kesztyű|csizma/i.test(`${item.name} ${item.description}`);
+  }
+  return true;
 }
 
 export type CraftRequirement = { id: ItemId; count: number };
