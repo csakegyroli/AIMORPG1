@@ -157,3 +157,12 @@ State:
 **Szabály:** mindkét állomáson egy megfigyelési választás; perception/survival stat ≥7 esetén egy extra részlet látható, de a helyes megoldást nem adja meg. 2 helyes megfigyelés = teljes siker; 1 = részleges; 0 = kudarc. Nincs random encounter és nincs kötelező időzár.
 **Jutalom:** teljes siker új optional patrol report flag és központi XP egyszer; részleges clue, XP nélkül; ismétlés csak gyakorló szöveg. Nincs loot farm.
 **Teszt:** all routes; stat 6/7 boundary; 2/2; 1/2; 0/2; duplicate report; reload mid-patrol; route unavailable; no forced wait; no main quest mutation; no repeated XP.
+
+
+## 11. Alpha.26 runtime verification — central review
+
+**Verified source:** `src/lib/content.ts` blob `27206c65e37c5cc3b47d0257d91b1654f8971b95`; `src/lib/store.ts` blob `60fc472f8eeefd940aa25e226e3a1aa3a20b1aba`.
+
+Verified functions: `fn-rovan/security`, `fn-lena/documents` (20 gold), `fn-bran/jail`, `fn-orren/guardPatrol`. These kinds are currently grouped into the generic service/item branch in the client store; a complete evidence chain, document authenticity verifier, jail record access or patrol route resolver was not confirmed by this check. No source evidence permits modifying the 60-node main quest.
+
+**Required follow-up:** inspect exact case/quest flags and document items; ensure evidence records do not expose protected story data; add immutable-main-quest regression cases. All four NPCs remain IN PROGRESS.
