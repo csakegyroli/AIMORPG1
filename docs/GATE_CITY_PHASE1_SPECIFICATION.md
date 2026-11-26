@@ -168,3 +168,12 @@ State:
 **Mechanika:** útvonal csak akkor nyílik meg, ha mindkét végpont Canon szerint elérhető. A térkép három információt mutat: távolságkategória, ismert akadály, szükséges hozzáférés. A játékos által még fel nem fedezett veszélyt nem fedi fel automatikusan.
 **Jutalom:** nincs XP pusztán vásárlásért; új útvonal felfedezése egyszeri exploration XP-t kaphat a központi jutalomrendszeren keresztül. 20 gold sink. **SHARED DEPENDENCY:** discovery flags, map item, navigation stat, world routing.
 **Teszt:** már ismert útvonal; locked endpoint; 20 gold; insufficient funds; repeat purchase; no duplicate discovery XP; hidden danger remains hidden; reload; map item consumed/retained per approved contract; invalid route; cancel.
+
+
+## 11. Alpha.26 runtime verification — central review
+
+**Verified source:** `src/lib/content.ts` blob `27206c65e37c5cc3b47d0257d91b1654f8971b95`; `src/lib/store.ts` blob `60fc472f8eeefd940aa25e226e3a1aa3a20b1aba`.
+
+NPC_FUNCTIONS contains `fn-damar/warehouse`, `fn-alma/inn`, `fn-petar/transport`, `fn-vera/currency`, `fn-jarek/map`. The store groups warehouse, transport, currency and map into a generic item/service purchase branch (selected item, cost, inventory add or gold debit), not a shipment ledger, transport route resolver, coin-authentication minigame or discovery graph. Alma's authored function explicitly describes 60 gold / one hour / 10% max HP and `heartyStew` / `gateRations`; the exact runtime handler must be inspected in full before final acceptance. This is why the new mechanics remain proposals, not claims about existing behavior.
+
+**Required follow-up:** source-map each NPC's complete runtime branch; identify existing route/discovery/document state before freezing persistence. All five NPCs remain IN PROGRESS.
