@@ -267,6 +267,9 @@ try {
   assert.equal(itemSystem.canNpcCraftItem("nara", getCatalogItem("lurkerGloves")), true, "Nara must craft leather gloves.");
   assert.equal(itemSystem.canNpcCraftItem("nara", getCatalogItem("guildRing")), false, "Nara must not craft unrelated accessories.");
   assert.equal(itemSystem.canNpcCraftItem("arenaOlen", getCatalogItem("militiaBlade")), true, "Non-workshop forge NPCs retain existing behavior.");
+  assert.deepEqual(itemSystem.craftRecipeForNpcItem(getCatalogItem("travelerBoots"), "outskirts", "nara"), [{ id: "tannersWax", count: 2 }], "Nara boot recipes must use leatherwork materials.");
+  assert.deepEqual(itemSystem.craftRecipeForNpcItem(getCatalogItem("paddedArmor"), "outskirts", "nara"), [{ id: "tannersWax", count: 3 }], "Nara leather armor recipes must use leatherwork materials.");
+  assert.deepEqual(itemSystem.dismantleYieldsForNpcItem(getCatalogItem("travelerBoots"), "outskirts", "nara"), [{ id: "tannersWax", count: 1 }], "Nara dismantling must return half the leatherwork material cost.");
 
   const royalRapierRecipe = itemSystem.craftRecipeForItem(content.ITEMS.find(item => item.id === "royalRapier"), "palace");
   assert.ok(royalRapierRecipe.some(req => req.id === "blackArchiveWax"), "Ink-and-seal gear should use black archive wax.");
