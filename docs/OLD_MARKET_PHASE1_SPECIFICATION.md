@@ -123,3 +123,35 @@ State:
 - confirmation that no source code, shared documents, or other district branches were modified.
 
 **Stage 2 exit rule:** all assigned NPC sections are complete and testable; no Canon changes; no parallel global systems; shared conflicts are explicitly raised; no implementation has begun.
+
+
+## 10. Központi tervezési pass — három piaci NPC (v0.2)
+
+**Státusz:** Zora, Cador, Pell: **IN PROGRESS**. Ilren nem része a kiosztott specifikációnak, besorolása változatlanul **CENTRAL DECISION REQUIRED**.
+
+### Zora Fűszeres — fűszerkeverék és minőségismeret
+**Forrás:** `fn-zora`, kind `spiceTrade`, 18 gold alapdíj; régiós fűszerkeveréket kínál. A pontos item outputok és recipe inputok forrásban ellenőrzendők.
+**Loop:** cél kiválasztása (étel / főzet / kereskedelmi keverék) → recept és allergén/hatás előnézet → összetevők minőség szerinti vizsgálata → keverési sorrend kiválasztása → elkészítés vagy vásárlás.
+**Minijáték:** 3 összetevő, 3 hozzáadási fázis. A recept megadja a helyes sorrendet és két kompatibilis alternatívát. Minden fázisban a játékos kiválaszt egy még fel nem használt összetevőt. Mindhárom helyes sorrendben = siker; két helyes pozíció = részleges minőség; 0–1 = hibás keverék, de nem kap új itemet. Nincs random; az alacsony minőségű input csökkenti az eredmény minőségi osztályát.
+**Erőforrás:** recipe által meghatározott ingredient item/count, 18 gold szolgáltatási díj; output csak előre jóváhagyott ItemDefinition lehet. Nincs helyi rarity/quality tier; minőségi eredmény csak központilag jóváhagyott tag vagy recipe variant lehet.
+**Kapcsolat/progression:** appraisal/alchemy stat ≥7 esetén a játékos előre láthatja egy összetevő eredetét; ≥9 esetén mindháromét. Zora bizalma a hibás keverék okának őszinte elfogadásával +1, receptszándék elhallgatásával −1. Mastery központi.
+**Teszt:** sorrend 6 permutációja; 3/3; 2/3; 1/3; hiányzó ingredient; item instance duplikáció; repeat output cap; insufficient gold; reload; invalid recipe; no new rarity; output item whitelist.
+
+### Cador — pénzügyi vizsgálat és könyvelési egyeztetés
+**Forrás:** `fn-cador`, kind `ledger`, 25 gold; hivatalos számla/adóslevél/tranzakciós okirat készítése. A meglévő funkció nem bizonyít teljes pénzügyi vizsgálati rendszert.
+**Loop:** ügy kiválasztása (szállítmány / piaci ügylet / magánkölcsön) → forrásdokumentumok áttekintése → tranzakciós tételek egyeztetése → eltérés besorolása → hitelesített jegyzőkönyv.
+**Minijáték:** három oszlopos ledger (dátum, összeg, partner). A játékos négy sorból kiválasztja az egyetlen olyan sort, amelynél legalább két mező eltér a kapcsolódó bizonylattól. Minden ügy 4 sor; pontos találat = siker, helyes sor + helyes eltéréskategória = teljes siker; helyes sor, rossz kategória = részleges; rossz sor = kudarc. Ügyenként egy beküldés; nincs újragörgetés.
+**Költség/jutalom:** 25 gold okiratkészítés; pénzügyi vizsgálat első olvasása ingyenes, hitelesített jegyzőkönyv további 10 gold javaslat. Jutalom nem a talált pénz, hanem a hozzáférés/quest flag és központi XP, ha egy authored case engedi. Soha nem adhat hozzáférést más játékos vagy NPC pénzéhez.
+**Kapcsolat:** helyes bizonyítéklánc Cador bizalmát növeli; manipulált könyvelés −2. Kapcsolódik Damar fuvarjegyzékéhez, Vera coin opinionjához, Lena okirataihoz és Rovan opcionális ügyeihez.
+**Állapot/teszt:** caseId + documentIds + selectedRow + classification; submitted ügy lezárt. Tesztek: 4 sor/1 anomaly; több eltérés; helyes sor rossz kategória; rossz sor; duplikált dokumentum; forged seal; no source docs; duplicate submit; reload; transaction amount zero/negative; no currency mint; evidence chain integrity.
+
+### Pell — élelmiszer- és alapanyaggazdaság
+**Forrás:** `fn-pell`, kind `foodTrade`, 14 gold; friss gyümölcs és gyorsan fogyasztható étel, `gateRations` megnevezett item.
+**Loop:** napi (világóra szerinti) készlet megtekintése → termék/állapot ellenőrzése → vásárlás vagy beszállítási ajánlat → fogyasztás / későbbi Zora recept input.
+**Minőség:** három állapotjelző: friss, érett, romlásközeli; ezek nem új rarityk, hanem NPC-kereskedelmi készletállapotok. A világóra 12 real hours = 1 in-game day; készletváltás csak a közös világóra napi határán történhet. Nincs valós idejű kötelező várakozás.
+**Szabály:** Pell készlete fix, authored készletlista; a játékos saját itemet csak akkor adhat el neki, ha sellable és marketEligible. Ajánlati ár = `tradeValue` (ha hiányzik, basePrice) × állapot szorzó (friss 1.0, érett 0.85, romlásközeli 0.5), lefelé kerekítve; a szorzók **LOCAL PROPOSAL**, központi economy approval szükséges. Nincs végtelen NPC buyback.
+**Jutalom/kapcsolat:** készletfeltöltés csak előre limitált szerződésből, legfeljebb 3 tétel/contract; nincs végtelen eladás. Pell bizalma +1, ha a játékos nem próbál romlott árut frissként eladni; −2 csalásnál. Zora fűszerreceptjei Pell által árult összetevőket használhatnak.
+**Teszt:** stock cap; daily rollover; no forced wait; freshness multiplier; sellable false; quest item blocked; marketEligible false; buyback cap; duplicate sale; reload; no negative price; tradeValue fallback.
+
+### Ilren — központi döntés
+**BLOCKED / CENTRAL DECISION REQUIRED:** `NpcId=ilren`, `region=market`, `district=exchangeSquare`, miközben korábbi district assignment más körzethez kötötte. Nem készül NPC-specifikáció és nem módosítjuk a besorolást, amíg a Canon owner nem dönt.
