@@ -123,3 +123,45 @@ State:
 - confirmation that no source code, shared documents, or other district branches were modified.
 
 **Stage 2 exit rule:** all assigned NPC sections are complete and testable; no Canon changes; no parallel global systems; shared conflicts are explicitly raised; no implementation has begun.
+
+
+## 10. Központi tervezési pass — Vörös Utcák (v0.2)
+
+**Státusz:** mind az öt NPC **IN PROGRESS**. Minden tét pénzkezelése, nagy értékű kimenetele és mentett meccsállapota **CENTRAL DECISION REQUIRED**, mert a jelenlegi store kliensoldali.
+
+### Havel — eredeti stratégiai kártyajáték: „Három Kapu”
+**Forrás:** NPC Canon: fogadós és kártyaklub-házigazda, Vörös Lámpás Fogadó; `fn-havel`, kind `gamble`, 35 gold belépő. A jelenlegi generikus gamble handler nem tekinthető a játék szabályrendszerének.
+**Játék célja:** a játékos és Havel három fordulón át három „kapu” közül választ; a cél a legmagasabb összesített taktikai pontszám, nem a véletlen lapérték.
+**Pakli:** 12 egyedi akciólap, négy család, családonként három lap: Olvasás (Előrejelzés, Kivárás, Visszakérdezés), Nyomás (Blöff, Szorítás, Kockáztatás), Védekezés (Őrzés, Elterelés, Visszalépés), Fordítás (Csere, Tükör, Megakasztás). Minden körben a játékos 3 lapot kap, Havel 3 lapot tart nyíltan látható „stílus” jelzéssel, de pontos lapját nem.
+**Kör:** (1) játékos titokban kiválaszt egy lapot; (2) Havel determinisztikus AI-policy választ az előző játékosi lépések és a nyílt stílus alapján; (3) mindkét lap felfedése; (4) interakciós táblázat alapján pontozás; (5) eldobott lap pótlása a saját 12-es pakliból; (6) három kör után összegzés. A pakli sorrendjét a meccs session seedje rögzíti, nem kliensoldali újrarandomizálás.
+**Pontozás:** minden lap alappontja 1. Taktikai matchup: Olvasás legyőzi Nyomást (+2); Nyomás legyőzi Védekezést (+2); Védekezés legyőzi Fordítást (+2); Fordítás legyőzi Olvasást (+2). Azonos család: nincs bónusz. A családi kör egyenrangú, ezért a döntetlenekben a játékos által választott „tét nélküli fókusz” (Olvasás/Erő/Védelem) ad +1, ha az adott lap családjával egyezik. Havel azonos szabály szerint játszik.
+**Speciális lapok:** Előrejelzés: ha a következő Havel-lap családját helyesen tippeli a játékos, +1; Kivárás: matchup bónuszt nulláz, de döntetlenben +1; Blöff: Nyomásként számít, de ha Havel Fordítást játszik, −1; Őrzés: Nyomás bónusz ellen immunis; Csere: a játékos és Havel családját megfordítja a matchuphoz; Tükör: az előző forduló Havel-lap családját másolja; Visszalépés: a kör döntetlen és mindkét fél 0 pontot kap; Megakasztás: Havel következő körében a matchup bónusz −1. A többi lap családja szerinti alap szabályt követi. **Ezek a speciális szabályok local design proposal-k**, Havel canonhoz nem nyúlnak.
+**Eredmény:** 3 kör után 2+ pont különbség = győzelem; 0–1 pont különbség = döntetlen; negatív különbség = vereség. Győzelem: klubjelző/relationship event és előre meghatározott, maximum 1.2× belépődíj értékű jutalom; döntetlen: belépődíj vissza, jutalom nincs; vereség: 35 gold elveszik. **CENTRAL DECISION REQUIRED:** pénznyeremény, maximum stake és kliensoldali manipuláció miatt első fázisban csak tét nélküli practice mode javasolt.
+**Döntések:** practice vagy pénzes meccs; kezdő fókusz; minden körben lapválasztás; meccs előtt kilépés. Meccs indulása után nincs visszatérítés, de a session állapot folytatható.
+**UI:** lapok képpel és szöveges szabállyal, keyboard fókusz, mobil tap target, választás lock, reveal animáció, forduló pontszám, meccs history. Reduced motion opció. Kártyahatás szövegesen is.
+**Exploit/test:** seed session-bound; reload ugyanazt a lapot mutatja; duplicate submit idempotens; stake levonása csak meccs nyitásakor; no second reward; tampered card ID rejected. Legalább tesztek: 4 matchup irány; azonos család; fókusz bónusz; 6 speciális lap; három kör; win/draw/loss; disconnect/reload; duplicate; invalid card; practice no currency; stake bounds; reward cap.
+
+### Miri — utcai hírszerzés
+**Forrás:** `fn-miri`, kind `rumor`; hírvivő, Keskeny Udvar, 16–2 óra.
+**Loop:** témakör választása → Miri forrásának megbízhatósága → információ megvásárlása vagy ingyenes általános pletyka → a játékos eldönti, keresztellenőrzi-e Vera/Cador/Rovan irányában. Minden lead egyedi leadId-t kap; ismételt kérés csak már ismert szöveget ad, új jutalmat nem.
+**Minőség:** forrásminőség 0–2 authored szint; 0 = rumor, 1 = corroborated, 2 = verified. Egy másik NPC dokumentuma vagy független forrás emelheti, nem a játékos ismételt kattintása. Költség 10/20/30 gold a minőség szerint (javaslat).
+**Kapcsolat:** Miri bizalma +1 ha a játékos visszajelez a forrás veszélyeztetése nélkül; −1 ha kiadja a forrást. Tesztek: duplicate lead, false rumor, corroboration, source privacy, reload, no quest leak.
+
+### Brenka — fogadási vonal
+**Forrás:** `fn-brenka`, kind `odds`, 25 gold díj; a korábbi audit szerint a store generic gamble handler `Math.random()<0.45`-öt használ, ez nem elfogadható odds-modell.
+**Loop:** esemény kiválasztása → odds és implied probability megtekintése → stake és maximum payout preview → confirm → single settlement. Minden event odds authored, nem manipulálható játékosoldali random.
+**Szabály:** implied probability = 1/decimalOdds. Payout = floor(stake×decimalOdds); nettó eredmény payout−stake. Javasolt decimal odds 1.5–3.0; max stake 100 gold; eventenként egy fogadás; event lezárás után nincs új fogadás. A fogadás expected value-ját a central economy owner hagyja jóvá; nincs biztos profit.
+**Kockázat:** kliensoldali store miatt pénzes fogadás **BLOCKED** szerver-authoritative settlementig. Addig csak odds-olvasó és practice calculator.
+**Teszt:** odds boundary; max stake; duplicate bet; event closed; payout rounding; negative stake; insufficient gold; reload; altered odds; no random 0.45; one bet/event; no payout twice.
+
+### Silas — utcai közvetítő
+**Forrás:** `fn-silas`, kind `information`, 30 gold; kapcsolatot közvetít, bizalom vagy arany szükséges.
+**Loop:** cél/kapcsolattípus megadása → előfeltétel ellenőrzése → közvetítői díj preview → kapcsolatfelvétel → intro flag vagy elutasítás. Három út: fizetett közvetítés (30 gold), bizalmi ajánlás (relationship threshold 6, nincs díj), saját nyom felmutatása (releváns lead/document, díj nélkül).
+**Siker:** csak olyan NPC-hez adhat bevezetést, aki már létezik a Canonban és hozzáférhető. Részleges: intro csak egyszeri párbeszédet ad; teljes: intro + optional service unlock. Fail: pénz nem vonható le, ha nincs érvényes cél vagy feltétel.
+**Exploit:** intro flag once per target; nem váltható goldra; nem írhat felül zárt district access. Tesztek: all three routes, trust boundary, missing target, duplicate intro, insufficient funds, reload, locked target, consumed lead, no new currency.
+
+### Tosk — éjszakai beléptetés
+**Forrás:** `fn-tosk`, kind `doorGuard`, 20 gold; zárt helyek beléptetése.
+**Loop:** célajtó megtekintése → jogosultság (credential/intro/relationship) ellenőrzése → kérés → beengedés / feltételes beengedés / elutasítás. 20 gold csak akkor fizetendő, ha a kapu díjköteles és az access flag nem áll fenn.
+**Szabály:** a gold nem vásárolhat quest/Canon tiltást felülíró hozzáférést. Siker = valid flag; partial = időben korlátozott, authored visit flag; failure = elutasítás, díj nélkül. A Tosk által adott belépő nem lehet átruházható item.
+**Teszt:** no credential; valid intro; fee; duplicate access; locked story gate; reload; expired visit; invalid target; payment rollback; no tradable access token.
