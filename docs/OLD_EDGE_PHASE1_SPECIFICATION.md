@@ -153,3 +153,12 @@ State:
 **Szem-szabály:** A Szem kizárólag korábban authored megfigyelést jeleníthet meg a helyszínről; nem adhatja meg a helyes párosítást, nem generálhat új relikvia-állapotot és nem állíthatja, hogy a kút beszél.
 **Költség/jutalom:** víz ára 0 vagy a meglévő itemár; `silentWellVial` csak jóváhagyott, egyszeri discovery rewardként adható. A rejtvény jutalma discovery flag, nem ismételhető gold/item. **CENTRAL DECISION REQUIRED:** relic discovery state és Eye event schema.
 **Teszt:** 6 permutáció; 3/3; 2/3; 0/3; reset; no time pressure; repeated puzzle no reward; vial once; no Eye solution leak; reload; invalid symbol; main quest unaffected.
+
+
+## 11. Alpha.26 runtime verification — central review
+
+**Verified source:** `src/lib/content.ts` blob `27206c65e37c5cc3b47d0257d91b1654f8971b95`; `src/lib/store.ts` blob `60fc472f8eeefd940aa25e226e3a1aa3a20b1aba`.
+
+Verified functions: `fn-eldra/alchemy` (items `moonleaf`, `emberRoot`, `strengthTonic`, `runeInfusion`), `fn-siven/ruins` (40 gold), `fn-maela/well` (`silentWellVial`). Eldra has a dedicated alchemy handler; its runtime uses temporary buffs and prevents a second active infusion on the same equipped instance. Siven and Maela are grouped in the generic service/item branch in the store; a persistent expedition or puzzle state was not confirmed. The Eye must remain an authored observation layer, not an autonomous solver or state writer.
+
+**Required follow-up:** inspect complete alchemy handler, buff expiry/save behavior and Eye event contract; expedition state remains a central schema decision. All three NPCs remain IN PROGRESS.
