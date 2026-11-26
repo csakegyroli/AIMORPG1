@@ -155,3 +155,12 @@ State:
 
 ### Ilren — központi döntés
 **BLOCKED / CENTRAL DECISION REQUIRED:** `NpcId=ilren`, `region=market`, `district=exchangeSquare`, miközben korábbi district assignment más körzethez kötötte. Nem készül NPC-specifikáció és nem módosítjuk a besorolást, amíg a Canon owner nem dönt.
+
+
+## 11. Alpha.26 runtime verification — central review
+
+**Verified source:** `src/lib/content.ts` blob `27206c65e37c5cc3b47d0257d91b1654f8971b95`; `src/lib/store.ts` blob `60fc472f8eeefd940aa25e226e3a1aa3a20b1aba`.
+
+Verified functions: `fn-zora/spiceTrade` (18 gold), `fn-cador/ledger` (25 gold), `fn-pell/foodTrade` (14 gold, `gateRations`). The store currently routes these kinds through a generic buy/service branch; this is not yet a recipe research, accounting investigation or stock-quality simulation. The NPC master data shows Ilren as `id=ilren`, `region=market`, `district=exchangeSquare`; no assignment change is authorized.
+
+**Required follow-up:** enumerate actual item IDs and prices for Zora/Pell; establish Cador's authored document inputs; Ilren remains excluded pending central owner decision. All three assigned NPCs remain IN PROGRESS.
