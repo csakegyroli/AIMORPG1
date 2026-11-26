@@ -123,3 +123,37 @@ State:
 - confirmation that no source code, shared documents, or other district branches were modified.
 
 **Stage 2 exit rule:** all assigned NPC sections are complete and testable; no Canon changes; no parallel global systems; shared conflicts are explicitly raised; no implementation has begun.
+
+
+## 10. Központi tervezési pass — Őrségi Negyed (v0.2)
+
+**Státusz:** mind a négy NPC **IN PROGRESS**. A rendszer opcionális eseteket oldhat meg, a 60 main questet, azok sorrendjét, eredményét és Canon szereplőit nem módosíthatja.
+
+### Rovan — hivatalos nyomozás
+**Forrás:** `fn-rovan`, kind `security`; NPC Canon: városi őrkapitány, az eltűnt adószállítmány ügye foglalkoztatja.
+**Loop:** opcionális case kiválasztása → bizonyítékok áttekintése → hipotézis felállítása → bizonyítékok összekapcsolása → jelentés → ügy lezárása / további vizsgálat.
+**Bizonyítéklánc:** minden evidence record mezői: evidenceId, sourceId, acquiredAtWorldTime, custodyOwner, sealStatus, linkedCaseId. Ezek **PROPOSED shared evidence contract**, central decision required. Bizonyíték eredet nélkül nem használható hiteles bizonyítékként.
+**Döntések:** formális út (csak hitelesített iratok); tanúvallomás út (két egymástól független forrás); tárgyi út (Damar raktárjegyzék + Vera vizsgálat). A játékos legalább két külön típusú bizonyítékot kapcsoljon össze.
+**Siker:** legalább 2 független evidence source, nincs custody break, a következtetés megfelel az authored case key-nek. Részleges: jó következtetés, de egy bizonyíték lánca hiányos → további nyom kérhető. Kudarc: ellentmondó vagy manipulált bizonyíték alapján vád → ügy nem zárul, relationship −1, a bizonyíték nem semmisül meg.
+**Jutalom:** csak egyszeri optional case XP / access flag; nincs pénzbírság vagy új item, amely main questet módosít. Tesztek: custody intact; broken seal; duplicate source; false testimony; two independent sources; one source repeated; wrong conclusion; partial; reload; duplicate report; main quest immutable; evidence cannot be sold.
+
+### Lena Varr — dokumentumhitelesítés
+**Forrás:** `fn-lena`, kind `documents`, 20 gold; hiteles másolat és városi bejegyzés.
+**Loop:** irat kiválasztása → kiállító/pecsét/dátum összevetése → hiteles másolat vagy eltérésjegyzék kérése → dokumentum státusz.
+**Mechanika:** 3 ellenőrző mező: issuer, seal, registryEntry. 3/3 egyezés = authenticated; 2/3 = provisional copy, csak leadként használható; 0–1 = rejected. Lena nem gyárt hamis pecsétet és nem tesz hitelessé egy ismeretlen eredetű tárgyat.
+**Költség:** 20 gold csak hiteles másolatnál; elutasított ellenőrzés ingyenes. A másolat nem új jogot ad, csak az eredeti irat állapotát tükrözi. **SHARED DEPENDENCY:** document/evidence instance schema.
+**Teszt:** 3/3, 2/3, 1/3, wrong issuer, forged seal, duplicate copy, no source doc, cost only on success, reload, no quest flag overwrite.
+
+### Bran — fogdai nyilvántartás és kihallgatási hozzáférés
+**Forrás:** `fn-bran`, kind `jail`; fogdaőr, hivatalos információ csak jogosultsággal.
+**Loop:** ügyhivatkozás → hozzáférési jog bemutatása → nyilvántartás kiválasztása → kérdés (jelenlét / időpont / átadás) → anonimizált vagy hitelesített válasz.
+**Szabály:** Bran nem adhat ki olyan információt, amely nincs authored case-ben engedélyezve. Három kérdés/ügy; minden kérdés külön clueId; ismétlés nem ad új clue-t. Megfélemlítés vagy fizetség nem írhatja felül a jogi hozzáférést.
+**Következmény:** szabályos lekérdezés +1 Bran bizalom; jogtalan nyomás −2. Jutalom információ/flag, nem gold.
+**Teszt:** no access; valid warrant; three question cap; duplicate clue; unauthorized coercion; reload; invalid case; no protected NPC secret; source reference preserved.
+
+### Orren — járőrözés és helyszíni jelentés
+**Forrás:** `fn-orren`, kind `guardPatrol`; járőrparancsnok, útvonal- és biztonsági információ.
+**Loop:** patrol board → 3 útvonal összevetése → választás (rövid / biztonságos / bizonyítékra fókuszáló) → 2 állomásos járőr → eseményjelentés.
+**Szabály:** mindkét állomáson egy megfigyelési választás; perception/survival stat ≥7 esetén egy extra részlet látható, de a helyes megoldást nem adja meg. 2 helyes megfigyelés = teljes siker; 1 = részleges; 0 = kudarc. Nincs random encounter és nincs kötelező időzár.
+**Jutalom:** teljes siker új optional patrol report flag és központi XP egyszer; részleges clue, XP nélkül; ismétlés csak gyakorló szöveg. Nincs loot farm.
+**Teszt:** all routes; stat 6/7 boundary; 2/2; 1/2; 0/2; duplicate report; reload mid-patrol; route unavailable; no forced wait; no main quest mutation; no repeated XP.
