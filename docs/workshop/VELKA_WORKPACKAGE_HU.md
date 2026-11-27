@@ -169,3 +169,31 @@ Ebben a fázisban kizárólag ez a dokumentum módosítható. Jövőbeni, külö
 - Döntés kell: repair csak durability-vel együtt vagy külön, durability nélküli narratív szolgáltatásként?
 
 **Végső státusz:** SPECIFICATION COMPLETE — UNIQUE SERVICE DESIGN BLOCKED BY OVERLAP / CENTRAL DECISIONS.
+
+
+---
+
+## 18. Célzott PHASE 2 — Borin–Velka szerepütközés
+
+A teljes, nyolc kategóriás termékkör-mátrix és a két alternatív szereposztás a BORIN_GARRAN_WORKPACKAGE_HU.md 18. fejezetében szerepel.
+
+**VERIFIED CURRENT:**
+- fn-velka kind=forge; Borin fn-garran szintén forge.
+- A store közös craft/dismantle ága nem vizsgálja az NPC ID-t termékjogosultság vagy receptválasztás céljából.
+- A UI a forge típushoz ugyanazt a panelt rendereli; a terméklista régió/set + common rarity + slot alapján szűr, nem páncélra.
+- A dismantle lista bármely inventory slotos itemet felkínál.
+- Nincs durability/condition mező és repair handler; a „Páncélt javíttatok” action label jelenleg nem a végrehajtott műveletet nevezi meg.
+
+| Szempont | A — Velka páncél-specialista | B — Velka minőség-/beszállítóvizsgáló |
+|---|---|---|
+| Canon-kompatibilitás | Közvetlenül megfelel a Páncélkovács szerepnek és a védelmi felszerelés craft-leírásnak; Borin vért/pajzs említése miatt átfedés marad. | Illik a karakter történetéhez; a jelenlegi craft-leírás szolgáltatásmódosítása szükséges. |
+| Játékosoldali egyediség | Slot-alapú páncél-specializáció. | Vizsgálati/diagnosztikai funkció, nem második craftkatalógus. |
+| Runtime módosítás | Központi NPC-termékkör allowlist és azonos UI/store validáció. | Külön diagnosztikai action; repair csak condition rendszer után. |
+| Recipe következmény | A közös helper maradhat; új recept nem szükségszerű. | A vizsgálatnak nincs craft outputja; repair recipe csak külön döntéssel. |
+| UI következmény | Páncélkatalógus; a repair címke csak működő repair után maradhat. | Vizsgálati panel; pontos, nem félrevezető action label. |
+
+A páncélcraft, pajzsbesorolás, dismantle-jog és repair négy külön döntés. WD-09 szerephatár, WD-05 durability és WD-06 repair nélkül Velka nem kaphat önálló repair jogosultságot.
+
+**Forrás:** alpha.26 src/lib/content.ts:316,464,501; src/lib/store.ts:643-652; src/components/GameClient.tsx:760-798; src/lib/types.ts:48-60.
+
+**Státusz:** SPECIFICATION COMPLETE — UNIQUE SERVICE / REPAIR DESIGN BLOCKED BY CENTRAL DECISIONS.
