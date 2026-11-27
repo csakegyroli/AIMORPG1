@@ -1,5 +1,5 @@
 import { EQUIPMENT_SETS, ITEMS } from "./content";
-import type { EquipmentSetDefinition, EquipmentSlot, ItemDefinition, ItemId, ItemLegalStatus, RegionId } from "./types";
+import type { EquipmentSetDefinition, EquipmentSlot, ItemDefinition, ItemId, ItemLegalStatus, NpcId, RegionId } from "./types";
 
 export const ITEM_CATEGORY_LABELS: Record<string, string> = {
   equipment: "Felszerelés", consumable: "Fogyóeszköz", material: "Alapanyag", tradeGood: "Kereskedelmi áru", upgrade: "Fejlesztés",
@@ -108,6 +108,37 @@ export function regionPriceModifier(item: ItemDefinition, region: RegionId): num
 
 export function itemSourceLabel(item: ItemDefinition): string {
   return item.origin ?? (item.regions?.length ? item.regions.join(", ") : "Ismeretlen eredet");
+}
+
+/**
+ * Műhelynegyed specialist boundaries.
+ * Other forge NPCs retain the existing regional crafting behavior.
+ */
+export function canNpcCraftItem(npcId: NpcId, item: ItemDefinition): boolean {
+  const specialties: Partial<Record<NpcId, readonly EquipmentSlot[]>> = {
+    garran: ["weapon", "shield"],
+    velka: ["armor"],
+    nara: ["boots", "armor", "accessory"],
+  };
+  const allowedSlots = specialties[npcId];
+  if (!allowedSlots) return true;
+  if (!item.slot || !allowedSlots.includes(item.slot)) return false;
+  if (npcId === "nara") return /bőr|bőrvért|kesztyű|csizma/i.test(item.name + " " + item.description);
+  return true;
+}
+
+export function craftRecipeForNpcItem(item: ItemDefinition, region: RegionId, npcId: NpcId): CraftRequirement[] {
+  if (npcId !== "nara") return craftRecipeForItem(item, region);
+  if (!canNpcCraftItem(npcId, item) || item.sideQuestOnly || item.category === "relic" || item.marketEligible === false) return [];
+  if (item.slot === "boots") return [{ id: "tannersWax", count: 2 }];
+  if (item.slot === "armor") return [{ id: "tannersWax", count: 3 }];
+  if (item.slot === "accessory") return [{ id: "tannersWax", count: 2 }];
+  return [];
+}
+
+export function dismantleYieldsForNpcItem(item: ItemDefinition, region: RegionId, npcId: NpcId): CraftRequirement[] {
+  if (npcId !== "nara") return dismantleYieldsForItem(item);
+  return craftRecipeForNpcItem(item, region, npcId).map(req => ({ id: req.id, count: Math.max(1, Math.floor(req.count * 0.5)) }));
 }
 
 export type CraftRequirement = { id: ItemId; count: number };

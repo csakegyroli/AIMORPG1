@@ -257,6 +257,20 @@ try {
   assert.ok(synergies.getActiveGearSynergies(fullEyeSet).some(entry => entry.id === "eye-bound" && entry.activeThresholds.length === 2), "A weapon, armor, and accessory should unlock the complete Eye-bound synergy.");
   const missingBookQuest = mainStory.MAIN_STORY_BLUEPRINT.find(quest => quest.id === "main_palace_05");
   assert.ok(missingBookQuest?.rewards?.items?.some(item => item.itemId === "silverEyeShard" && item.count === 1), "The Eye shard must be obtainable as a main-story reward.");
+  const getCatalogItem = (id) => content.ITEMS.find(item => item.id === id);
+  assert.equal(itemSystem.canNpcCraftItem("garran", getCatalogItem("militiaBlade")), true, "Borin must craft weapons.");
+  assert.equal(itemSystem.canNpcCraftItem("garran", getCatalogItem("oakShield")), true, "Borin must craft shields.");
+  assert.equal(itemSystem.canNpcCraftItem("garran", getCatalogItem("paddedArmor")), false, "Borin must not craft armor.");
+  assert.equal(itemSystem.canNpcCraftItem("velka", getCatalogItem("paddedArmor")), true, "Velka must craft armor.");
+  assert.equal(itemSystem.canNpcCraftItem("velka", getCatalogItem("militiaBlade")), false, "Velka must not craft weapons.");
+  assert.equal(itemSystem.canNpcCraftItem("nara", getCatalogItem("travelerBoots")), true, "Nara must craft boots.");
+  assert.equal(itemSystem.canNpcCraftItem("nara", getCatalogItem("lurkerGloves")), true, "Nara must craft leather gloves.");
+  assert.equal(itemSystem.canNpcCraftItem("nara", getCatalogItem("guildRing")), false, "Nara must not craft unrelated accessories.");
+  assert.equal(itemSystem.canNpcCraftItem("arenaOlen", getCatalogItem("militiaBlade")), true, "Non-workshop forge NPCs retain existing behavior.");
+  assert.deepEqual(itemSystem.craftRecipeForNpcItem(getCatalogItem("travelerBoots"), "outskirts", "nara"), [{ id: "tannersWax", count: 2 }], "Nara boot recipes must use leatherwork materials.");
+  assert.deepEqual(itemSystem.craftRecipeForNpcItem(getCatalogItem("paddedArmor"), "outskirts", "nara"), [{ id: "tannersWax", count: 3 }], "Nara leather armor recipes must use leatherwork materials.");
+  assert.deepEqual(itemSystem.dismantleYieldsForNpcItem(getCatalogItem("travelerBoots"), "outskirts", "nara"), [{ id: "tannersWax", count: 1 }], "Nara dismantling must return half the leatherwork material cost.");
+
   const royalRapierRecipe = itemSystem.craftRecipeForItem(content.ITEMS.find(item => item.id === "royalRapier"), "palace");
   assert.ok(royalRapierRecipe.some(req => req.id === "blackArchiveWax"), "Ink-and-seal gear should use black archive wax.");
   const stormBowRecipe = itemSystem.craftRecipeForItem(content.ITEMS.find(item => item.id === "stormglassBow"), "harbor");
