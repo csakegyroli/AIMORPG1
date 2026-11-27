@@ -192,7 +192,7 @@ A teljes, nyolc kategóriás termékkör-mátrix és a két alternatív szerepos
 | Recipe következmény | A közös helper maradhat; új recept nem szükségszerű. | A vizsgálatnak nincs craft outputja; repair recipe csak külön döntéssel. |
 | UI következmény | Páncélkatalógus; a repair címke csak működő repair után maradhat. | Vizsgálati panel; pontos, nem félrevezető action label. |
 
-A páncélcraft, pajzsbesorolás, dismantle-jog és repair négy külön döntés. WD-09 szerephatár, WD-05 durability és WD-06 repair nélkül Velka nem kaphat önálló repair jogosultságot.
+A páncélcraft, pajzsbesorolás, dismantle-jog és repair négy külön döntés. WD-09 szerephatár, WD-02 durability és WD-03 repair nélkül Velka nem kaphat önálló repair jogosultságot.
 
 **Forrás:** alpha.26 src/lib/content.ts:316,464,501; src/lib/store.ts:643-652; src/components/GameClient.tsx:760-798; src/lib/types.ts:48-60.
 
