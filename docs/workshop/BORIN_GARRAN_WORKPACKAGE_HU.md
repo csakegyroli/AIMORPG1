@@ -205,7 +205,7 @@ Sikeres funkcióhasználatkor a közös used() journal-bejegyzést, relationship
 | Csizma | Boots slot craft/dismantle engedélyezett a közös handlerben. | Borin funkcióleírása csizmát említ; Nara Canon is csizmát készít; Velka nem nevezi meg. | Csizma anyag/termék szerint Borin és Nara között szétválasztandó. | Igen: travelerBoots anyaga és termékkör. |
 | Kiegészítő | Accessory slotra is van generic recipe; handler elfogadja. | Borin és Velka Canon nem nevez meg kiegészítőt; Nara kesztyűt említ. | Csak itemenként igazolt anyag és jóváhagyott NPC-hozzárendelés. | Igen: kesztyű és általános accessory jog. |
 | Szétszerelés | Bármely inventoryban lévő slotos item szétszerelhető; hozam fél recipe, lefelé kerekítve, minimum 1/inputtípus. | Borin: felesleges felszerelés; Velka: páncél; Nara: sérült bőrfelszerelés. | Közös dismantle vagy NPC-specifikus item allowlist. | Igen: jogosultság, protected item, capacity és yield. |
-| Javítás | Nincs condition mező vagy repair handler. | Borin, Velka és Nara service-leírása javítást említ. | Csak globális condition contract után mechanikai repair. | Igen: WD-05/06. |
+| Javítás | Nincs condition mező vagy repair handler. | Borin, Velka és Nara service-leírása javítást említ. | Csak globális condition contract után mechanikai repair. | Igen: WD-02/03. |
 
 **Értelmezés:** VERIFIED CURRENT a kód általános engedélyét jelenti, nem a Canon-helyességet és nem azt, hogy a UI ténylegesen megjeleníti. A UI régió/set szűrője és a store target-ellenőrzése eltérhet.
 
