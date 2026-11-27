@@ -578,13 +578,21 @@ export function useGameStore(): GameState {
     let result={success:false,message:"Ezt a funkciót most nem tudod használni."};
     let submissionReserved = false;
     let resultDelivered = false;
+    const isInn = NPC_FUNCTIONS.some(candidate => candidate.id === functionId && candidate.npcId === npcId && candidate.kind === "inn");
+    const finishInnSubmission = () => {
+      if (isInn && submissionReserved && transactionId) {
+        // Both success and rejected preflight outcomes are terminal for this submission.
+        innSubmissionController.commit(transactionId);
+        submissionReserved = false;
+      }
+    };
     const complete = () => {
+      finishInnSubmission();
       if (!onResult || resultDelivered) return;
       resultDelivered = true;
       const settled = { ...result };
       queueMicrotask(() => onResult(settled));
     };
-    const isInn = NPC_FUNCTIONS.some(candidate => candidate.id === functionId && candidate.npcId === npcId && candidate.kind === "inn");
     if (isInn) {
       if (!transactionId || !innSubmissionController.canCommit(transactionId)) {
         result = { success: false, message: "A fogadói műveletet megszakították a végrehajtás előtt." };
@@ -594,6 +602,12 @@ export function useGameStore(): GameState {
       submissionReserved = true;
     }
     update(s=>{
+      // Re-check at the actual functional-update boundary: cancel can win before React commits.
+      if (isInn && transactionId && !innSubmissionController.canCommit(transactionId)) {
+        result = { success: false, message: "A fogadói műveletet a végrehajtás előtt megszakították." };
+        complete();
+        return s;
+      }
       const npc=NPCS.find(n=>n.id===npcId); const fn=NPC_FUNCTIONS.find(x=>x.id===functionId && x.npcId===npcId);
       if(!npc||!fn){result={success:false,message:"Ismeretlen NPC-funkció."};complete(); return s;}
       const present=npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id]);
@@ -721,7 +735,6 @@ export function useGameStore(): GameState {
         }
         default: result={success:true,message:`${fn.title}: ${fn.description}`}; break;
       }
-      if (isInn && submissionReserved && transactionId) innSubmissionController.commit(transactionId);
       complete();
       return next;
     });
