@@ -164,3 +164,54 @@ The current GitHub compare still reports 33 commits ahead and 2 behind main, wit
 - The 256-entry receipt guard remains session-memory-only; it is not durable idempotency or server security.
 - No save key/version, save schema, InventoryItem, Canon, item definitions, or main quest data were intentionally changed.
 - PR #11 remains **Open / Draft / Unmerged**. Alma remains pending explicit owner acceptance. No other NPC implementation was started.
+
+
+## Owner follow-up — transaction reservation order correction (2026-11-27)
+
+### Implementation
+- Reordered `executeAlmaInnTransaction`: validate the target and request identity payload; construct the rest/purchase plan; return the unchanged input state for failed preflight without mutating the receipt map; only then perform the mutating ID reservation and return the planned next state.
+- Added `isValidInnTransactionId` so malformed IDs are rejected before planning/reservation.
+- The bounded session guard now supports a read-only `probe` argument. If a plan fails, the executor probes only for an existing receipt: a previously committed identical request remains `duplicate`, and reuse with another payload remains `collision`. If no receipt exists, the preflight reason is returned and the ID remains unreserved. This preserves deterministic idempotency without burning IDs on failed attempts.
+- Production store still calls this same `executeAlmaInnTransaction` function and the same 256-entry in-memory guard. No store, UI, save, Canon, item-definition, or main-quest file was changed in this reservation-order pass.
+
+### Exact execution order
+1. Validate args object, target (`rest` or non-empty `buy:<itemId>`), NPC/function identity, allow-list/items arrays, and transaction ID format.
+2. Build the applicable `planInnRest` or `planInnFoodPurchase` plan.
+3. If the plan fails, perform a read-only guard probe. Return existing `duplicate`/`collision` if already recorded; otherwise return the preflight reason and original state. No receipt is inserted.
+4. If the plan succeeds, mutate the receipt guard. Reject `duplicate`/`collision`; only `reserved` returns the planned next state.
+
+### Targeted test evidence
+- Updated `scripts/alma-inn-smoke.cjs` to invoke the same exported executor used by the production store. Cases A–E cover insufficient gold, max HP, non-allow-listed item, post-success duplicate, and ID/payload collision. Case F covers invalid target. Every rejected case checks gold, HP and inventory separately; same-ID retries prove failed preflights did not reserve.
+- Case D deliberately replays a rest after the first rest reduced gold below the rest price. The expected result is still `duplicate`, not `insufficient-gold`.
+- Case E deliberately collides after the first rest leaves the bag full. The expected result is still `collision`, not `inventory-full`.
+- The first local test attempt exposed this duplicate-vs-preflight edge case and failed as expected. The read-only probe was then added; the final focused run passed all 7 assertions/groups.
+
+### Exact staged-file runtime
+The available local environment does not contain a full Git checkout. For a targeted run, the exact current branch blobs were staged into an isolated directory:
+- `src/lib/innService.ts`, blob `bdf57408a35d5f3dfcf5e6409f8bfcb00303fa33`
+- `scripts/alma-inn-smoke.cjs`, blob `0dcf08d6cbbf9f2d44982a2cf9cb6f890d8ba1d3`
+
+Both local files were verified with `git hash-object` to match those GitHub blob SHAs byte-for-byte. Command:
+```bash
+NODE_PATH=/opt/nvm/versions/node/v22.16.0/lib/node_modules node scripts/alma-inn-smoke.cjs
+```
+Environment: Node `v22.16.0`, npm `10.9.2`, global TypeScript `5.8.3`.
+Actual output:
+```text
+A — insufficient gold / unchanged balances / same-ID retry: PASS
+B — maximum HP / unchanged balances / same-ID retry: PASS
+C — fn.itemIds rejection / unchanged balances / same-ID allow-list retry: PASS
+D — successful transaction replay / deterministic duplicate / no second mutation: PASS
+E — same-ID different payload / deterministic collision / no mutation: PASS
+F — invalid target / unchanged balances / same-ID retry: PASS
+Executor source order: plan and failed-preflight check precede mutating ID reservation: PASS
+Alma transaction reservation-order tests: PASS (7/7)
+```
+
+This is a genuine Node runtime execution of the exact branch helper and test file blobs, but not an execution from a complete branch checkout. The full project `npm test`, `npm run lint`, and `npm run build` remain separate NOT RUN checks.
+
+### Repository and main alignment
+- Node and npm are available; the isolated runtime test ran successfully.
+- A full branch checkout and remote fetch remain blocked: `git ls-remote https://github.com/csakegyroli/AIMORPG1.git refs/heads/gate-city/phase-2-alma` returned exit 128 with `fatal: unable to access 'https://github.com/csakegyroli/AIMORPG1.git/': Could not resolve host: github.com`.
+- Main compare remains 2 commits behind, merge base `894e9606fa84f5d609d810152e326b1cfae09b18`. The two documented main commits were reviewed previously, but no cherry-pick or history-level conflict test was possible here.
+- PR remains Open / Draft / Unmerged. No main update, force push, merge, or other NPC implementation was performed.
