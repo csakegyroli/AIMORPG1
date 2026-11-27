@@ -148,3 +148,48 @@ export function createInnSubmissionController() {
     },
   };
 }
+
+import type { ItemDefinition } from "./types";
+import { planInnFoodPurchase, planInnRest, type InnTransactionState } from "./innService";
+
+export type AlmaInnCommitResult = {
+  success: boolean;
+  message: string;
+  state: InnTransactionState;
+  addedItemId: string | null;
+};
+
+export function executeAlmaInnTransaction(
+  state: InnTransactionState,
+  args: {
+    targetId: string;
+    transactionId: unknown;
+    npcId: string;
+    functionId: string;
+    allowedItemIds: readonly string[];
+    items: readonly ItemDefinition[];
+    maxHealth: number;
+    restPrice?: number;
+    inventoryLimit?: number;
+  },
+  reserve: (id: unknown, fingerprint: string) => string,
+): AlmaInnCommitResult {
+  const fingerprint = `${args.npcId}|${args.functionId}|${args.targetId}`;
+  const idResult = reserve(args.transactionId, fingerprint);
+  if (idResult !== "reserved") {
+    return { success: false, message: idResult, state, addedItemId: null };
+  }
+  if (args.targetId === "rest") {
+    const plan = planInnRest(state, args.maxHealth, args.restPrice ?? 60);
+    if (!plan.success) return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
+    return { success: true, message: "rest", state: plan.nextState, addedItemId: null };
+  }
+  if (args.targetId.startsWith("buy:")) {
+    const itemId = args.targetId.slice(4);
+    const item = args.items.find(candidate => candidate.id === itemId);
+    const plan = planInnFoodPurchase(state, item, args.allowedItemIds, args.maxHealth, args.inventoryLimit ?? 80);
+    if (!plan.success) return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
+    return { success: true, message: "purchase", state: plan.nextState, addedItemId: itemId };
+  }
+  return { success: false, message: "invalid-target", state, addedItemId: null };
+}
