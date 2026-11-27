@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { ITEMS, NPCS, QUESTS, REGIONS, STAT_DEFINITIONS, OUTSKIRTS_DISTRICTS, REGION_DISTRICTS, NPC_STORIES, NPC_FUNCTIONS } from "@/lib/content";
 import { getEffectiveStats, getItem, getActiveEquipmentSetProgress, groupScore, marketPrice, sellingPrice, XP_FOR_LEVEL } from "@/lib/rules";
 import { ITEM_CATEGORY_LABELS, ITEM_LEGAL_LABELS, itemCategory, itemLegalStatus, regionalMarketItems, REGIONAL_MARKET_NAMES, isMarketEligible, getEquipmentSet, getEquipmentSetCollectionProgress, craftRecipeForItem, dismantleYieldsForItem } from "@/lib/itemSystem";
-import { getReputation, useGameStore } from "@/lib/store";
+import { getMaxHealth, getReputation, useGameStore } from "@/lib/store";
 import { getInnFoodPreview, getInnRestPreview } from "@/lib/innService";
 import { buildNarrativeContext, getAvailableDialogueTopics, evaluateSideQuestChoice } from "@/lib/narrative";
 import { rewardPreview } from "@/lib/rewardEconomy";
@@ -773,21 +773,29 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
   const shopItems = fn.itemIds?.length ? fn.itemIds.map(id=>getItem(id)).filter(Boolean) : regionItems;
   const forgeCraftables = ITEMS.filter(item => item.slot && (item.regions?.includes(npc.region) || item.setId?.startsWith(`${npc.region}_`)) && item.rarity === "Közönséges").slice(0,8);
   const activeShop = shopItems.find(item=>item?.id===shopItem) ?? null;
-  const activeFood = shopItems.find(item=>item?.id===shopItem && itemCategory(item)==="consumable") ?? null;
-  const innStats = getEffectiveStats(game.baseStats, game.equipment, game.temporaryStatBuffs, game.temporaryItemBuffs);
-  const innMaxHealth = 100 + Math.max(0, innStats.endurance) * 5;
+  const activeFood = shopItems.find(item=>item?.id===shopItem && item.type==="consumable" && fn.itemIds?.includes(item.id)) ?? null;
+  const innMaxHealth = getMaxHealth(game);
   const innRestPreview = fn.kind === "inn" ? getInnRestPreview(game.health, innMaxHealth, game.gold, fn.cost ?? 60) : null;
   const innFoodPreview = activeFood ? getInnFoodPreview(activeFood, innMaxHealth, game.health, game.gold, game.inventory.length) : null;
   const runInnAction = (targetId: string) => {
     if (innActionLock.current || innPending) return;
     innActionLock.current = true;
     setInnPending(true);
+    const transactionId = `alma:${npc.id}:${fn.id}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 12)}`;
     setInnStatus("A művelet feldolgozása…");
-    const result = game.useNpcFunction(npc.id, fn.id, targetId);
-    notify(result.message);
-    setInnStatus(result.message);
-    if (!result.success) { innActionLock.current = false; setInnPending(false); return; }
-    window.setTimeout(() => { innActionLock.current = false; setInnPending(false); }, 500);
+    game.useNpcFunction(npc.id, fn.id, targetId, transactionId, result => {
+      setInnStatus(result.message);
+      notify(result.message);
+      innActionLock.current = false;
+      setInnPending(false);
+    });
+  };
+  const cancelInnAction = (kind: "rest" | "food") => {
+    if (innActionLock.current) return;
+    innActionLock.current = false;
+    setInnPending(false);
+    if (kind === "food") setShopItem(null);
+    setInnStatus(kind === "rest" ? "A pihenés megszakítva. Nem történt levonás." : "A vásárlás megszakítva. Nem történt levonás.");
   };
   const selectedCraft = forgeTarget.startsWith("craft:") ? ITEMS.find(i=>i.id===forgeTarget.slice(6)) : null;
   const craftMaterials = selectedCraft ? craftRecipeForItem(selectedCraft, npc.region) : [];
@@ -826,12 +834,12 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
           <div className="function-item-icon big">⌂</div>
           <div><span>PIHENÉSI ELŐNÉZET</span><h4>{innRestPreview?.restoredHealth ?? 0} HP visszatöltése</h4><p>Jelenlegi életerő: {game.health}/{innMaxHealth} HP. A gyógyítás nem lépheti túl a maximális életerőt.</p><small>Ár: {fn.cost ?? 60} arany · Időtartam: 1 óra</small></div>
           <button className="gold-button" disabled={!innRestPreview?.canRest || innPending} onClick={()=>runInnAction("rest")}>{innPending?"Folyamatban…":`Pihenek · ${fn.cost ?? 60} arany`}</button>
-          <button className="outline-button" disabled={innPending} onClick={()=>setInnStatus("A pihenés megszakítva.")}>Mégsem</button>
+          <button className="outline-button" disabled={innPending} onClick={()=>cancelInnAction("rest")}>Mégsem</button>
         </div>
         {innRestPreview?.reason==="full-health"&&<p className="inn-rest-note" role="status">Teljes az életerőd. A pihenés nem von le aranyat.</p>}
         {innRestPreview?.reason==="insufficient-gold"&&<p className="inn-rest-note" role="status">Nincs elég aranyad a pihenéshez. Szükséges: {innRestPreview.price} arany.</p>}
         <div className="function-section-head"><div><span>ÉTELVÁSÁRLÁS</span><strong>Alma fogadói kínálata</strong></div><small>Csak a két, már engedélyezett étel vásárolható meg.</small></div>
-        <div className="function-item-grid">{shopItems.filter(item=>itemCategory(item)==="consumable").map(item=>{
+        <div className="function-item-grid">{shopItems.filter(item=>item.type==="consumable" && fn.itemIds?.includes(item.id)).map(item=>{
           const preview=getInnFoodPreview(item,innMaxHealth,game.health,game.gold,game.inventory.length);
           const effect=preview.healingAmount>0?`+${preview.healingAmount} HP az aktuális maximumból`:"Nincs közvetlen HP-hatása";
           return <button type="button" key={item.id} className={`function-item-card compact ${shopItem===item.id?"selected":""}`} onClick={()=>setShopItem(item.id)}><span className="function-item-icon"><ItemArtwork itemId={item.id} fallback={item.icon} /></span><b>{item.name}</b><small>{effect}</small><strong>{item.basePrice} arany</strong></button>;
@@ -840,7 +848,7 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
           <div className="function-item-icon big"><ItemArtwork itemId={activeFood.id} fallback={activeFood.icon} /></div>
           <div><span>ÉTEL · {activeFood.rarity}</span><h4>{activeFood.name}</h4><p>{activeFood.description}</p><small>{innFoodPreview.healingAmount>0?`Várható gyógyítás most: +${innFoodPreview.restoredHealth} HP · eredeti hatás: ${activeFood.effects?.healPercent?`+${activeFood.effects.healPercent}% max HP`:`+${activeFood.effects?.heal ?? 0} HP`}`:"Az item jelenlegi definíciója nem tartalmaz közvetlen gyógyító hatást."} · Ár: {innFoodPreview.price} arany</small></div>
           <button className="gold-button" disabled={!innFoodPreview.canPurchase || innPending} onClick={()=>runInnAction(`buy:${activeFood.id}`)}>{innPending?"Folyamatban…":`Megveszem · ${innFoodPreview.price} arany`}</button>
-          <button className="outline-button" disabled={innPending} onClick={()=>{setShopItem(null);setInnStatus("A kiválasztás megszakítva.");}}>Mégsem</button>
+          <button className="outline-button" disabled={innPending} onClick={()=>cancelInnAction("food")}>Mégsem</button>
         </div>}
         {innStatus&&<p className="inn-rest-note" role="status" aria-live="polite">{innStatus}</p>}
         <div className="inn-rest-note"><span>🍲</span><div><b>A vásárlás nem fogyasztja el az ételt.</b><small>A tárgy a táskádba kerül. A saját itemdefiníciója és későbbi felhasználási szabálya változatlan marad.</small></div></div>
