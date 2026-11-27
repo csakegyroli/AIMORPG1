@@ -603,7 +603,7 @@ export function useGameStore(): GameState {
       const present=npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id]);
       if(s.currentRegion!==npc.region){result={success:false,message:`Jelenleg nem tudsz interakcióba lépni vele, mert nem a(z) ${npc.region} helyszínén vagy.`};complete(); return s;}
       if(!present){result={success:false,message:`${npc.name} jelenleg más dolgaival foglalkozik. Most nem tudod használni a funkcióját.`};complete(); return s;}
-      const max=100+Math.max(0,getEffectiveStatsWithBuffs(s).endurance)*5;
+      const max=getMaxHealth(s);
       let next={...s};
       const itemById=(id:string)=>ITEMS.find(i=>i.id===id);
       const addItem=(id:string)=>({...next,inventory:[...next.inventory,makeInventoryItem(id)]});
