@@ -187,7 +187,7 @@ The final GitHub compare after the evidence-document commits reports 42 commits 
 ### Exact staged-file runtime
 The available local environment does not contain a full Git checkout. For a targeted run, the exact current branch blobs were staged into an isolated directory:
 - `src/lib/innService.ts`, blob `bdf57408a35d5f3dfcf5e6409f8bfcb00303fa33`
-- `scripts/alma-inn-smoke.cjs`, blob `0dcf08d6cbbf9f2d44982a2cf9cb6f890d8ba1d3`
+- `scripts/alma-inn-smoke.cjs`, blob `dd80ebe26ba0c9e2364f7764cfd118dcc4c83ad8`
 
 Both local files were verified with `git hash-object` to match those GitHub blob SHAs byte-for-byte. Command:
 ```bash
