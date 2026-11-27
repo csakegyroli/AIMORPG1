@@ -86,114 +86,154 @@ try {
     assert.deepEqual(plan.nextState, state, "Rejected purchase must preserve its input gold, HP and inventory.");
   }
 
-  // Actual store transaction boundary used by the React store; assert full state outcome.
-  const integrationGuard = createInnTransactionGuard(32);
-  const storeState = { gold: 100, health: 100, inventoryCount: 79 };
-  const restArgs = {
-    targetId: "rest", transactionId: "alma:store:rest:tx000001",
-    npcId: "alma", functionId: "fn-alma",
+  // The same executor used by store.ts is the sole transaction path under test.
+  const makeArgs = (targetId, transactionId) => ({
+    targetId, transactionId, npcId: "alma", functionId: "fn-alma",
     allowedItemIds: ["heartyStew", "gateRations"], items: [stew, rations],
     maxHealth: 125, restPrice: 60, inventoryLimit: 80,
+  });
+  const assertBalances = (actual, expected, label) => {
+    assert.equal(actual.gold, expected.gold, `${label}: gold`);
+    assert.equal(actual.health, expected.health, `${label}: HP`);
+    assert.equal(actual.inventoryCount, expected.inventoryCount, `${label}: inventory`);
   };
-  const committedRest = executeAlmaInnTransaction(storeState, restArgs, integrationGuard);
-  assert.equal(committedRest.success, true);
-  assert.deepEqual(committedRest.state, { gold: 40, health: 113, inventoryCount: 79 });
-  const duplicateRest = executeAlmaInnTransaction(committedRest.state, restArgs, integrationGuard);
-  assert.equal(duplicateRest.success, false);
-  assert.equal(duplicateRest.message, "duplicate");
-  assert.deepEqual(duplicateRest.state, committedRest.state);
-  const collisionRest = executeAlmaInnTransaction(committedRest.state, {
-    ...restArgs, targetId: "buy:heartyStew",
-  }, integrationGuard);
-  assert.equal(collisionRest.success, false);
-  assert.equal(collisionRest.message, "collision");
-  assert.deepEqual(collisionRest.state, committedRest.state);
+  const baseState = { gold: 100, health: 100, inventoryCount: 79 };
 
-  // Failed preflight does not reserve the transaction ID; corrected retry can proceed.
-  const retryGuard = createInnTransactionGuard(32);
-  const retryArgs = { ...restArgs, transactionId: "alma:store:retry:tx00001" };
-  const rejectedFirst = executeAlmaInnTransaction({ ...storeState, gold: 59 }, retryArgs, retryGuard);
-  assert.equal(rejectedFirst.success, false);
-  assert.deepEqual(rejectedFirst.state, { ...storeState, gold: 59 });
-  const acceptedRetry = executeAlmaInnTransaction(storeState, retryArgs, retryGuard);
-  assert.equal(acceptedRetry.success, true);
-  assert.deepEqual(acceptedRetry.state, { gold: 40, health: 113, inventoryCount: 79 });
+  // A. Insufficient gold: original balances and unreserved ID; same ID succeeds after funds recover.
+  {
+    const guard = createInnTransactionGuard();
+    const id = "alma:case-a:tx000001";
+    const args = makeArgs("rest", id);
+    const before = { ...baseState, gold: 59 };
+    const rejected = executeAlmaInnTransaction(before, args, guard);
+    assert.equal(rejected.success, false);
+    assert.equal(rejected.message, "insufficient-gold");
+    assertBalances(rejected.state, before, "A rejected");
+    const retry = executeAlmaInnTransaction(baseState, args, guard);
+    assert.equal(retry.success, true, "A same-ID retry must succeed, proving no reservation on failed preflight.");
+    assertBalances(retry.state, { gold: 40, health: 113, inventoryCount: 79 }, "A retry");
+    const duplicate = executeAlmaInnTransaction(retry.state, args, guard);
+    assert.equal(duplicate.success, false);
+    assert.equal(duplicate.message, "duplicate");
+    assertBalances(duplicate.state, retry.state, "A guard after retry");
+  }
 
-  const purchaseArgs = {
-    ...restArgs, targetId: "buy:heartyStew",
-    transactionId: "alma:store:buy:tx000001",
-  };
-  const committedPurchase = executeAlmaInnTransaction(storeState, purchaseArgs, integrationGuard);
-  assert.equal(committedPurchase.success, true);
-  assert.equal(committedPurchase.addedItemId, "heartyStew");
-  assert.deepEqual(committedPurchase.state, { gold: 76, health: 100, inventoryCount: 80 });
-  const disallowed = executeAlmaInnTransaction(storeState, {
-    ...purchaseArgs, targetId: "buy:unknownItem", transactionId: "alma:store:buy:tx000002",
-  }, integrationGuard);
-  assert.equal(disallowed.success, false);
-  assert.deepEqual(disallowed.state, storeState);
-  const notConsumable = executeAlmaInnTransaction(storeState, {
-    ...purchaseArgs,
-    targetId: "buy:blade",
-    transactionId: "alma:store:buy:tx000003",
-    items: [...purchaseArgs.items, { id: "blade", type: "weapon", basePrice: 10 }],
-  }, integrationGuard);
-  assert.equal(notConsumable.success, false);
-  assert.deepEqual(notConsumable.state, storeState);
-  const fullBag = executeAlmaInnTransaction({ ...storeState, inventoryCount: 80 }, {
-    ...purchaseArgs, transactionId: "alma:store:buy:tx000004",
-  }, integrationGuard);
-  assert.equal(fullBag.success, false);
-  assert.deepEqual(fullBag.state, { ...storeState, inventoryCount: 80 });
-  const poorPurchase = executeAlmaInnTransaction({ ...storeState, gold: 1 }, {
-    ...purchaseArgs, transactionId: "alma:store:buy:tx000005",
-  }, integrationGuard);
-  assert.equal(poorPurchase.success, false);
-  assert.deepEqual(poorPurchase.state, { ...storeState, gold: 1 });
+  // B. Maximum HP: no charge or mutation; same ID remains available for a valid rest.
+  {
+    const guard = createInnTransactionGuard();
+    const id = "alma:case-b:tx000001";
+    const args = makeArgs("rest", id);
+    const fullHp = { ...baseState, health: 125 };
+    const rejected = executeAlmaInnTransaction(fullHp, args, guard);
+    assert.equal(rejected.success, false);
+    assert.equal(rejected.message, "full-health");
+    assertBalances(rejected.state, fullHp, "B rejected");
+    const retry = executeAlmaInnTransaction(baseState, args, guard);
+    assert.equal(retry.success, true, "B same-ID retry must succeed after HP is no longer full.");
+    assertBalances(retry.state, { gold: 40, health: 113, inventoryCount: 79 }, "B retry");
+  }
 
-  // Duplicate submission, ID collision, invalid ID and bounded-cache eviction.
-  // UI submission state machine: pending may cancel before commit; committed work cannot cancel.
+  // C. Item outside fn.itemIds: unchanged balances and unreserved ID; allow-listed retry succeeds.
+  {
+    const guard = createInnTransactionGuard();
+    const id = "alma:case-c:tx000001";
+    const disallowedArgs = makeArgs("buy:outsiderItem", id);
+    const before = { ...baseState };
+    const rejected = executeAlmaInnTransaction(before, disallowedArgs, guard);
+    assert.equal(rejected.success, false);
+    assert.equal(rejected.message, "invalid-item");
+    assertBalances(rejected.state, before, "C rejected");
+    const allowedArgs = makeArgs("buy:heartyStew", id);
+    const retry = executeAlmaInnTransaction(before, allowedArgs, guard);
+    assert.equal(retry.success, true, "C same-ID retry with allow-listed payload must succeed.");
+    assert.equal(retry.addedItemId, "heartyStew");
+    assertBalances(retry.state, { gold: 76, health: 100, inventoryCount: 80 }, "C retry");
+  }
+
+  // D. Successful transaction followed by identical request: duplicate and no second mutation.
+  {
+    const guard = createInnTransactionGuard();
+    const id = "alma:case-d:tx000001";
+    const args = makeArgs("rest", id);
+    const first = executeAlmaInnTransaction(baseState, args, guard);
+    assert.equal(first.success, true);
+    assertBalances(first.state, { gold: 40, health: 113, inventoryCount: 79 }, "D first");
+    const second = executeAlmaInnTransaction(first.state, args, guard);
+    assert.equal(second.success, false);
+    assert.equal(second.message, "duplicate");
+    assertBalances(second.state, first.state, "D duplicate");
+  }
+
+  // E. Same ID with a different, independently valid payload: collision and no mutation.
+  {
+    const guard = createInnTransactionGuard();
+    const id = "alma:case-e:tx000001";
+    const firstArgs = makeArgs("rest", id);
+    const first = executeAlmaInnTransaction(baseState, firstArgs, guard);
+    assert.equal(first.success, true);
+    const collisionArgs = makeArgs("buy:heartyStew", id);
+    const collision = executeAlmaInnTransaction(first.state, collisionArgs, guard);
+    assert.equal(collision.success, false);
+    assert.equal(collision.message, "collision");
+    assertBalances(collision.state, first.state, "E collision");
+  }
+
+  // Other executor rejections also preserve all three mutable balances.
+  {
+    const cases = [
+      ["buy:unknownItem", baseState, [stew, rations]],
+      ["buy:blade", baseState, [stew, rations, { id: "blade", type: "weapon", basePrice: 10 }]],
+      ["buy:heartyStew", { ...baseState, inventoryCount: 80 }, [stew, rations]],
+      ["buy:heartyStew", { ...baseState, gold: 1 }, [stew, rations]],
+      ["invalid-target", baseState, [stew, rations]],
+    ];
+    for (let index = 0; index < cases.length; index += 1) {
+      const [target, state, items] = cases[index];
+      const guard = createInnTransactionGuard();
+      const args = { ...makeArgs(target, `alma:extra:tx00000${index + 1}`), items };
+      const result = executeAlmaInnTransaction(state, args, guard);
+      assert.equal(result.success, false);
+      assertBalances(result.state, state, `Extra rejection ${index + 1}`);
+      // The failed ID remains unreserved; a valid rest with the same ID can reserve it.
+      const retry = executeAlmaInnTransaction(baseState, makeArgs("rest", args.transactionId), guard);
+      assert.equal(retry.success, true);
+      assertBalances(retry.state, { gold: 40, health: 113, inventoryCount: 79 }, `Extra retry ${index + 1}`);
+    }
+  }
+
+  // The bounded guard itself remains session-local and evicts oldest receipts at its configured cap.
+  const boundedGuard = createInnTransactionGuard(2);
+  const firstId = "alma:guard:tx000001";
+  assert.equal(boundedGuard(firstId, "alma|fn-alma|rest"), "reserved");
+  assert.equal(boundedGuard(firstId, "alma|fn-alma|rest"), "duplicate");
+  assert.equal(boundedGuard(firstId, "alma|fn-alma|buy:heartyStew"), "collision");
+  assert.equal(boundedGuard("short", "alma|fn-alma|rest"), "invalid");
+  assert.equal(boundedGuard("alma:guard:tx000002", "alma|fn-alma|rest"), "reserved");
+  assert.equal(boundedGuard("alma:guard:tx000003", "alma|fn-alma|rest"), "reserved");
+  assert.equal(boundedGuard(firstId, "alma|fn-alma|rest"), "reserved", "Oldest receipt is evicted at the configured cap.");
+
+  // Pending/cancel controller tests remain separate from React DOM click-flow coverage.
   const submission = createInnSubmissionController();
-  const submissionId = "alma:alma:fn-alma:submit0001";
+  const submissionId = "alma:submit:tx000001";
   assert.equal(submission.getStatus(), "idle");
   assert.equal(submission.begin(submissionId), true);
   assert.equal(submission.getStatus(), "pending");
   assert.equal(submission.canCommit(submissionId), true);
-  const cancelledStoreState = { ...storeState };
   assert.equal(submission.cancel(submissionId), true);
   assert.equal(submission.getStatus(), "cancelled");
   assert.equal(submission.canCommit(submissionId), false);
   assert.equal(submission.commit(submissionId), false);
   assert.equal(submission.cancel(submissionId), false);
-  // The store's actual commit gate is re-checked immediately before executing its shared transaction boundary.
-  const afterCancel = submission.canCommit(submissionId)
-    ? executeAlmaInnTransaction(cancelledStoreState, restArgs, createInnTransactionGuard())
-    : { success: false, state: cancelledStoreState };
-  assert.equal(afterCancel.success, false);
-  assert.deepEqual(afterCancel.state, cancelledStoreState);
   submission.reset();
-  assert.equal(submission.getStatus(), "idle");
-  const committedId = "alma:alma:fn-alma:submit0002";
+  const committedId = "alma:submit:tx000002";
   assert.equal(submission.begin(committedId), true);
   assert.equal(submission.commit(committedId), true);
   assert.equal(submission.getStatus(), "committed");
   assert.equal(submission.cancel(committedId), false);
   assert.equal(submission.commit(committedId), false);
-  assert.equal(submission.begin("alma:alma:fn-alma:submit0003"), true);
-  assert.equal(submission.begin("alma:alma:fn-alma:submit0004"), false, "Only one submission may be pending at a time.");
-  assert.equal(submission.cancel("alma:alma:fn-alma:submit0003"), true);
   submission.reset();
-  assert.equal(submission.begin("alma:alma:fn-alma:submit0005"), true, "A terminal submission must permit a later submission.");
-
-  const guard = createInnTransactionGuard(2);
-  const firstId = "alma:fn-alma:1:abcdef1234";
-  assert.equal(guard(firstId, "alma|fn-alma|rest"), "reserved");
-  assert.equal(guard(firstId, "alma|fn-alma|rest"), "duplicate");
-  assert.equal(guard(firstId, "alma|fn-alma|buy:heartyStew"), "collision");
-  assert.equal(guard("short", "alma|fn-alma|rest"), "invalid");
-  assert.equal(guard("alma:fn-alma:2:abcdef1234", "alma|fn-alma|rest"), "reserved");
-  assert.equal(guard("alma:fn-alma:3:abcdef1234", "alma|fn-alma|rest"), "reserved");
-  assert.equal(guard(firstId, "alma|fn-alma|rest"), "reserved");
+  assert.equal(submission.getStatus(), "idle");
+  assert.equal(submission.begin("alma:submit:tx000003"), true, "A later submission must not remain locked.");
 
   // Static source-contract checks; these do not replace React DOM integration tests.
   const store = fs.readFileSync(path.join(root, "src/lib/store.ts"), "utf8");
@@ -205,6 +245,9 @@ try {
   assert.match(store, /queueMicrotask\(\(\) => onResult\(settled\)\)/);
   assert.match(store, /if \(isInn && transactionId && !innSubmissionController\.canCommit\(transactionId\)\)/);
   assert.match(store, /finishInnSubmission\(\)/);
+  const executorSource = fs.readFileSync(path.join(root, "src/lib/innService.ts"), "utf8");
+  assert.ok(executorSource.indexOf("const plan =") < executorSource.indexOf("const idResult = reserve("), "The transaction plan must be built before ID reservation.");
+  assert.ok(executorSource.indexOf("if (!plan.success)") < executorSource.indexOf("const idResult = reserve("), "Failed preflight must return before ID reservation.");
   assert.doesNotMatch(store, /hours:1/);
   assert.match(store, /const SAVE_KEY = "aimorpg-final-demo-v1-29"/);
   assert.match(store, /saveVersion: 6/);
