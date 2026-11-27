@@ -92,11 +92,14 @@ export function planInnFoodPurchase(
 
 /** Bounded, session-local transaction-ID guard. Its receipts are never persisted. */
 export type InnTransactionReservation = "reserved" | "duplicate" | "collision" | "invalid";
+export function isValidInnTransactionId(transactionId: unknown): transactionId is string {
+  return typeof transactionId === "string" && /^[a-zA-Z0-9:_-]{12,128}$/.test(transactionId);
+}
 export function createInnTransactionGuard(limit = 256) {
   const receipts = new Map<string, string>();
   const maxEntries = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 256;
   return (transactionId: unknown, fingerprint: string): InnTransactionReservation => {
-    if (typeof transactionId !== "string" || !/^[a-zA-Z0-9:_-]{12,128}$/.test(transactionId)) return "invalid";
+    if (!isValidInnTransactionId(transactionId)) return "invalid";
     const prior = receipts.get(transactionId);
     if (prior !== undefined) return prior === fingerprint ? "duplicate" : "collision";
     receipts.set(transactionId, fingerprint);
@@ -172,30 +175,46 @@ export function executeAlmaInnTransaction(
   },
   reserve: (id: unknown, fingerprint: string) => string,
 ): AlmaInnCommitResult {
+  // 1. Validate the operation target and identity payload without reserving an ID.
+  const validTarget = args.targetId === "rest"
+    || (typeof args.targetId === "string" && args.targetId.startsWith("buy:") && args.targetId.length > 4);
+  const validPayload = typeof args.npcId === "string" && args.npcId.length > 0
+    && typeof args.functionId === "string" && args.functionId.length > 0
+    && Array.isArray(args.allowedItemIds) && Array.isArray(args.items)
+    && isValidInnTransactionId(args.transactionId);
+  if (!validTarget || !validPayload) {
+    return { success: false, message: "invalid-payload", state, addedItemId: null };
+  }
+
+  // 2. Build the exact business transaction plan first.
+  const itemId = args.targetId.startsWith("buy:") ? args.targetId.slice(4) : null;
+  const plan = args.targetId === "rest"
+    ? planInnRest(state, args.maxHealth, args.restPrice ?? 60)
+    : planInnFoodPurchase(
+        state,
+        args.items.find(candidate => candidate.id === itemId),
+        args.allowedItemIds,
+        args.maxHealth,
+        args.inventoryLimit ?? 80,
+      );
+
+  // 3–4. A failed preflight returns the original state and never consumes the ID.
+  if (!plan.success) {
+    return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
+  }
+
+  // 5–6. Only a valid, successful plan reaches ID reservation.
   const fingerprint = `${args.npcId}|${args.functionId}|${args.targetId}`;
   const idResult = reserve(args.transactionId, fingerprint);
   if (idResult !== "reserved") {
     return { success: false, message: idResult, state, addedItemId: null };
   }
-  // A failed preflight is not a committed operation and must not burn the ID.
-  const plan = args.targetId === "rest"
-    ? planInnRest(state, args.maxHealth, args.restPrice ?? 60)
-    : args.targetId.startsWith("buy:")
-      ? planInnFoodPurchase(
-          state,
-          args.items.find(candidate => candidate.id === args.targetId.slice(4)),
-          args.allowedItemIds,
-          args.maxHealth,
-          args.inventoryLimit ?? 80,
-        )
-      : null;
-  if (!plan) return { success: false, message: "invalid-target", state, addedItemId: null };
-  if (!plan.success) return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
 
+  // 7. The caller may apply this state only after this successful result.
   return {
     success: true,
     message: args.targetId === "rest" ? "rest" : "purchase",
     state: plan.nextState,
-    addedItemId: args.targetId.startsWith("buy:") ? args.targetId.slice(4) : null,
+    addedItemId: itemId,
   };
 }
