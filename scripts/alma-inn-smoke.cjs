@@ -83,6 +83,25 @@ try {
   }
 
   // Duplicate submission, ID collision, invalid ID and bounded-cache eviction.
+  // UI submission state machine: pending may cancel before commit; committed work cannot cancel.
+  const submission = createInnSubmissionController();
+  const submissionId = "alma:alma:fn-alma:submit0001";
+  assert.equal(submission.begin(submissionId), true);
+  assert.equal(submission.getStatus(), "pending");
+  assert.equal(submission.canCommit(submissionId), true);
+  assert.equal(submission.cancel(submissionId), true);
+  assert.equal(submission.getStatus(), "cancelled");
+  assert.equal(submission.canCommit(submissionId), false);
+  assert.equal(submission.commit(submissionId), false);
+  assert.equal(submission.cancel(submissionId), false);
+  assert.equal(submission.begin("alma:alma:fn-alma:submit0002"), true);
+  assert.equal(submission.commit("alma:alma:fn-alma:submit0002"), true);
+  assert.equal(submission.getStatus(), "committed");
+  assert.equal(submission.cancel("alma:alma:fn-alma:submit0002"), false);
+  assert.equal(submission.begin("alma:alma:fn-alma:submit0003"), true);
+  assert.equal(submission.begin("alma:alma:fn-alma:submit0004"), false, "Only one submission may be pending at a time.");
+  submission.cancel("alma:alma:fn-alma:submit0003");
+
   const guard = createInnTransactionGuard(2);
   const firstId = "alma:fn-alma:1:abcdef1234";
   assert.equal(guard(firstId, "alma|fn-alma|rest"), "reserved");
