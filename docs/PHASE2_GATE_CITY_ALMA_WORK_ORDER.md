@@ -72,7 +72,7 @@ This is a sequencing decision, not a Canon change. Damar remains the first Gate 
 
 ### Transaction identity and protection
 - Each UI submission receives a unique ID composed of the Alma NPC ID, function ID, local timestamp and random suffix.
-- The store reserves that ID before queueing the functional state update. A repeated ID+target is rejected as duplicate; reuse of the same ID with another target is rejected as a collision.
+- The executor reserves the ID only after a successful transaction plan. On failed preflight it performs only a read-only lookup for an existing receipt, preserving duplicate/collision responses without reserving an unused ID.
 - The bounded receipt map stores at most 256 recent IDs in client memory. It is lost on reload and old entries can be evicted; it is not persistent idempotency and is not server-side security.
 - The existing functional store update evaluates gold, health and inventory from the latest state. The completion callback returns the resolved action result once, and the UI keeps its lock until that result is delivered rather than using a fixed delay.
 
@@ -81,8 +81,7 @@ This is a sequencing decision, not a Canon change. Damar remains the first Gate 
 - Cancel resets pending/lock/selection before submission and performs no store mutation. The control is disabled while a submitted transaction is pending; a submitted or committed store action cannot be rolled back.
 
 ### Test scope
-- `scripts/alma-inn-smoke.cjs` dynamically exercises the pure rest/purchase planners and the bounded transaction-ID guard.
-- Its static contract checks verify store/UI wiring, canonical target, save key/version and the 60 main quests.
+- `scripts/alma-inn-smoke.cjs` invokes `executeAlmaInnTransaction`, the same exported executor called by the production store. The final focused suite covers insufficient gold, maximum HP, allow-list rejection, post-success duplicate, payload collision, invalid target and source-order assertions.
 - React DOM click dispatch and the full React hook lifecycle are not dynamically tested because this repository has no configured component renderer or DOM test framework.
 
 
@@ -145,8 +144,7 @@ The connected GitHub tool can inspect and write individual files/commits, but do
 
 ### Runtime evidence
 - Environment: Node `v22.16.0`; npm `10.9.2`; globally available TypeScript `5.8.3`.
-- The current branch test source was exercised in an isolated local harness with the same `innService.ts` implementation and expanded runtime assertions. Result: **PASS** — `Alma executor, planners, idempotency guard, and pending/cancel state-machine runtime checks.`
-- Scope limitation: the full repository checkout and all source dependencies were not present locally. The isolated harness exercised the shared transaction executor and state-machine module; it did not mount React or dispatch DOM clicks, and it was not the complete repository test suite.
+- The exact current branch blobs for `src/lib/innService.ts` and `scripts/alma-inn-smoke.cjs` were staged locally and verified byte-for-byte with `git hash-object`. The final focused test file was executed under Node 22.16.0 and global TypeScript 5.8.3; result: **PASS (7/7)**. This was not a full Git checkout or the complete repository test suite.
 
 ### Full project checks — NOT RUN against the branch checkout
 A complete `gate-city/phase-2-alma` git checkout could not be established. No `.git` repository exists in the available local project directories. DNS resolution for `github.com`, `api.github.com`, and `raw.githubusercontent.com` fails with `Temporary failure in name resolution`; there is no configured HTTP(S) proxy. Thus the full project dependency lockfile/node_modules are unavailable here.
@@ -156,7 +154,7 @@ A complete `gate-city/phase-2-alma` git checkout could not be established. No `.
 - `npm ci`: **NOT RUN**; there is no branch checkout/lockfile available locally and DNS resolution is failing.
 
 ### Main alignment
-The current GitHub compare still reports 33 commits ahead and 2 behind main, with merge base `894e9606fa84f5d609d810152e326b1cfae09b18`. The two main commits were individually fetched and their complete diffs reviewed. Both only touch `docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md`, in order 076239c then 2190291. Direct path collision with Alma's six PR files is absent. Git cherry-pick was not performed because there is no local checkout and no working GitHub DNS; no conclusion about history-level conflict-free cherry-picking is claimed.
+The current GitHub compare reports 40 commits ahead and 2 behind main, with merge base `894e9606fa84f5d609d810152e326b1cfae09b18`. The two main commits were individually fetched and their complete diffs reviewed. Both only touch `docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md`, in order 076239c then 2190291. Direct path collision with Alma's six PR files is absent. Git cherry-pick was not performed because there is no local checkout and no working GitHub DNS; no conclusion about history-level conflict-free cherry-picking is claimed.
 
 ### Remaining limitations / status
 - The React hook/UI click lifecycle is not dynamically verified; no DOM renderer is configured in this isolated environment.
