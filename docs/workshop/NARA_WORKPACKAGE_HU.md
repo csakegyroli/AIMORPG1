@@ -175,3 +175,71 @@ Nara nem rendelkezik saját state-tel. A közös inventory instance instanceId +
 Elfogadási kritérium: a forrásból igazolt anyag/recipe elkülönül a javaslattól; Nara UI hiánya és a shared-handler átfedése látható; a fő küldetés védett; új anyag és recipe nincs önkényesen létrehozva.
 
 **Végső státusz:** SPECIFICATION COMPLETE — RECIPE / MATERIAL CONTRACT BLOCKED BY CENTRAL DECISIONS.
+
+
+---
+
+## 18. Célzott PHASE 2 — alpha.26 item- és receptkatalógus
+
+**Baseline:** alpha.26 main, 894e9606fa84f5d609d810152e326b1cfae09b18.  
+**Forrás:** src/lib/content.ts:45-75, 323, 469, 507; src/lib/itemSystem.ts:113-147; src/lib/store.ts:643-652; src/components/GameClient.tsx:760-798; src/lib/mainStory.ts:32.
+
+### 18.1 Canon és runtime
+
+Nara Canon szerepe Bőrműves; service: Bőr, kesztyű, javítás. fn-nara kind=leatherwork; leírása bőrből kesztyű és csizma készítését, valamint sérült bőrfelszerelés bontását mondja. A store forge és leatherwork esetén közös craft/dismantle kódot futtat, és nem ellenőrzi az item anyagát. A UI viszont kizárólag fn.kind === forge esetén renderel workbench-et. Nara normál UI-ján ezért nincs craft/dismantle panel: ez VERIFIED UI GAP.
+
+### 18.2 Releváns itemkatalógus
+
+Az ár a forrásbeli basePrice, nem garantált NPC-eladási ár. A „nincs deklarálva” azt jelenti, hogy a mező hiányzik.
+
+| Item ID | Név | Kategória / slot | Forráshely | basePrice | Eredet / tradeValue | Craft szerep | Nara-kapcsolat | Címke |
+|---|---|---|---|---:|---|---|---|---|
+| paddedArmor | Bélelt bőrvért | armor / armor | content.ts:47 | 52 | nincs deklarálva / nincs deklarálva | Craft output target és dismantle input lehet; armor recipe | Leírása bőrvértet mond; Nara-hozzárendelés tematikus javaslat | VERIFIED item / PROPOSAL-hozzárendelés |
+| lurkerGloves | Leselkedő kesztyű | accessory / accessory | content.ts:50 | 64 | nincs deklarálva / nincs deklarálva | Craft output target és dismantle input lehet; accessory recipe | Leírása finom bőrkesztyű; Nara Canon kesztyűkészítéséhez közvetlenül illik | VERIFIED item / PROPOSAL-hozzárendelés |
+| travelerBoots | Futár csizmája | boots / boots | content.ts:48 | 30 | nincs deklarálva / nincs deklarálva | Craft output target és dismantle input lehet; boots recipe | Nara csizmát készít, de az item anyaga nincs megadva | VERIFIED item / CENTRAL DECISION REQUIRED |
+| workshopIron | Műhelyvas | material / nincs slot | content.ts:62 | 18 | Külváros · Műhelynegyed / 16 | Outskirts recipe primary input | Fém alapanyag, nem bőr | VERIFIED |
+| tannersWax | Bőrviasz | material / nincs slot | content.ts:63 | 22 | Külváros · Műhelynegyed / 20 | Outskirts recipe secondary input | Tartósító viasz; nem nyersbőr, nem bőrlemez | VERIFIED |
+| smithingKit | Kovács fejlesztőkészlet | upgrade / nincs slot | content.ts:71 | 48 | Külváros · Műhelynegyed / 52 | Nem része a jelenlegi recipe helpernek | Műhelyhez kötött eszköz, de nem igazolt bőranyag; más questekben szerepel | VERIFIED / Nara-receptkapcsolat nem igazolt |
+| guildWaxSet | Céhes viaszpecsét-készlet | material / nincs slot | content.ts:143 | 64 | Céhesor / 76 | Nem az outskirts recipe secondary inputja | Velka main_outskirts_06 jutalma; nem Nara-bőranyag | VERIFIED / kapcsolat nincs igazolva |
+| tradeSilk | Céhes selyemtekercs | tradeGood / nincs slot | content.ts:87 | 68 | Kereskedelmi Központ · Céhesor / 82 | Nem craft helper input/output | main_outskirts_11 jutalma; nem bőranyag | VERIFIED |
+
+A három felszerelés itemdefiníciójában nincs explicit regions=["outskirts"] mező. A forgeCraftables UI régió/set tagságot, common rarityt és slotot vár; ezért a létező itemdefiníció és a ténylegesen látható UI-katalógus eltérhet. A store közvetlen target ellenőrzése ettől függetlenül elfogadja a létező, slotos itemet, ha a hívás ilyen targetet ad.
+
+### 18.3 tannersWax és recipe/dismantle helper
+
+craftRecipeForItem:
+- Üres recept, ha sideQuestOnly, relic kategória vagy marketEligible=false; üres recept slot nélküli itemre.
+- Outskirts secondary input: tannersWax.
+- weapon: 4 workshopIron + 1 tannersWax.
+- shield: 3 workshopIron + 1 tannersWax.
+- armor: 5 workshopIron + 2 tannersWax.
+- boots: 2 workshopIron + 1 tannersWax.
+- accessory: 1 workshopIron + 1 tannersWax.
+- Nem vizsgál NPC ID-t, anyagcímkét, bőrminőséget, Nara-jogosultságot vagy smithing statot.
+
+dismantleYieldsForItem:
+- Slot nélküli itemre üres hozam.
+- Régió az item regions[0] mezője, hiányában outskirts.
+- Minden recipe input fele, lefelé kerekítve, típusonként minimum 1.
+- paddingArmor: 2 workshopIron + 1 tannersWax.
+- lurkerGloves: 1 workshopIron + 1 tannersWax.
+- travelerBoots: 1 workshopIron + 1 tannersWax.
+Ezek helperből számolt generic értékek, nem Nara által jóváhagyott receptek/yield-ek.
+
+### 18.4 GAP-ek
+
+- GAP-NARA-01: nincs igazolt nyersbőr item.
+- GAP-NARA-02: nincs igazolt cserzett bőr/bőrlemez item.
+- GAP-NARA-03: nincs igazolt bőralkatrész input/output.
+- GAP-NARA-04: leatherwork UI workbench hiányzik.
+- GAP-NARA-05: paddedArmor és lurkerGloves leírása bőrre utal, de formális material mező nincs; travelerBoots anyaga ismeretlen.
+- Új item ID, ár, rarity, effect vagy drop nem vezethető le a forrásból.
+- main_outskirts_11: 3 tannersWax consume, tradeSilk reward; ez beszállítói/eredetvizsgálati fő küldetés, nem crafting recipe, és védett.
+
+### 18.5 Alternatívák — PROPOSAL
+
+**A — meglévő katalógusra szűkített Nara:** paddedArmor és lurkerGloves csak content owner jóváhagyással Nara-termék; travelerBoots besorolása függőben. A generic recipe ideiglenes referencia, nem nevezhető bőrreceptnek.
+
+**B — valódi bőranyaglánc később:** nyersbőr/cserzett bőr/alkatrész és Nara-receptek csak külön content/economy review után. Addig a GAP nyitva marad.
+
+**Státusz:** SPECIFICATION COMPLETE — MATERIAL / RECIPE / UI CONTRACT BLOCKED BY CENTRAL DECISIONS.
