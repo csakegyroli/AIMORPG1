@@ -367,3 +367,41 @@ Central tracker: #10
 - UI double-submit protection is a short-lived in-flight lock for the current client interaction. The existing store remains client-side and is not server-authoritative.
 - Focused test file is committed but not executed in this environment because the repository could not be cloned into the local runtime (GitHub host DNS resolution failed). Full npm test, npm run lint and npm run build are therefore **NOT RUN**; no pass is claimed.
 - Central review must inspect the diff and run checks in a dependency-complete checkout before accepting Alma.
+
+
+## 14. PHASE 2 — project-owner decision update (2026-11-27)
+
+This section supersedes earlier Damar statements that the choice of Shipment architecture model itself is pending. The project owner has approved:
+
+- Shipment model A: one Shipment aggregate plus Shipment-scoped custody event log.
+- Item/manifest-line-level partial receipt.
+- Hybrid NPC transaction protection: client-side stable transaction ID and duplicate-execution guard for the initial single-player demo; this is not server security. Future server-authority transition must be documented.
+- Risk-tiered authority: ordinary low-risk single-player demo may remain client-side initially; high-value, chance-based, competitive or future multiplayer-affecting economic settlement requires server authority before trusted release.
+- A separate versioned migration plan before each new persistent domain state; no general save redesign.
+
+### Damar status correction
+
+**APPROVED ARCHITECTURAL DIRECTION — SPECIFICATION DETAIL IN PROGRESS.**
+
+Damar's Shipment architecture choice is no longer a pending central decision. Continue the detailed domain/source specification using docs/GATE_CITY_DAMAR_PHASE2_ARCHITECTURE_DECISIONS.md.
+
+Still unresolved and must remain explicitly open:
+- quantity semantics against the existing instance-based InventoryItem model;
+- whether a line may split quantities or must map one-to-one to item instances;
+- exact custody transfer timing and permitted transitions;
+- shipment terminal-state and hold-release rules;
+- transaction ID scope/retention and same-ID/different-payload behavior;
+- high-value transaction threshold and server deployment boundary.
+
+The Shipment event log is shipment-scoped only. Do not create a universal event bus, parallel inventory or cargo stock registry.
+
+### Independent Gate City work continues
+
+- Petar route/delivery source verification and local specification continue; route graph and delivery custody details remain open only where they depend on missing shared contracts.
+- Vera read-only appraisal/source verification continues; trusted evidence issuance and admissibility remain separate open contracts.
+- Jarek map/route source verification continues; persistent discovery requires its own versioned migration plan.
+- Alma remains on the separate PHASE 2 implementation branch and is NOT OWNER-ACCEPTED until the project owner explicitly accepts PR #11.
+
+### Implementation gate
+
+This update changes documentation status only. It does not authorize Damar, Petar, Vera or Jarek source implementation. Alma PR #11 remains draft/unmerged; no next NPC implementation may start before Alma owner acceptance and separate authorization.
