@@ -108,3 +108,43 @@ export function createInnTransactionGuard(limit = 256) {
     return "reserved";
   };
 }
+
+
+/** State machine for cancellable UI submissions before store commit. */
+export type InnSubmissionStatus = "idle" | "pending" | "committed" | "cancelled";
+export function createInnSubmissionController() {
+  let status: InnSubmissionStatus = "idle";
+  let activeId: string | null = null;
+  return {
+    begin(id: string): boolean {
+      if (status === "pending") return false;
+      status = "pending";
+      activeId = id;
+      return true;
+    },
+    canCommit(id: string): boolean {
+      return status === "pending" && activeId === id;
+    },
+    cancel(id: string): boolean {
+      if (status !== "pending" || activeId !== id) return false;
+      status = "cancelled";
+      activeId = null;
+      return true;
+    },
+    commit(id: string): boolean {
+      if (status !== "pending" || activeId !== id) return false;
+      status = "committed";
+      activeId = null;
+      return true;
+    },
+    getStatus(): InnSubmissionStatus {
+      return status;
+    },
+    reset(): void {
+      if (status !== "pending") {
+        status = "idle";
+        activeId = null;
+      }
+    },
+  };
+}
