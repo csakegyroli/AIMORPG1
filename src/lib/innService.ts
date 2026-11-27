@@ -98,10 +98,11 @@ export function isValidInnTransactionId(transactionId: unknown): transactionId i
 export function createInnTransactionGuard(limit = 256) {
   const receipts = new Map<string, string>();
   const maxEntries = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 256;
-  return (transactionId: unknown, fingerprint: string): InnTransactionReservation => {
+  return (transactionId: unknown, fingerprint: string, probe = false): InnTransactionReservation | "available" => {
     if (!isValidInnTransactionId(transactionId)) return "invalid";
     const prior = receipts.get(transactionId);
     if (prior !== undefined) return prior === fingerprint ? "duplicate" : "collision";
+    if (probe) return "available";
     receipts.set(transactionId, fingerprint);
     while (receipts.size > maxEntries) {
       const oldest = receipts.keys().next().value;
@@ -173,7 +174,7 @@ export function executeAlmaInnTransaction(
     restPrice?: number;
     inventoryLimit?: number;
   },
-  reserve: (id: unknown, fingerprint: string) => string,
+  reserve: (id: unknown, fingerprint: string, probe?: boolean) => string,
 ): AlmaInnCommitResult {
   // 1. Validate the operation target and identity payload without reserving an ID.
   if (!args || typeof args !== "object") {
@@ -202,13 +203,20 @@ export function executeAlmaInnTransaction(
         args.inventoryLimit ?? 80,
       );
 
-  // 3–4. A failed preflight returns the original state and never consumes the ID.
+  const fingerprint = `${args.npcId}|${args.functionId}|${targetId}`;
+
+  // 3–4. On failed preflight, perform a read-only receipt lookup so an already
+  // committed retry remains a deterministic duplicate/collision. This probe
+  // never reserves a new ID; otherwise the original preflight failure is returned.
   if (!plan.success) {
+    const priorResult = reserve(args.transactionId, fingerprint, true);
+    if (priorResult === "duplicate" || priorResult === "collision") {
+      return { success: false, message: priorResult, state, addedItemId: null };
+    }
     return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
   }
 
-  // 5–6. Only a valid, successful plan reaches ID reservation.
-  const fingerprint = `${args.npcId}|${args.functionId}|${targetId}`;
+  // 5–6. Only a valid, successful plan reaches mutating ID reservation.
   const idResult = reserve(args.transactionId, fingerprint);
   if (idResult !== "reserved") {
     return { success: false, message: idResult, state, addedItemId: null };
