@@ -21,6 +21,7 @@ try {
   const {
     getInnRestPreview, getInnFoodPreview, planInnRest,
     planInnFoodPurchase, createInnTransactionGuard,
+    createInnSubmissionController, executeAlmaInnTransaction,
   } = require(helperOut);
 
   // One-hour rest: 60 gold and ceil(10% max HP), capped at max HP.
