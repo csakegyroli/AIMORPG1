@@ -768,6 +768,7 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
   const [innPending, setInnPending] = useState(false);
   const [innStatus, setInnStatus] = useState<string | null>(null);
   const innActionLock = useRef(false);
+  const innTransactionId = useRef<string | null>(null);
   const availableTargets = game.inventory.filter(inv=>Boolean(getItem(inv.itemId).slot));
   const regionItems = regionalMarketItems(npc.region).filter(item => isMarketEligible(item));
   const shopItems = fn.itemIds?.length ? fn.itemIds.map(id=>getItem(id)).filter(Boolean) : regionItems;
@@ -782,16 +783,20 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
     innActionLock.current = true;
     setInnPending(true);
     const transactionId = `alma:${npc.id}:${fn.id}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 12)}`;
+    innTransactionId.current = transactionId;
     setInnStatus("A művelet feldolgozása…");
     game.useNpcFunction(npc.id, fn.id, targetId, transactionId, result => {
       setInnStatus(result.message);
       notify(result.message);
       innActionLock.current = false;
+      innTransactionId.current = null;
       setInnPending(false);
     });
   };
   const cancelInnAction = (kind: "rest" | "food") => {
-    if (innActionLock.current) return;
+    const transactionId = innTransactionId.current;
+    if (!transactionId || !game.cancelInnSubmission(transactionId)) return;
+    innTransactionId.current = null;
     innActionLock.current = false;
     setInnPending(false);
     if (kind === "food") setShopItem(null);
@@ -834,7 +839,7 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
           <div className="function-item-icon big">⌂</div>
           <div><span>PIHENÉSI ELŐNÉZET</span><h4>{innRestPreview?.restoredHealth ?? 0} HP visszatöltése</h4><p>Jelenlegi életerő: {game.health}/{innMaxHealth} HP. A gyógyítás nem lépheti túl a maximális életerőt.</p><small>Ár: {fn.cost ?? 60} arany · Időtartam: 1 óra</small></div>
           <button className="gold-button" disabled={!innRestPreview?.canRest || innPending} onClick={()=>runInnAction("rest")}>{innPending?"Folyamatban…":`Pihenek · ${fn.cost ?? 60} arany`}</button>
-          <button className="outline-button" disabled={innPending} onClick={()=>cancelInnAction("rest")}>Mégsem</button>
+          <button className="outline-button" onClick={()=>cancelInnAction("rest")}>Mégsem</button>
         </div>
         {innRestPreview?.reason==="full-health"&&<p className="inn-rest-note" role="status">Teljes az életerőd. A pihenés nem von le aranyat.</p>}
         {innRestPreview?.reason==="insufficient-gold"&&<p className="inn-rest-note" role="status">Nincs elég aranyad a pihenéshez. Szükséges: {innRestPreview.price} arany.</p>}
@@ -848,7 +853,7 @@ function NpcFunctionPanel({ game, npc, notify }: { game: GameState; npc: typeof 
           <div className="function-item-icon big"><ItemArtwork itemId={activeFood.id} fallback={activeFood.icon} /></div>
           <div><span>ÉTEL · {activeFood.rarity}</span><h4>{activeFood.name}</h4><p>{activeFood.description}</p><small>{innFoodPreview.healingAmount>0?`Várható gyógyítás most: +${innFoodPreview.restoredHealth} HP · eredeti hatás: ${activeFood.effects?.healPercent?`+${activeFood.effects.healPercent}% max HP`:`+${activeFood.effects?.heal ?? 0} HP`}`:"Az item jelenlegi definíciója nem tartalmaz közvetlen gyógyító hatást."} · Ár: {innFoodPreview.price} arany</small></div>
           <button className="gold-button" disabled={!innFoodPreview.canPurchase || innPending} onClick={()=>runInnAction(`buy:${activeFood.id}`)}>{innPending?"Folyamatban…":`Megveszem · ${innFoodPreview.price} arany`}</button>
-          <button className="outline-button" disabled={innPending} onClick={()=>cancelInnAction("food")}>Mégsem</button>
+          <button className="outline-button" onClick={()=>cancelInnAction("food")}>Mégsem</button>
         </div>}
         {innStatus&&<p className="inn-rest-note" role="status" aria-live="polite">{innStatus}</p>}
         <div className="inn-rest-note"><span>🍲</span><div><b>A vásárlás nem fogyasztja el az ételt.</b><small>A tárgy a táskádba kerül. A saját itemdefiníciója és későbbi felhasználási szabálya változatlan marad.</small></div></div>
