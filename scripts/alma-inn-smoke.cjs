@@ -68,7 +68,8 @@ try {
     const guard = createInnTransactionGuard(256);
     const id = "alma:case-c:tx000001";
     const before = { ...state };
-    const failed = executeAlmaInnTransaction(before, makeArgs("buy:outsiderItem", id), guard);
+    const disallowedArgs = { ...makeArgs("buy:heartyStew", id), allowedItemIds: ["gateRations"] };
+    const failed = executeAlmaInnTransaction(before, disallowedArgs, guard);
     assert.equal(failed.success, false);
     assert.equal(failed.message, "invalid-item");
     assertState(failed.state, before, "C failed preflight");
