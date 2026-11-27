@@ -170,3 +170,62 @@ A jelenlegi képzés csak meglévő gold, baseStats, identity affinity, reputati
 - Projektgazda dönt: smithing capnél tiltott legyen-e a vásárlás.
 
 **Végső státusz:** SPECIFICATION COMPLETE — ROLE / PROGRESSION DESIGN BLOCKED BY CENTRAL DECISION.
+
+
+---
+
+## 18. Célzott PHASE 2 — Canon-kompatibilis szerepalternatívák
+
+**Alapelv:** Tomen tanonc marad. Nem válik mesterré, nem kap önálló craft/repair/dismantle jogosultságot, és nem vezetünk be profession mastery-t vagy külön szakmai XP-t. A 60 fő küldetés változatlan.
+
+### 18.1 A opció — gyakorlófeladatokat adó társ-oktató (PROPOSAL)
+
+Tomen nem kész mesterként tanít. A más műhelyekből ellesett ismereteit megosztja, a játékossal együtt végzi a gyakorlatot, kérdez és visszajelzést ad.
+
+- **Player loop:** kis, már ismert anyag-/szerszámhiba bemutatása → játékos megközelítést választ (meglévő smithing, perception, investigation vagy speech) → közös resolver statpróbát futtat → Tomen visszajelzést ad → a gyakorlat lezárul.
+- **Jogosultság/feltétel:** Tomen jelenléte és Külváros; nincs craft, recipe unlock, repair vagy dismantle jog. Új statminimum csak központi döntéssel.
+- **Economy/reward:** nincs új valuta, mastery pont vagy itemjutalom. A jelenlegi 15 gold képzés külön döntés: a gyakorlati alkalom díja marad-e, vagy legacyként kivezetjük. A meglévő handler +1 global smithinget ad 50-ig és +2 trade affinityt 100-ig; ez nem vihető át automatikusan ismételhető feladatjutalomnak. A used() első alkalommal 2 általános XP-t ad, nem mastery.
+- **Kapcsolat/progression:** csak a meglévő journal, memory, globális activity/relationships használható. Nincs új Tomen relationship facet vagy szakmai rank.
+- **UI:** feladatleírás, választott megközelítés, használt stat, siker/kudarc magyarázat; ha 15 gold marad, költség és várható tényleges jutalom előnézet kötelező.
+- **Mentés:** repeat limit/egyszeri reward esetén task-state kell, de csak központi quest/progression/save contracttal. Egyszeri, narratív gyakorlat meglévő journal/memory mezővel megoldható.
+- **Tesztek:** jelenlét/időhatár, wrong region, statpróba success/failure/fail-forward, gold/item delta, smithing cap 50, repeat claim, save/reload, nincs mastery/recipe unlock, main quest snapshot.
+- **Globális mastery függőség:** nincs; meglévő global stat és közös resolver használható.
+
+### 18.2 B opció — korlátozott munkafolyamat-segéd (PROPOSAL)
+
+Tomen a műhelymunka előkészítését segíti: anyagot azonosít, mennyiséget számol, hiányt jelez. A tényleges műveletet a jogosult mester végzi.
+
+- **Player loop:** játékos létező itemet vagy craftcélt választ → Tomen read-only módon megmutatja a közös recipe inputot és inventory mennyiséget → játékos a megfelelő mesterhez lép → craft/dismantle a közös műhelypanelben fut.
+- **Jogosultság/feltétel:** csak meglévő item ID és központi helper eredménye olvasható; Tomen nem von le inputot, nem hoz létre outputot, nem bont és nem javít.
+- **Economy/reward:** preview ingyenes, nem fogyaszt anyagot/aranyat és nem ad itemet. A 15 gold training külön legacy funkció maradna vagy megszűnne, nem a preview díja. Preview megnyitás nem adhat XP-t farmolható módon.
+- **Kapcsolat/progression:** legfeljebb a közös, központilag engedélyezett activity/journal hatás; nincs szakmai XP, mastery vagy recipe unlock.
+- **UI:** read-only item/slot, szükséges input, birtokolt mennyiség, hiányzó mennyiség és illetékes műhely. Tomen paneljén nincs „Elkészítem” vagy „Szétszerelem” gomb.
+- **Mentés:** read-only preview-hoz nem kell új save mező; nincs task record vagy craft history.
+- **Tesztek:** preview nem módosít inventory/gold/stats; csak létező ID; mennyiség egyezik a helperrel; Tomen nem tud műveletet végrehajtani; nincs XP farm; reload után state változatlan.
+- **Globális mastery függőség:** nincs; a helper csak olvasott adatforrás.
+
+### 18.3 Összehasonlítás
+
+| Szempont | A — gyakorlófeladat | B — munkafolyamat-segéd |
+|---|---|---|
+| Canon-kompatibilitás | Tanonc marad, közösen tanul; nem állítja, hogy mester. | Tanonc szerephez erősen illik: megfigyel, kérdez, segít. |
+| Player loop | Aktív statpróba és tanulási jelenet. | Gyakorlati recipe/input előnézet. |
+| Jogosultság | Közös resolver, nincs craft/repair jog. | Read-only, nincs műveleti jog. |
+| Economy | 15 gold legacy külön döntés; nincs új item/valuta. | Preview ingyenes, nincs input/output. |
+| Progression | Global stat/általános XP, mastery nélkül. | Nincs szakmai progression reward. |
+| UI | Feladatválasztó és eredmény. | Read-only anyagellenőrző panel. |
+| Mentés | Task-state csak központi save/progression döntéssel. | Nincs új save mező. |
+| Függőség | Közös quest/side-activity resolver. | Közös recipe contract és azonos preview forrás. |
+
+### 18.4 15 gold és smithing 50 cap — külön döntés
+
+A jelenlegi alpha.26 handler 15 goldot von le, +1 smithinget ad maximum 50-ig és +2 trade affinityt maximum 100-ig. Smithing 50-nél is levonja az aranyat, de statnövekedés nincs.
+
+Alternatívák:
+1. Capnél a vásárlás tiltott, költség nélkül.
+2. Capnél más jutalom járna — ez új economy/reward döntés.
+3. A legacy statvásárlás kivezetése és A vagy B szerep átvétele.
+
+Ajánlás: 1 vagy 3; ne legyen statnövekedés nélküli fizetős képzés. Projektgazdai döntés szükséges.
+
+**Státusz:** SPECIFICATION COMPLETE — ROLE / PROGRESSION / TRAINING ECONOMY BLOCKED BY CENTRAL DECISIONS.
