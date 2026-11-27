@@ -30,19 +30,20 @@ A függőségi térkép és tesztterv: DEPENDENCIES_AND_TEST_PLAN_HU.md.
 **Szabály:** PENDING döntés nem tekinthető jóváhagyásnak, és nem ad forráskód-módosítási jogosultságot.
 
 
+
 ---
 
 ## PHASE 2 — pontosított döntési regiszter
 
 | ID | Döntés | Tulajdonos | Státusz | Implementációs következmény |
 |---|---|---|---|---|
-| WD-01 | Item instance szerződés / enhancement | Projektgazda | PENDING | InventoryItem = {instanceId, itemId}; nincs enhancement mező |
-| WD-02 | Recipe input/output központi tulajdonosa | Projektgazda | PENDING | Generikus regionális helper; nincs NPC recipe registry |
-| WD-03 | Crafting eredmény szerződése | Projektgazda | PENDING | Determinisztikus craft; nincs quality/failure outcome |
-| WD-04 | Mastery és karakter XP elkülönítése | Projektgazda | PENDING | Nincs profession mastery vagy szakmai XP |
-| WD-05 | Durability / condition globális állapota | Projektgazda | PENDING | Nincs condition mező/kopási resolver |
-| WD-06 | Repair jogosultság és szolgáltatás | Projektgazda | PENDING | Nincs mechanikai repair handler |
-| WD-07 | Craft failure, anyagveszteség, dismantle yield | Projektgazda | PENDING | Determinisztikus craft + fél-recipe/minimum-1 dismantle |
+| WD-01 | +1–+9 enhancement / item instance | Projektgazda | PENDING | Nincs enhancement mező; InventoryItem változatlan |
+| WD-02 | Durability / condition | Projektgazda | PENDING | Nincs condition mező vagy kopási resolver |
+| WD-03 | Repair | Projektgazda | PENDING | Nincs mechanikai repair handler |
+| WD-04 | Profession mastery és karakter XP elkülönítése | Projektgazda | PENDING | Nincs profession mastery vagy szakmai XP |
+| WD-05 | Recipe input/output központi tulajdonosa | Projektgazda | PENDING | Generikus regionális helper; nincs NPC recipe registry |
+| WD-06 | Crafting eredmény / sikertelen craft | Projektgazda | PENDING | Determinisztikus craft; nincs quality/failure outcome |
+| WD-07 | Anyagveszteség és dismantle yield | Projektgazda | PENDING | Fél-recipe/minimum-1 dismantle; capacity/protected-item kockázat |
 | WD-08 | Tranzakció, idempotencia, duplikációvédelem | Projektgazda | PENDING | Client-side store; nincs server-authoritative transaction |
 | WD-09 | Borin–Velka termékkör és szerephatár | Projektgazda | PENDING | Nincs NPC-specifikus termékkör-szűrés |
 | WD-10 | Nara anyag- és receptkatalógus | Projektgazda | PENDING | Nincs jóváhagyott bőranyaglánc; leatherwork UI hiányzik |
@@ -53,7 +54,7 @@ A függőségi térkép és tesztterv: DEPENDENCIES_AND_TEST_PLAN_HU.md.
 | NPC | Dokumentációs státusz | Nyitott döntés |
 |---|---|---|
 | Borin | SPECIFICATION COMPLETE — BLOCKED | WD-09; közös WD-01–08 |
-| Velka | SPECIFICATION COMPLETE — BLOCKED | WD-09; WD-05/06 |
+| Velka | SPECIFICATION COMPLETE — BLOCKED | WD-09; WD-02/03 |
 | Nara | SPECIFICATION COMPLETE — BLOCKED | WD-10; leatherwork UI; közös WD-01–08 |
 | Tomen | SPECIFICATION COMPLETE — BLOCKED | WD-11; WD-04 progression/mastery |
 
