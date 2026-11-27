@@ -84,3 +84,51 @@ This is a sequencing decision, not a Canon change. Damar remains the first Gate 
 - `scripts/alma-inn-smoke.cjs` dynamically exercises the pure rest/purchase planners and the bounded transaction-ID guard.
 - Its static contract checks verify store/UI wiring, canonical target, save key/version and the 60 main quests.
 - React DOM click dispatch and the full React hook lifecycle are not dynamically tested because this repository has no configured component renderer or DOM test framework.
+
+
+## Main alignment plan — 2026-11-27
+
+Current comparison was refreshed against `main` at `2190291a6a58fe907f5aa737e4c466a6f334a08c`. The current Alma branch head at the time of this plan is `c9cc8ffddab57a3a48b7976eea92cba92a413c58`; comparison reports 25 commits ahead, 2 commits behind, with merge base `894e9606fa84f5d609d810152e326b1cfae09b18`.
+
+Missing main commits:
+1. `076239c4e6c0aeffd698520125882a61c939f1d9` — `docs: record owner-approved PHASE 2 architecture decisions`
+2. `2190291a6a58fe907f5aa737e4c466a6f334a08c` — `docs: reconcile shared architecture open decisions with PHASE 2 approvals`
+
+Reviewed diffs:
+- Commit 1 adds §16 owner-approved PHASE 2 architecture decisions to `docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md`.
+- Commit 2 refines §14 open decision wording in the same file.
+- Neither changes any of the six files currently changed by Alma PR #11. No direct file-level overlap is present.
+
+Potential conflict assessment:
+- No same-file conflict is expected with the current six-file Alma diff.
+- A history-level integration conflict remains possible because the branch diverged from main at the alpha.26 merge base.
+- The two commits are ordered and both required: apply 076239c first, then 2190291c.
+
+Safe integration procedure (NOT EXECUTED in this environment):
+```bash
+git fetch origin
+git checkout gate-city/phase-2-alma
+git status --short
+git rev-parse HEAD
+git rev-parse origin/main
+git show --stat --oneline 076239c4e6c0aeffd698520125882a61c939f1d9
+git show --stat --oneline 2190291a6a58fe907f5aa737e4c466a6f334a08c
+git show --format=fuller --find-renames 076239c4e6c0aeffd698520125882a61c939f1d9 -- docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md
+git show --format=fuller --find-renames 2190291a6a58fe907f5aa737e4c466a6f334a08c -- docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md
+git cherry-pick 076239c4e6c0aeffd698520125882a61c939f1d9
+git cherry-pick 2190291a6a58fe907f5aa737e4c466a6f334a08c
+git diff --check
+git status --short
+git diff --name-only origin/main...HEAD
+git log --oneline origin/main..HEAD
+git push origin gate-city/phase-2-alma
+```
+
+Expected scope after integration:
+- Alma implementation remains confined to the six existing PR files.
+- The one additional file `docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md` is included only because it contains the two owner-approved main decisions being integrated.
+- No main ref is modified. No force push, rebase, merge, or PR merge is performed.
+- If cherry-pick reports a conflict, stop, preserve the conflict details, and request owner/central direction; do not resolve by guessing.
+
+Blocker:
+The connected GitHub tool can inspect and write individual files/commits, but does not provide a local git checkout or cherry-pick operation. Local `git clone` previously failed with `Could not resolve host: github.com`. Therefore the two commits are reviewed and their exact integration plan is documented, but they have NOT been integrated.
