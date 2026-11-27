@@ -45,6 +45,9 @@ try {
   const blockedRest = planInnRest({ ...restState, gold: 59 }, 125, 60);
   assert.equal(blockedRest.success, false);
   assert.deepEqual(blockedRest.nextState, { ...restState, gold: 59 });
+  const fullHealthRest = planInnRest({ ...restState, health: 125 }, 125, 60);
+  assert.equal(fullHealthRest.success, false);
+  assert.deepEqual(fullHealthRest.nextState, { ...restState, health: 125 });
 
   const content = fs.readFileSync(path.join(root, "src/lib/content.ts"), "utf8");
   const stewMatch = content.match(/\{ id: "heartyStew"[^\n]*effects: \{ healPercent: (\d+) \}/);
@@ -97,7 +100,24 @@ try {
   assert.deepEqual(committedRest.state, { gold: 40, health: 113, inventoryCount: 79 });
   const duplicateRest = executeAlmaInnTransaction(committedRest.state, restArgs, integrationGuard);
   assert.equal(duplicateRest.success, false);
+  assert.equal(duplicateRest.message, "duplicate");
   assert.deepEqual(duplicateRest.state, committedRest.state);
+  const collisionRest = executeAlmaInnTransaction(committedRest.state, {
+    ...restArgs, targetId: "buy:heartyStew",
+  }, integrationGuard);
+  assert.equal(collisionRest.success, false);
+  assert.equal(collisionRest.message, "collision");
+  assert.deepEqual(collisionRest.state, committedRest.state);
+
+  // Failed preflight does not reserve the transaction ID; corrected retry can proceed.
+  const retryGuard = createInnTransactionGuard(32);
+  const retryArgs = { ...restArgs, transactionId: "alma:store:retry:tx00001" };
+  const rejectedFirst = executeAlmaInnTransaction({ ...storeState, gold: 59 }, retryArgs, retryGuard);
+  assert.equal(rejectedFirst.success, false);
+  assert.deepEqual(rejectedFirst.state, { ...storeState, gold: 59 });
+  const acceptedRetry = executeAlmaInnTransaction(storeState, retryArgs, retryGuard);
+  assert.equal(acceptedRetry.success, true);
+  assert.deepEqual(acceptedRetry.state, { gold: 40, health: 113, inventoryCount: 79 });
 
   const purchaseArgs = {
     ...restArgs, targetId: "buy:heartyStew",
@@ -112,31 +132,58 @@ try {
   }, integrationGuard);
   assert.equal(disallowed.success, false);
   assert.deepEqual(disallowed.state, storeState);
-  const wrongTargetPayload = executeAlmaInnTransaction(storeState, {
-    ...purchaseArgs, targetId: "buy:gateRations",
-  }, (id, fingerprint) => integrationGuard(purchaseArgs.transactionId, fingerprint));
-  assert.equal(wrongTargetPayload.success, false);
-  assert.deepEqual(wrongTargetPayload.state, storeState);
+  const notConsumable = executeAlmaInnTransaction(storeState, {
+    ...purchaseArgs,
+    targetId: "buy:blade",
+    transactionId: "alma:store:buy:tx000003",
+    items: [...purchaseArgs.items, { id: "blade", type: "weapon", basePrice: 10 }],
+  }, integrationGuard);
+  assert.equal(notConsumable.success, false);
+  assert.deepEqual(notConsumable.state, storeState);
+  const fullBag = executeAlmaInnTransaction({ ...storeState, inventoryCount: 80 }, {
+    ...purchaseArgs, transactionId: "alma:store:buy:tx000004",
+  }, integrationGuard);
+  assert.equal(fullBag.success, false);
+  assert.deepEqual(fullBag.state, { ...storeState, inventoryCount: 80 });
+  const poorPurchase = executeAlmaInnTransaction({ ...storeState, gold: 1 }, {
+    ...purchaseArgs, transactionId: "alma:store:buy:tx000005",
+  }, integrationGuard);
+  assert.equal(poorPurchase.success, false);
+  assert.deepEqual(poorPurchase.state, { ...storeState, gold: 1 });
 
   // Duplicate submission, ID collision, invalid ID and bounded-cache eviction.
   // UI submission state machine: pending may cancel before commit; committed work cannot cancel.
   const submission = createInnSubmissionController();
   const submissionId = "alma:alma:fn-alma:submit0001";
+  assert.equal(submission.getStatus(), "idle");
   assert.equal(submission.begin(submissionId), true);
   assert.equal(submission.getStatus(), "pending");
   assert.equal(submission.canCommit(submissionId), true);
+  const cancelledStoreState = { ...storeState };
   assert.equal(submission.cancel(submissionId), true);
   assert.equal(submission.getStatus(), "cancelled");
   assert.equal(submission.canCommit(submissionId), false);
   assert.equal(submission.commit(submissionId), false);
   assert.equal(submission.cancel(submissionId), false);
-  assert.equal(submission.begin("alma:alma:fn-alma:submit0002"), true);
-  assert.equal(submission.commit("alma:alma:fn-alma:submit0002"), true);
+  // The store's actual commit gate is re-checked immediately before executing its shared transaction boundary.
+  const afterCancel = submission.canCommit(submissionId)
+    ? executeAlmaInnTransaction(cancelledStoreState, restArgs, createInnTransactionGuard())
+    : { success: false, state: cancelledStoreState };
+  assert.equal(afterCancel.success, false);
+  assert.deepEqual(afterCancel.state, cancelledStoreState);
+  submission.reset();
+  assert.equal(submission.getStatus(), "idle");
+  const committedId = "alma:alma:fn-alma:submit0002";
+  assert.equal(submission.begin(committedId), true);
+  assert.equal(submission.commit(committedId), true);
   assert.equal(submission.getStatus(), "committed");
-  assert.equal(submission.cancel("alma:alma:fn-alma:submit0002"), false);
+  assert.equal(submission.cancel(committedId), false);
+  assert.equal(submission.commit(committedId), false);
   assert.equal(submission.begin("alma:alma:fn-alma:submit0003"), true);
   assert.equal(submission.begin("alma:alma:fn-alma:submit0004"), false, "Only one submission may be pending at a time.");
-  submission.cancel("alma:alma:fn-alma:submit0003");
+  assert.equal(submission.cancel("alma:alma:fn-alma:submit0003"), true);
+  submission.reset();
+  assert.equal(submission.begin("alma:alma:fn-alma:submit0005"), true, "A terminal submission must permit a later submission.");
 
   const guard = createInnTransactionGuard(2);
   const firstId = "alma:fn-alma:1:abcdef1234";
@@ -156,6 +203,8 @@ try {
   assert.match(store, /reserveInnTransaction\(transactionId, fingerprint\)/);
   assert.match(store, /getMaxHealth\(s\)/);
   assert.match(store, /queueMicrotask\(\(\) => onResult\(settled\)\)/);
+  assert.match(store, /if \(isInn && transactionId && !innSubmissionController\.canCommit\(transactionId\)\)/);
+  assert.match(store, /finishInnSubmission\(\)/);
   assert.doesNotMatch(store, /hours:1/);
   assert.match(store, /const SAVE_KEY = "aimorpg-final-demo-v1-29"/);
   assert.match(store, /saveVersion: 6/);
