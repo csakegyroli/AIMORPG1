@@ -251,3 +251,14 @@ The discrepancy remains: `OUTSKIRTS_DISTRICTS.oldMarket.npcIds` lists `ilren`, w
 **PROPOSAL:** any future Zora spice-specific catalogue, any Cador-authored invoice/debt-note output, any new document data contract, any Damar manifest fields listed above, and any cross-NPC read-only reconciliation adapter.
 
 No source code, Canon, main quest, item model, inventory model, currency model, or save model is changed by this addendum.
+
+
+### Cador matrix correction — tagged archive material
+
+Add this related material row to the cross-district input matrix:
+
+| Item ID | Exact name | Authored fields | Cador status |
+|---|---|---|---|
+| `blackArchiveWax` | Fekete archív viasz | basePrice 51; type consumable; category material; origin Kereskedelmi Központ · zárt árusor; legalStatus restricted; tradeValue 62; sellable true; marketEligible true; rarity Ritka; tags `crafting`, `archive`, `evidence`; no effects | **VERIFIED MATERIAL, NOT DOCUMENT.** No Cador function hook or consumption rule exists. Any use for sealing/authenticating a Cador document is **PROPOSAL** only. |
+
+Source: [blackArchiveWax item definition](../src/lib/expansionItems.ts#L105-L114). This row does not make the item a Cador input and does not create an evidence/custody model.
