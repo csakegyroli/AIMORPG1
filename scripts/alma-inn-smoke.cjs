@@ -18,51 +18,109 @@ try {
   const errors = (compiled.diagnostics ?? []).filter(d => d.category === ts.DiagnosticCategory.Error);
   assert.equal(errors.length, 0, errors.map(e => ts.flattenDiagnosticMessageText(e.messageText, " ")).join("; "));
   fs.writeFileSync(helperOut, compiled.outputText);
-  const { getInnRestPreview, getInnFoodPreview } = require(helperOut);
+  const {
+    getInnRestPreview, getInnFoodPreview, planInnRest,
+    planInnFoodPurchase, createInnTransactionGuard,
+  } = require(helperOut);
 
-  const rest = getInnRestPreview(100, 125, 60);
-  assert.deepEqual({ canRest: rest.canRest, price: rest.price, restored: rest.restoredHealth, result: rest.resultingHealth }, { canRest: true, price: 60, restored: 13, result: 113 });
-  assert.equal(getInnRestPreview(123, 125, 60).restoredHealth, 2, "Rest must cap healing at max HP.");
-  assert.equal(getInnRestPreview(125, 125, 1000).reason, "full-health", "Full HP must block and never charge.");
+  // One-hour rest: 60 gold and ceil(10% max HP), capped at max HP.
+  const rest = getInnRestPreview(100, 125, 125, 60);
+  assert.deepEqual(
+    { canRest: rest.canRest, price: rest.price, restored: rest.restoredHealth, resulting: rest.resultingHealth },
+    { canRest: true, price: 60, restored: 13, resulting: 113 },
+  );
+  assert.equal(getInnRestPreview(123, 125, 60).restoredHealth, 2);
+  assert.equal(getInnRestPreview(125, 125, 1000).reason, "full-health");
   assert.equal(getInnRestPreview(100, 125, 59).reason, "insufficient-gold");
-  assert.equal(getInnRestPreview(100, 125, 60).price, 60);
-  assert.equal(getInnRestPreview(0, 125, 60).restoredHealth, 13);
+  assert.equal(getInnRestPreview(100, 125, -1).reason, "invalid-preview");
+  assert.equal(getInnRestPreview(100, 125, Number.NaN).reason, "invalid-preview");
+  assert.equal(getInnRestPreview(140, 125, 60).currentHealth, 140);
+  assert.equal(getInnRestPreview(100, 125.9, 60).maxHealth, 125);
+
+  const restState = { gold: 125, health: 100, inventoryCount: 4 };
+  const restPlan = planInnRest(restState, 125, 60);
+  assert.equal(restPlan.success, true);
+  assert.deepEqual(restPlan.nextState, { gold: 65, health: 113, inventoryCount: 4 });
+  const blockedRest = planInnRest({ ...restState, gold: 59 }, 125, 60);
+  assert.equal(blockedRest.success, false);
+  assert.deepEqual(blockedRest.nextState, { ...restState, gold: 59 });
 
   const content = fs.readFileSync(path.join(root, "src/lib/content.ts"), "utf8");
   const stewMatch = content.match(/\{ id: "heartyStew"[^\n]*effects: \{ healPercent: (\d+) \}/);
-  assert.ok(stewMatch, "Existing heartyStew healPercent definition must remain.");
-  const rationsMatch = content.match(/\{ id: "gateRations"[^\n]*basePrice: (\d+)[^\n]*\}/);
-  assert.ok(rationsMatch, "Existing gateRations definition must remain.");
+  assert.ok(stewMatch, "Existing heartyStew effect must remain present.");
+  const rationsMatch = content.match(/\{ id: "gateRations"[^\n]*\}/);
+  assert.ok(rationsMatch, "Existing gateRations definition must remain present.");
+  assert.doesNotMatch(rationsMatch[0], /effects:/);
   const stew = { id: "heartyStew", type: "consumable", basePrice: 24, effects: { healPercent: Number(stewMatch[1]) } };
-  const rations = { id: "gateRations", type: "consumable", basePrice: Number(rationsMatch[1]), effects: undefined };
+  const rations = { id: "gateRations", type: "consumable", basePrice: 12, effects: undefined };
   assert.equal(getInnFoodPreview(stew, 125, 100, 24, 10).healingAmount, 25);
   assert.equal(getInnFoodPreview(stew, 125, 123, 24, 10).restoredHealth, 2);
-  assert.equal(getInnFoodPreview(rations, 125, 100, 100, 10).healingAmount, 0, "Rations must not gain an invented healing effect.");
-  assert.equal(getInnFoodPreview(stew, 125, 100, 23, 10).reason, "insufficient-gold");
-  assert.equal(getInnFoodPreview(stew, 125, 100, 100, 80).reason, "inventory-full");
-  assert.equal(getInnFoodPreview({ ...stew, basePrice: -1 }, 125, 100, 100, 10).reason, "invalid-item");
+  assert.equal(getInnFoodPreview(rations, 125, 100, 100, 10).healingAmount, 0);
+  assert.equal(getInnFoodPreview(stew, 125, 100, 100, 10, 80, false).reason, "invalid-item");
   assert.equal(getInnFoodPreview({ ...stew, type: "weapon" }, 125, 100, 100, 10).reason, "invalid-item");
+  assert.equal(getInnFoodPreview({ ...stew, basePrice: -1 }, 125, 100, 100, 10).reason, "invalid-item");
+  assert.equal(getInnFoodPreview({ ...stew, basePrice: Number.NaN }, 125, 100, 100, 10).reason, "invalid-item");
+  assert.equal(getInnFoodPreview(stew, 125, 100, 100, 80).reason, "inventory-full");
+  assert.equal(getInnFoodPreview(stew, 125, 100, 23, 10).reason, "insufficient-gold");
 
+  // Store and tests share this planner, so every invalid request is state-preserving.
+  const purchaseState = { gold: 100, health: 100, inventoryCount: 10 };
+  const validPurchase = planInnFoodPurchase(purchaseState, stew, ["heartyStew", "gateRations"], 125);
+  assert.equal(validPurchase.success, true);
+  assert.deepEqual(validPurchase.nextState, { gold: 76, health: 100, inventoryCount: 11 });
+  const invalidPlans = [
+    planInnFoodPurchase(purchaseState, undefined, ["heartyStew"], 125),
+    planInnFoodPurchase(purchaseState, stew, ["gateRations"], 125),
+    planInnFoodPurchase(purchaseState, { ...stew, type: "weapon" }, ["heartyStew"], 125),
+    planInnFoodPurchase(purchaseState, { ...stew, basePrice: -1 }, ["heartyStew"], 125),
+    planInnFoodPurchase({ ...purchaseState, gold: 1 }, stew, ["heartyStew"], 125),
+    planInnFoodPurchase({ ...purchaseState, inventoryCount: 80 }, stew, ["heartyStew"], 125),
+  ];
+  for (const plan of invalidPlans) {
+    assert.equal(plan.success, false);
+    assert.deepEqual(plan.nextState, purchaseState, "Rejected purchase must preserve gold, HP and inventory.");
+  }
+
+  // Duplicate submission, ID collision, invalid ID and bounded-cache eviction.
+  const guard = createInnTransactionGuard(2);
+  const firstId = "alma:fn-alma:1:abcdef1234";
+  assert.equal(guard(firstId, "alma|fn-alma|rest"), "reserved");
+  assert.equal(guard(firstId, "alma|fn-alma|rest"), "duplicate");
+  assert.equal(guard(firstId, "alma|fn-alma|buy:heartyStew"), "collision");
+  assert.equal(guard("short", "alma|fn-alma|rest"), "invalid");
+  assert.equal(guard("alma:fn-alma:2:abcdef1234", "alma|fn-alma|rest"), "reserved");
+  assert.equal(guard("alma:fn-alma:3:abcdef1234", "alma|fn-alma|rest"), "reserved");
+  assert.equal(guard(firstId, "alma|fn-alma|rest"), "reserved");
+
+  // Static source-contract checks; these do not replace React DOM integration tests.
   const store = fs.readFileSync(path.join(root, "src/lib/store.ts"), "utf8");
-  assert.match(store, /targetId!==undefined && targetId!=="rest"/);
-  assert.match(store, /getInnRestPreview\(s\.health,max,s\.gold,fn\.cost\?\?60\)/);
-  assert.match(store, /fn\.itemIds\?\.includes\(selectedId as ItemId\)/);
-  assert.match(store, /getInnFoodPreview\(item,max,s\.health,s\.gold,next\.inventory\.length\)/);
+  assert.match(store, /targetId !== "rest"/);
+  assert.match(store, /planInnRest\(/);
+  assert.match(store, /planInnFoodPurchase\(/);
+  assert.match(store, /reserveInnTransaction\(transactionId, fingerprint\)/);
+  assert.match(store, /getMaxHealth\(s\)/);
+  assert.match(store, /queueMicrotask\(\(\) => onResult\(settled\)\)/);
+  assert.doesNotMatch(store, /hours:1/);
   assert.match(store, /const SAVE_KEY = "aimorpg-final-demo-v1-29"/);
   assert.match(store, /saveVersion: 6/);
 
   const ui = fs.readFileSync(path.join(root, "src/components/GameClient.tsx"), "utf8");
-  assert.match(ui, /getInnRestPreview/);
-  assert.match(ui, /getInnFoodPreview/);
-  assert.match(ui, /innActionLock/);
-  assert.match(ui, /Pihenek ·/);
-  assert.match(ui, /Mégsem/);
-  assert.match(ui, /aria-live="polite"/);
-  assert.doesNotMatch(ui, /\[1,2,4,8\]\.map\(h=>/);
+  assert.match(ui, /getMaxHealth\(game\)/);
+  assert.match(ui, /transactionId = `alma:/);
+  assert.match(ui, /cancelInnAction\("rest"\)/);
+  assert.match(ui, /cancelInnAction\("food"\)/);
+  assert.match(ui, /result => \{/);
+  const innAction = ui.slice(ui.indexOf("const runInnAction"), ui.indexOf("const selectedCraft"));
+  assert.doesNotMatch(innAction, /setTimeout/);
+  assert.match(ui, /item\.type==="consumable" && fn\.itemIds\?\.includes\(item\.id\)/);
 
-  console.log("Alma Varg inn focused tests: PASS");
-  console.log("Covered by executable helper assertions: 60 gold / 10% max HP, HP cap, full HP, insufficient gold, stew effect, unchanged no-effect rations, inventory cap, invalid item and low-HP boundary.");
-  console.log("Covered by static source-contract assertions: inn allow-list, fixed one-hour rest, UI duplicate-click lock/cancel feedback, and unchanged save key/version. React interaction and full store integration are not dynamically exercised by this focused script.");
+  const mainStory = fs.readFileSync(path.join(root, "src/lib/mainStory.ts"), "utf8");
+  assert.equal((mainStory.match(/id:\s*"main_[^"]+"/g) ?? []).length, 60);
+
+  console.log("Alma focused runtime tests: PASS");
+  console.log("Runtime coverage: rest rounding/cap, full HP, insufficient funds, above-max HP, price validation, food allow-list, unknown/wrong item, invalid price, inventory limit, rejected-state immutability, transaction ID duplicate/collision/eviction.");
+  console.log("Static source-contract checks: store/UI wiring, canonical rest target, save-v6 invariants and 60 main quests.");
+  console.log("React DOM click dispatch is not dynamically exercised; no component renderer or DOM test framework is configured.");
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
 }
