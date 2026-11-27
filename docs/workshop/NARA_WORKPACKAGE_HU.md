@@ -221,7 +221,7 @@ dismantleYieldsForItem:
 - Slot nélküli itemre üres hozam.
 - Régió az item regions[0] mezője, hiányában outskirts.
 - Minden recipe input fele, lefelé kerekítve, típusonként minimum 1.
-- paddingArmor: 2 workshopIron + 1 tannersWax.
+- paddedArmor: 2 workshopIron + 1 tannersWax.
 - lurkerGloves: 1 workshopIron + 1 tannersWax.
 - travelerBoots: 1 workshopIron + 1 tannersWax.
 Ezek helperből számolt generic értékek, nem Nara által jóváhagyott receptek/yield-ek.
