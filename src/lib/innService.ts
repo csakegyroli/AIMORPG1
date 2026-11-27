@@ -177,17 +177,25 @@ export function executeAlmaInnTransaction(
   if (idResult !== "reserved") {
     return { success: false, message: idResult, state, addedItemId: null };
   }
-  if (args.targetId === "rest") {
-    const plan = planInnRest(state, args.maxHealth, args.restPrice ?? 60);
-    if (!plan.success) return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
-    return { success: true, message: "rest", state: plan.nextState, addedItemId: null };
-  }
-  if (args.targetId.startsWith("buy:")) {
-    const itemId = args.targetId.slice(4);
-    const item = args.items.find(candidate => candidate.id === itemId);
-    const plan = planInnFoodPurchase(state, item, args.allowedItemIds, args.maxHealth, args.inventoryLimit ?? 80);
-    if (!plan.success) return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
-    return { success: true, message: "purchase", state: plan.nextState, addedItemId: itemId };
-  }
-  return { success: false, message: "invalid-target", state, addedItemId: null };
+  // A failed preflight is not a committed operation and must not burn the ID.
+  const plan = args.targetId === "rest"
+    ? planInnRest(state, args.maxHealth, args.restPrice ?? 60)
+    : args.targetId.startsWith("buy:")
+      ? planInnFoodPurchase(
+          state,
+          args.items.find(candidate => candidate.id === args.targetId.slice(4)),
+          args.allowedItemIds,
+          args.maxHealth,
+          args.inventoryLimit ?? 80,
+        )
+      : null;
+  if (!plan) return { success: false, message: "invalid-target", state, addedItemId: null };
+  if (!plan.success) return { success: false, message: plan.reason ?? "blocked", state, addedItemId: null };
+
+  return {
+    success: true,
+    message: args.targetId === "rest" ? "rest" : "purchase",
+    state: plan.nextState,
+    addedItemId: args.targetId.startsWith("buy:") ? args.targetId.slice(4) : null,
+  };
 }
