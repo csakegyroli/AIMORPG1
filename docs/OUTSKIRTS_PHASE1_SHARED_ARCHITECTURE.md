@@ -280,13 +280,13 @@ Every extension needs separate central approval with trigger, source data, exact
 
 ## 14. Open central decisions
 
-1. Server-authoritative operation architecture.
+1. Server-authority architecture details and risk-tier implementation boundary (the owner-approved risk-tiered rule is recorded in §16).
 2. Shared item-instance schema and migration plan.
 3. Durability/repair model.
 4. +1–+9 formula, probabilities and failure outcomes.
 5. Shared professional mastery contract.
 6. Recipe schema and cross-district contract.
-7. Transaction/idempotency contract.
+7. Transaction/idempotency details: canonical ID format/scope, same-key/different-payload behavior, retention and result-history ownership (the hybrid direction is approved in §16).
 8. Persistent minigame session policy.
 9. Cross-district access/permission contract.
 10. A Szem observation extension policy.
