@@ -261,4 +261,4 @@ Add this related material row to the cross-district input matrix:
 |---|---|---|---|
 | `blackArchiveWax` | Fekete archív viasz | basePrice 51; type consumable; category material; origin Kereskedelmi Központ · zárt árusor; legalStatus restricted; tradeValue 62; sellable true; marketEligible true; rarity Ritka; tags `crafting`, `archive`, `evidence`; no effects | **VERIFIED MATERIAL, NOT DOCUMENT.** No Cador function hook or consumption rule exists. Any use for sealing/authenticating a Cador document is **PROPOSAL** only. |
 
-Source: [blackArchiveWax item definition](../src/lib/expansionItems.ts#L105-L114). This row does not make the item a Cador input and does not create an evidence/custody model.
+Source: [blackArchiveWax item definition](../src/lib/expansionItems.ts#L114-L117). This row does not make the item a Cador input and does not create an evidence/custody model.
