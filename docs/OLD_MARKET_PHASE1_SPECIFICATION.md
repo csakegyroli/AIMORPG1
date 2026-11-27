@@ -164,3 +164,86 @@ State:
 Verified functions: `fn-zora/spiceTrade` (18 gold), `fn-cador/ledger` (25 gold), `fn-pell/foodTrade` (14 gold, `gateRations`). The store currently routes these kinds through a generic buy/service branch; this is not yet a recipe research, accounting investigation or stock-quality simulation. The NPC master data shows Ilren as `id=ilren`, `region=market`, `district=exchangeSquare`; no assignment change is authorized.
 
 **Required follow-up:** enumerate actual item IDs and prices for Zora/Pell; establish Cador's authored document inputs; Ilren remains excluded pending central owner decision. All three assigned NPCs remain IN PROGRESS.
+
+---
+
+## 12. TARGETED GAP CLOSURE — PHASE 2 PREPARATION (ALPHA.26)
+
+**Status:** SOURCE-VERIFIED ADDENDUM · DOCUMENTATION ONLY · NOT APPROVED FOR IMPLEMENTATION  
+**Baseline:** `main`, `2.0.0-alpha.26`  
+**Branch:** `old-market/phase-1-specification`
+
+This section is the authoritative correction to speculative mechanics in §10. §10's spice-recipe minigame, Cador ledger puzzle, Pell freshness/quality tiers, and price multipliers remain **PROPOSAL ONLY** and are not alpha.26 facts. Where §10 conflicts with the findings below, the source-verified findings below take precedence.
+
+### 12.1 Zora — actual alpha.26 catalogue and runtime
+
+**VERIFIED**
+- `fn-zora`: `kind:"spiceTrade"`, `cost:18`, `itemIds` absent.
+- UI fallback uses `regionalMarketItems("outskirts")`, producing 25 visible entries: 5 generated common Outskirts set pieces, 13 explicit legacy-pool items, and 7 expansion-pool items.
+- Every visible entry has `fn.itemIds membership = NONE`.
+- The UI displays each item's `basePrice` but sends `buy:<itemId>`; the generic backend handler cannot accept the selected item because `fn.itemIds` is absent. It charges 18 gold and grants no item.
+- No Zora-specific spice blend ItemId, ingredient recipe, blend effect, or dedicated runtime handler is defined in alpha.26.
+
+The complete 25-item ID/name/basePrice/type/category/origin/rarity/effects table and source links are in [OUTSKIRTS_NPC_FUNCTION_MATRIX.md — Phase 2 Zora catalogue](OUTSKIRTS_NPC_FUNCTION_MATRIX.md#phase-2-targeted-gap-closure--old-market-alpha26).
+
+**SUPERSEDED PROPOSAL:** the §10 three-ingredient spice minigame and its recipe/quality outputs are not verified. They require item and recipe approval before specification can become implementation-ready.
+
+### 12.2 Pell — actual alpha.26 offer and economic path
+
+**VERIFIED**
+- `fn-pell`: `kind:"foodTrade"`, `cost:14`, `itemIds:["gateRations"]`.
+- The only current Pell item is `gateRations` (Úti fejadag), basePrice 12, category consumable, origin Külváros · Kapuváros, rarity Közönséges, `tradeValue:8`, `sellable:true`, `marketEligible:true`.
+- UI shows 12 gold; dedicated backend `foodTrade` handler charges 14 gold.
+- `gateRations` has no `effects` field. The backend success message claims percentage-based healing, but `consumeItem` rejects it because no positive healing effect is present.
+- `heartyStew` has `healPercent:20` but is assigned to Alma's inn function, not Pell.
+- The generic sale formula uses `basePrice`, effective appraisal and equipped `sellBonus`; it does not use `tradeValue`. There is no Pell-specific buyback.
+- Neither `ItemDefinition` nor `InventoryItem` contains freshness or quality data.
+
+The exact Pell catalogue and purchase/resale analysis are in [OUTSKIRTS_NPC_FUNCTION_MATRIX.md — Pell](OUTSKIRTS_NPC_FUNCTION_MATRIX.md#2-pell--exact-current-offer-and-transaction-discrepancy) and [OUTSKIRTS_ECONOMY_DEPENDENCY_MATRIX.md — Pell economic facts](OUTSKIRTS_ECONOMY_DEPENDENCY_MATRIX.md#3-pell-economic-facts).
+
+**SUPERSEDED PROPOSAL:** freshness states, 12-hour stock rollover, quality multipliers, and unlimited/limited buyback concepts from §10 are not alpha.26 fields or runtime behavior. Do not create these fields or rules locally.
+
+### 12.3 Cador — authored document-input facts
+
+**VERIFIED**
+- `fn-cador`: `kind:"ledger"`, `cost:25`, no `itemIds`.
+- Current UI uses generic function fallback; backend uses the generic handler, charges 25 gold, and creates no document item or structured reconciliation result.
+- `sealedLedger` is the evidence item for `main_outskirts_14`; Cador is core and Oris support. The item stores no ledger rows, transaction IDs, amounts, or timestamps.
+- `watchSeal` is a document hook for Lena's quest with Cador as support.
+- `guildPermit` is a document hook for Sera's quest with Cador as support.
+- `merchantInk` and `warehouseSeal` are materials, not documents.
+- Evidence/narrative linkage is represented by `legalStatus:"evidence"`, `questItem`, and external `MainQuestAudit.itemHooks`; there is no dedicated item evidence flag or document payload.
+- Damar's `warehouse` and Dain's `cargo` functions are currently generic handlers. There is no typed shipment/manifest/custody schema in the reviewed alpha.26 item/inventory types.
+
+Full document/evidence matrix and missing fields: [OUTSKIRTS_NPC_FUNCTION_MATRIX.md — Cador](OUTSKIRTS_NPC_FUNCTION_MATRIX.md#3-cador--authored-document-input-matrix).
+
+**PROPOSAL ONLY:** Cador may later read immutable manifest references from a Damar-owned, centrally approved shipment/manifest contract. Cador must not create a parallel shipment, custody, or evidence model.
+
+### 12.4 Cross-district dependencies
+
+**VERIFIED relationships**
+- Zora ↔ Pell: `main_outskirts_13`, Zora core / Pell support.
+- Cador ↔ Oris: `main_outskirts_14`, Cador core / Oris support; `sealedLedger` evidence.
+- Pell ↔ Alma: `main_outskirts_15`, Pell core / Alma support.
+- Cador ↔ Sera: `main_market_03`, Sera core / Cador support; `guildPermit` document.
+- Cador ↔ Oris/Marwen: `main_market_04`, warehouse seal evidence.
+- Damar ↔ Petar: `main_outskirts_03`, Damar core / Petar support; warehouse-key route opens the shipment thread.
+- Kael ↔ Dain: Harbor quests use official port permission, cargo tag, ship logs and cargo-manifest checking.
+
+**PROPOSAL ONLY:** the future Cador ↔ Damar connection is read-only manifest reconciliation, owned by Damar/Central. Full dependency matrix: [OUTSKIRTS_ECONOMY_DEPENDENCY_MATRIX.md — cross-district dependency list](OUTSKIRTS_ECONOMY_DEPENDENCY_MATRIX.md#5-cross-district-dependency-list--verified-links-vs-future-interfaces).
+
+### 12.5 Ilren — BLOCKED, unchanged
+
+Ilren is not included in this scope. The Old Market district list includes `ilren`, but the NPC master record defines `region:"market"` and `district:"exchangeSquare"`. No relocation, Canon change, implementation package, or accepted NPC-list update is made. **Project owner decision required.**
+
+### 12.6 Phase 2 gap-closure status
+
+| Work item | Status | Evidence outcome |
+|---|---|---|
+| Zora catalogue | VERIFIED | 25 UI-visible items enumerated; no Zora-specific `itemIds`; broken generic transaction path identified |
+| Pell catalogue | VERIFIED | One item only; 12/14 price mismatch; no healing effect; no freshness/quality data |
+| Cador inputs | VERIFIED | Authored documents/evidence and quest hooks enumerated; no structured document payload or output item |
+| Damar compatibility | PROPOSAL ONLY | Read-only interface boundary described; no new model |
+| Ilren | BLOCKED | Project owner decision required |
+
+**No source code, Canon, main quest, item/inventory/gold/diamond/save model, or other district implementation is changed. No merge is authorized.**
