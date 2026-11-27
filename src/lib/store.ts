@@ -591,18 +591,6 @@ export function useGameStore(): GameState {
         complete();
         return result;
       }
-      const fingerprint = `${npcId}|${functionId}|${targetId ?? ""}`;
-      const reservation = reserveInnTransaction(transactionId, fingerprint);
-      if (reservation !== "reserved") {
-        result = {
-          success: false,
-          message: reservation === "duplicate" ? "Ezt a fogadói műveletet már feldolgoztuk."
-            : reservation === "collision" ? "A tranzakcióazonosító egy másik fogadói művelethez tartozik."
-            : "A fogadói tranzakcióazonosító hiányzik vagy érvénytelen.",
-        };
-        complete();
-        return result;
-      }
       submissionReserved = true;
     }
     update(s=>{
