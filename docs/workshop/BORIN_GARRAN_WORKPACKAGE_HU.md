@@ -177,3 +177,58 @@ Sikeres funkcióhasználatkor a közös used() journal-bejegyzést, relationship
 5. A +1–+9, durability és repair csak központi jóváhagyás után specifikálható.
 
 **Végső státusz:** SPECIFICATION COMPLETE — IMPLEMENTATION BLOCKED BY CENTRAL DECISIONS.
+
+
+---
+
+## 18. Célzott PHASE 2 — Borin–Velka termékkör-mátrix
+
+**Forrásalap:** alpha.26 main, 894e9606fa84f5d609d810152e326b1cfae09b18. Ellenőrzött helyek: src/lib/content.ts:313,316,462,464; src/lib/itemSystem.ts:113-147; src/lib/store.ts:643-652; src/components/GameClient.tsx:760-798.
+
+### 18.1 Canon és tényleges runtime
+
+- Borin Canon szerepe Fegyverkovács; NPC service: Fegyverjavítás, kovácsmesterség. fn-garran kind=forge. Leírása fegyvert, pajzsot, vértet és csizmát nevez meg.
+- Velka Canon szerepe Páncélkovács; NPC service: Páncéljavítás, védelmi felszerelés. fn-velka kind=forge. Leírása páncél szétszerelését/újraillesztését és védelmi felszerelés craftját említi.
+- A store mindkét NPC-t ugyanazon forge ágon kezeli. A handler nem használ NPC ID alapú recept-, slot- vagy termékkör-szűrést.
+- A UI forgeCraftables szűrése: slotos item, a régióhoz tartozó regions vagy setId, common rarity, maximum 8 elem. Nem NPC-specializáció alapján szűr.
+- A dismantle UI a játékos inventoryjának slotos tárgyait mutatja, NPC-szereptől függetlenül. A store minden létező slotos itemet elfogad dismantle targetként.
+- Repair nincs: nincs condition/durability mező vagy repair handler. Velka actionLabelje „Páncélt javíttatok”, de a panel craft/dismantle műveletet hajt végre.
+
+### 18.2 Termékkör-mátrix
+
+| Kategória | VERIFIED CURRENT | CANON ROLE | PROPOSAL | CENTRAL DECISION REQUIRED |
+|---|---|---|---|---|
+| Fegyver | A közös forge craft/dismantle engedi a slotos itemet; a recept slotfüggő. | Borin: közvetlen szerep. Velka: nem fegyverkovács. | Fegyver Borin elsődleges katalógusában. | Igen: Borin kizárólagosság és UI/store allowlist. |
+| Pajzs | A shield slotot a helper kezeli, mindkét forge NPC-vel. | Borin funkcióleírása kifejezetten említi. Velka védelmi felszerelés szerepe tágabb értelmezést enged. | Borin elsődleges; Velka csak projektgazdai döntéssel. | Igen: pajzs felelőse és megosztása. |
+| Páncél | Armor slot craftolható és dismantle-ölhető a közös handlerben. | Borin leírása vértet említ; Velka Canon szerepe kifejezetten páncélkovács. | Velka elsődleges páncélkatalógus; Borin explicit leírása miatt az átfedés nem törölhető automatikusan. | Igen: páncél-hozzáférés és Borin kivétele. |
+| Bőr felszerelés | A runtime nem vizsgál anyagcímkét; slot és recipe alapján dolgozik. | Nara bőrműves; Borin/Velka fémműhely. | Bőrtermékek Narához, itemenkénti content jóváhagyással. | Igen: anyagbesorolás és NPC jogosultság. |
+| Csizma | Boots slot craft/dismantle engedélyezett a közös handlerben. | Borin funkcióleírása csizmát említ; Nara Canon is csizmát készít; Velka nem nevezi meg. | Csizma anyag/termék szerint Borin és Nara között szétválasztandó. | Igen: travelerBoots anyaga és termékkör. |
+| Kiegészítő | Accessory slotra is van generic recipe; handler elfogadja. | Borin és Velka Canon nem nevez meg kiegészítőt; Nara kesztyűt említ. | Csak itemenként igazolt anyag és jóváhagyott NPC-hozzárendelés. | Igen: kesztyű és általános accessory jog. |
+| Szétszerelés | Bármely inventoryban lévő slotos item szétszerelhető; hozam fél recipe, lefelé kerekítve, minimum 1/inputtípus. | Borin: felesleges felszerelés; Velka: páncél; Nara: sérült bőrfelszerelés. | Közös dismantle vagy NPC-specifikus item allowlist. | Igen: jogosultság, protected item, capacity és yield. |
+| Javítás | Nincs condition mező vagy repair handler. | Borin, Velka és Nara service-leírása javítást említ. | Csak globális condition contract után mechanikai repair. | Igen: WD-05/06. |
+
+**Értelmezés:** VERIFIED CURRENT a kód általános engedélyét jelenti, nem a Canon-helyességet és nem azt, hogy a UI ténylegesen megjeleníti. A UI régió/set szűrője és a store target-ellenőrzése eltérhet.
+
+### 18.3 Szereposztási alternatívák — mindkettő PROPOSAL
+
+**A — funkcióleírás szerinti megosztás**
+- Borin: fegyver + pajzs; vért és csizma csak a fn-garran szövegével összhangban, projektgazda által rögzített kivételként.
+- Velka: páncél + védelmi felszerelés; pajzs csak külön döntéssel.
+- Canon-kompatibilitás: Borin felsorolása miatt a vért/csizma nem zárható ki automatikusan; Velka páncél-specialista marad.
+- Játékosoldali egyediség: magasabb, slotonként egyértelmű szakember.
+- Runtime: NPC-azonosítóhoz kötött termékkör allowlist; ugyanaz a jogosultságlista érvényes a UI-ra és store-ra.
+- Recipe: közös helper maradhat; új recept nem szükségszerű.
+- UI: Borin és Velka külön katalógusa; dismantle jog külön konfigurációval.
+
+**B — Borin általános kovács, Velka minőségspecialista**
+- Borin: általános, jóváhagyott felszerelés craft/dismantle.
+- Velka: páncélillesztés, minőség- és beszállítóvizsgálat; mechanikai repair csak condition rendszer után.
+- Canon-kompatibilitás: Borin széles szolgáltatása illeszkedik a fn-garranhoz; Velka karaktertörténetéhez erős, de a jelenlegi védelmi felszerelés craft-leírás felülvizsgálata szükséges.
+- Játékosoldali egyediség: a művelettípus különbözteti meg a két NPC-t.
+- Runtime: Velkához külön diagnosztikai action; repair csak WD-05/06 után.
+- Recipe: Velka vizsgálata nem fogyaszt inputot és nem ad itemet; Borin a közös recipe contractot használja.
+- UI: Borin craft/dismantle panel; Velka vizsgálati panel, repair ígéret nélkül.
+
+A opció kevesebb Canon-szöveg változtatást, több katalógusszűrést igényel. B erősebb funkcionális különbség, de Velka service/fn leírásának projektgazdai felülvizsgálatát igényli. Egyik sem végleges döntés.
+
+**Státusz:** SPECIFICATION COMPLETE — IMPLEMENTATION BLOCKED BY CENTRAL DECISIONS. A döntés WD-09.
