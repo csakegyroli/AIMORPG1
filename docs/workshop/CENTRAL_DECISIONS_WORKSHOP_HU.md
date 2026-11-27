@@ -171,43 +171,44 @@
 Minden döntés külön, egyértelmű projektgazdai jóváhagyást igényel. Egy döntés elfogadása nem jelenti a kapcsolódó forrásfájlok módosításának automatikus engedélyezését. A jóváhagyás után külön implementációs scope, branch, owner és tesztkapu szükséges.
 
 
+
 ---
 
-# PHASE 2 — pontosított item / craft / mastery döntési szerződések
+# PHASE 2 — pontosított közös döntési szerződések
 
-Minden döntés **PENDING**, tulajdonos: **projektgazda**. A jelenlegi tény és az alternatíva külön szerepel. A jóváhagyás nem ad automatikus kódmódosítási engedélyt.
+Az alábbi pontosítás a korábbi WD-01–WD-08 azonosítókat és témákat változatlanul hagyja. Minden pont PENDING, döntési tulajdonos: projektgazda. A jóváhagyás önmagában nem ad forráskód-módosítási engedélyt.
 
-## WD-01 — Item instance változatlan szerződése / enhancement
+### WD-01 — +1–+9 enhancement és item-instance szerződés
 
-**Pontos kérdés:** maradjon-e az alpha.26 InventoryItem szerződés változatlanul {instanceId, itemId}, és ne kerüljön rá enhancement/durability/crafter/history mező központi adatmodell-döntés nélkül?
-- **Jelenlegi tény:** src/lib/types.ts:48-60 csak instanceId és itemId; makeInventoryItem új instance-t készít az item template ID alapján.
-- **A:** változatlan instance contract; nincs tartós +1–+9 vagy instance állapot.
-- **B:** közös, verziózott instance schema; enhancement és resolver csak migration, save compatibility és server-authority tervvel.
-- **Kockázat:** template stat módosítás minden példányt érintene; instance bővítés régi save-eket és minden inventory-felhasználót érint.
+**Pontos kérdés:** legyen-e tartós +1–+9 itemfejlesztés, és ha igen, milyen közös instance-adatmodell tárolja az enhancement szintet, stat-hatást, kudarcot és előzményt?
+- **Jelenlegi tény:** InventoryItem = {instanceId, itemId}; nincs enhancement mező vagy resolver. A smithingKit leírása finomhangoló eszközöket említ, nem bizonyít +1–+9 rendszert.
+- **A:** nincs +1–+9 ebben a fázisban; az instance szerződés változatlan.
+- **B:** közös, verziózott item-instance schema és enhancement resolver, migrációval, save compatibilityvel és server-authority tervvel.
+- **Kockázat:** template stat módosítás minden példányt érintene; instance bővítés régi save-eket és minden inventory-felhasználót érint; kliens RNG manipulálható.
 - **Érintett NPC:** Borin, Velka, Nara; Tomen csak oktatási kapcsolat.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-02 — Recipe input/output tulajdonosa
+### WD-02 — Durability / condition globális állapota
 
-**Pontos kérdés:** melyik központi réteg birtokolja a recipe inputot, output item ID-t/mennyiséget, NPC/profession jogosultságot és unlock feltételt?
-- **Jelenlegi tény:** craftRecipeForItem(item, region) generikus regionális inputlistát ad; a store 1 azonos item ID-jű új instance-t hoz létre; nincs NPC-specifikus registry.
-- **A:** generikus regionális helper marad, NPC csak hozzáférési pont.
-- **B:** egyetlen központi recipe registry/contract birtokolja az input/output/unlock adatot, és a UI/store ugyanazt olvassa.
-- **Kockázat:** párhuzamos recipe modellek, UI/store eltérés, output duplikáció, régiók közti economy eltérés.
-- **Érintett NPC:** Borin, Velka, Nara; Tomen preview-fogyasztó, nem tulajdonos.
+**Pontos kérdés:** szükséges-e minden felszerelés-instance-hez tartós condition/durability, és mi annak skálája, kopása, capje és stat/harc hatása?
+- **Jelenlegi tény:** InventoryItem nem tárol conditiont; nincs kopási esemény vagy condition resolver.
+- **A:** nincs durability ebben a fázisban; repair csak narratív/quest szöveg.
+- **B:** közös instance condition mező és globális kopás/hatás/szerviz szabály, save migrationnel.
+- **Kockázat:** inventory/equipment/harc érintett; régi save default, exploit, gold sink, item resale.
+- **Érintett NPC:** Velka elsődlegesen; Borin és Nara másodlagosan; Tomen diagnosztikai segédként.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-03 — Crafting eredmény szerződése
+### WD-03 — Repair jogosultság és szolgáltatás
 
-**Pontos kérdés:** maradjon-e a craft determinisztikus, validációs hibánál state-változás nélkül, vagy legyen közös quality/success/failure outcome?
-- **Jelenlegi tény:** valid craftnál recipe input levonás és 1 új instance; nincs random quality, partial success vagy craft failure; validációs hiba előtt nincs inputlevonás.
-- **A:** determinisztikus craft, output a jóváhagyott item template.
-- **B:** közös skill/quality resolver, rögzített success/failure/partial és anyagveszteségi szabály.
-- **Kockázat:** kliens RNG manipuláció, frusztráció, gazdasági infláció/anyagvesztés, stat-egyensúly.
-- **Érintett NPC:** Borin, Velka, Nara; Tomen csak feladat/preview.
+**Pontos kérdés:** durability esetén mely NPC mely slotot javíthatja, milyen inputért/árért, és a javítás mennyi conditiont állítson vissza?
+- **Jelenlegi tény:** nincs repair handler; Borin/Velka/Nara Canon service javítást említ; Velka actionLabel javítást ígér, de craft/dismantle fut.
+- **A:** durability nélkül nincs mechanikai repair; UI copy nem állíthat condition-javítást.
+- **B:** WD-02 után közös repair contract, NPC-nként slot allowlist, input, ár és condition output.
+- **Kockázat:** ingyen repair exploit, quest item kezelés, input infláció, NPC-átfedés.
+- **Érintett NPC:** Velka, Borin, Nara.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-04 — Mastery és karakter XP elkülönítése
+### WD-04 — Profession mastery és karakter XP elkülönítése
 
 **Pontos kérdés:** legyen-e profession mastery, és hogyan különüljön el a karakter általános XP-jétől és a global smithing statjától?
 - **Jelenlegi tény:** nincs profession mastery, profession XP, rank vagy recipe unlock. used() első használatkor adott 2 XP általános karakter XP; smithing global stat, nem mastery.
@@ -217,41 +218,41 @@ Minden döntés **PENDING**, tulajdonos: **projektgazda**. A jelenlegi tény és
 - **Érintett NPC:** Tomen elsődlegesen; Borin, Velka, Nara mint lehetséges tevékenységforrás.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-05 — Durability / condition globális állapota
+### WD-05 — Recipe input/output központi tulajdonosa
 
-**Pontos kérdés:** szükséges-e minden felszerelés-instance-hez tartós condition/durability, és mi annak skálája, kopása, capje és stat/harc hatása?
-- **Jelenlegi tény:** InventoryItem nem tárol állapotot; nincs condition mező, kopási esemény vagy resolver.
-- **A:** nincs durability ebben a fázisban; repair csak narratív/quest szöveg.
-- **B:** közös instance condition mező és globális kopás/hatás/szerviz szabály, save migrationnel.
-- **Kockázat:** minden inventory/equipment/harc érintett; régi save default, exploit, gold sink, resale.
-- **Érintett NPC:** Velka elsődlegesen; Borin és Nara másodlagosan; Tomen diagnosztikai segédként.
+**Pontos kérdés:** melyik központi réteg birtokolja a recipe inputot, output item ID-t/mennyiséget, NPC/profession jogosultságot és unlock feltételt?
+- **Jelenlegi tény:** craftRecipeForItem(item, region) generikus regionális inputlistát ad; a store 1 azonos item ID-jű új instance-t hoz létre; nincs NPC-specifikus registry.
+- **A:** generikus regionális helper marad, NPC csak hozzáférési pont.
+- **B:** egyetlen központi recipe registry/contract birtokolja az input/output/unlock adatot, és a UI/store ugyanazt olvassa.
+- **Kockázat:** párhuzamos recipe modellek, UI/store eltérés, output duplikáció, régiók közti economy eltérés.
+- **Érintett NPC:** Borin, Velka, Nara; Tomen preview-fogyasztó, nem tulajdonos.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-06 — Repair jogosultság és szolgáltatás
+### WD-06 — Crafting eredmény és sikertelen craft szerződése
 
-**Pontos kérdés:** durability esetén mely NPC mely slotot javíthatja, milyen inputért/árért, és a javítás mennyi conditiont állítson vissza?
-- **Jelenlegi tény:** nincs repair handler; Borin/Velka/Nara Canon service javítást említ, Velka actionLabel javítást ígér, de craft/dismantle fut.
-- **A:** durability nélkül nincs mechanikai repair; UI copy nem állíthat condition-javítást.
-- **B:** WD-05 után közös repair contract, NPC-nként slot allowlist, input, ár és condition output.
-- **Kockázat:** ingyen repair exploit, quest item kezelés, input infláció, NPC átfedés.
-- **Érintett NPC:** Velka, Borin, Nara.
+**Pontos kérdés:** maradjon-e a craft determinisztikus, validációs hibánál state-változás nélkül, vagy legyen közös quality/success/failure outcome és anyagveszteségi szabály?
+- **Jelenlegi tény:** valid craftnál recipe input levonás és 1 új instance; nincs random quality, partial success vagy craft failure; validációs hiba előtt nincs inputlevonás.
+- **A:** determinisztikus craft, output a jóváhagyott item template.
+- **B:** közös skill/quality resolver, rögzített success/failure/partial és anyagveszteségi szabály.
+- **Kockázat:** kliens RNG manipuláció, frusztráció, gazdasági infláció/anyagvesztés, stat-egyensúly.
+- **Érintett NPC:** Borin, Velka, Nara; Tomen csak feladat/preview.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-07 — Craft failure, anyagveszteség és dismantle yield
+### WD-07 — Alapanyagveszteség és dismantle yield
 
-**Pontos kérdés:** craft failure validációs no-op maradjon-e, vagy lehet anyagveszteség/hibás output; ettől külön milyen dismantle yield engedélyezett?
-- **Jelenlegi tény:** craft determinisztikus; invalid target/hiányzó input nem fogyaszt. Dismantle fél recipe, lefelé kerekítve, minimum 1/inputtípus.
-- **A:** determinisztikus craft és jelenlegi dismantle yield; protected item és inventory capacity guard tesztkapu.
-- **B:** központi loss/yield tábla külön craft failure és dismantle szabállyal.
-- **Kockázat:** craft/dismantle loop, input duplikáció, inventory 80-as limit, quest input visszanyerése, frusztráció.
-- **Érintett NPC:** Borin, Velka, Nara; Tomen nem veszteség okozója.
+**Pontos kérdés:** a jelenlegi fél-recept/minimum-1 yield maradjon-e, vagy legyen központi yield/loss tábla; hogyan védjük a protected itemeket és inventory capacityt?
+- **Jelenlegi tény:** dismantle fél recipe, lefelé kerekítve, minimum 1 inputtípusonként; output capacity guard nem látható a műhely handlerben.
+- **A:** jelenlegi yield marad, explicit protected-item és capacity guard tesztekkel.
+- **B:** központi loss/yield tábla és atomikus capacity check.
+- **Kockázat:** craft/dismantle loop, input duplikáció, inventory 80-as limit, quest input visszanyerése.
+- **Érintett NPC:** Borin, Velka, Nara.
 - **Tulajdonos:** projektgazda. **PENDING.**
 
-## WD-08 — Tranzakció, idempotencia és duplikációvédelem
+### WD-08 — Tranzakció, idempotencia és duplikációvédelem
 
 **Pontos kérdés:** a kliensoldali demo state elegendő-e, vagy minden craft/dismantle/training művelethez szerveroldali, atomikus, idempotens action API kell?
 - **Jelenlegi tény:** store kliensoldali state updater; nincs server-authoritative endpoint, transaction ID, idempotency key vagy durable operation log; save localStorage.
-- **A:** demo scope marad; validáció/regression teszt, de nem állítunk csalásbiztos vagy multi-device garanciát.
+- **A:** demo scope marad; validáció/regression teszt, de nincs csalásbiztos vagy multi-device garancia.
 - **B:** szerver-authoritative API, atomikus input/output és gold, idempotency key, replay protection és tartós operation log.
 - **Kockázat:** double submit, replay, rollback, item/gold duplikáció, kliensmanipuláció, multi-device conflict.
 - **Érintett NPC:** mind a négy; Borin/Velka/Nara item műveletek, Tomen fizetős képzés.
@@ -261,7 +262,7 @@ Minden döntés **PENDING**, tulajdonos: **projektgazda**. A jelenlegi tény és
 
 **Pontos kérdés:** a Borin fn-garran fegyver/pajzs/vért/csizma leírása és Velka páncélkovács/védelmi felszerelés Canonja hogyan oszoljon meg; ki kapjon accessory, bőrtermék és dismantle jogosultságot?
 - **A:** funkcióleírás szerinti megosztás: Borin fegyver/pajzs és jóváhagyott kivételek; Velka páncél/védelmi felszerelés.
-- **B:** Borin általános kovács; Velka minőség-/beszállítóvizsgáló, későbbi repair csak WD-05/06 után.
+- **B:** Borin általános kovács; Velka minőség-/beszállítóvizsgáló, későbbi repair csak WD-02/03 után.
 - **Kockázat:** Borin Canon indokolatlan szűkítése, Velka Borin-másolattá válása, UI/store mismatch, önkényes recipe/item.
 - **Érintett NPC:** Borin, Velka; másodlagosan Nara a csizma/bőrtermék miatt.
 - **Tulajdonos:** projektgazda. **PENDING.**
