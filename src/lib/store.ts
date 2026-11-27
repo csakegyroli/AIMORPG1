@@ -5,7 +5,7 @@ import { INITIAL_STATS, ITEMS, NPCS, NPC_FUNCTIONS, QUESTS } from "./content";
 import { getEffectiveStats, getItem, makeInventoryItem, marketPrice, reputationScore, sellingPrice, XP_FOR_LEVEL } from "./rules";
 import { rollReward, explainRewardRoll, nextRewardPity, type RewardPityState, type RewardRoll } from "./rewardEconomy";
 import { getWorldTime } from "./worldTime";
-import { getInnFoodPreview, getInnRestPreview } from "./innService";
+import { createInnTransactionGuard, planInnFoodPurchase, planInnRest } from "./innService";
 import { craftRecipeForItem, dismantleYieldsForItem } from "./itemSystem";
 import { isMarketEligible, isSellable, itemAvailableInRegion, itemLegalStatus, itemSourceLabel, itemCategory } from "./itemSystem";
 import type { AvatarId, EquipmentSlot, GmMessage, InventoryItem, ItemId, JournalEntry, NpcId, QuestChoice, QuestDefinition, QuestId, QuestStatus, RegionId, ReputationBreakdown, Stats, TemporaryItemBuff, TemporaryStatBuff, StatId } from "./types";
@@ -71,7 +71,7 @@ function freshState() {
 
 export type GameData = ReturnType<typeof freshState>;
 export type GameState = GameData & {
-  consumeItem: (instanceId: string) => { success: boolean; message: string }; rest: () => { success: boolean; message: string }; takeDamage: (amount: number, reason?: string) => { success: boolean; message: string }; useNpcFunction: (npcId: NpcId, functionId: string, targetId?: string) => { success: boolean; message: string };
+  consumeItem: (instanceId: string) => { success: boolean; message: string }; rest: () => { success: boolean; message: string }; takeDamage: (amount: number, reason?: string) => { success: boolean; message: string }; useNpcFunction: (npcId: NpcId, functionId: string, targetId?: string, transactionId?: string, onResult?: (result: { success: boolean; message: string }) => void) => { success: boolean; message: string };
   setName: (name: string) => void; setAvatar: (avatarId: AvatarId) => void; improveStat: (stat: keyof Stats) => void; travel: (region: RegionId) => void;
   startQuest: (questId: QuestId) => void; setMainQuestFollowing: (following: boolean) => void; followQuestChapter: (chapter: number | null) => void; trackQuest: (questId: QuestId | null) => void; trackSideQuest: (sideQuestId: string | null) => void; resolveQuest: (questId: QuestId, choice: QuestChoice) => { success: boolean; message: string };
   equip: (instanceId: string, slot: EquipmentSlot) => void; unequip: (slot: EquipmentSlot) => void;
@@ -302,6 +302,13 @@ function loadInitial(): GameData {
 function getEffectiveStatsWithBuffs(state: GameData) {
   return getEffectiveStats(state.baseStats, state.equipment, state.temporaryStatBuffs, state.temporaryItemBuffs);
 }
+
+/** Shared max-HP calculation for Alma's preview and store resolution. */
+export function getMaxHealth(state: GameData) {
+  return Math.floor(100 + Math.max(0, getEffectiveStatsWithBuffs(state).endurance) * 5);
+}
+const reserveInnTransaction = createInnTransactionGuard(256);
+
 
 export function useGameStore(): GameState {
   const [data, setData] = useState<GameData>(freshState);
@@ -566,14 +573,36 @@ export function useGameStore(): GameState {
   }, [data]);
   const buyListing = useCallback((itemId: ItemId, goldPrice: number, diamondPrice = 0) => { let result={success:false,message:"Nincs elég fizetőeszközöd."}; setData(s=>{ if(!Number.isInteger(goldPrice) || goldPrice<1 || goldPrice>1000000 || !Number.isInteger(diamondPrice) || diamondPrice<0 || diamondPrice>100){result={success:false,message:"Érvénytelen piactéri ajánlat."};return s;} if(s.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};return s;} if(s.gold<goldPrice || s.diamonds<diamondPrice){ result={success:false,message: diamondPrice ? `Ehhez ${goldPrice} arany és ${diamondPrice} 💎 szükséges.` : "Nincs elég aranyad."}; return s; } const item=getItem(itemId); if(!isMarketEligible(item)){result={success:false,message:"Ez a tárgy nem kerülhet játékospiaci forgalomba."}; return s;} result={success:true,message:`Megvetted ${item.name} tárgyat a játékospiacon.`}; return {...s,gold:s.gold-goldPrice,diamonds:s.diamonds-diamondPrice,inventory:[...s.inventory,makeInventoryItem(itemId)],reputationParts:{...s.reputationParts,economic:s.reputationParts.economic+1},journal:[entry("market","Játékospiaci vásárlás",`${item.name} — ${goldPrice} arany${diamondPrice?` + ${diamondPrice} gyémánt`:""}.`),...s.journal].slice(0,60),gmMessages:[gm("A Szem észrevette a cserét",`Egy játékospiaci tranzakció új tárgyat hozott a készletedbe: ${item.name}.`,"world"),...s.gmMessages].slice(0,20)}; }); return result; }, []);
   const sell = useCallback((instanceId: string) => { let result={success:false,message:"Ez a tárgy már nincs a táskádban."}; setData(s=>{const owned=s.inventory.find(x=>x.instanceId===instanceId);if(!owned)return s;const item=getItem(owned.itemId); if(!isSellable(item)){result={success:false,message:`${item.name} nem értékesíthető. A tárgy történeti, bizonyítéki vagy kötött státuszú.`}; return s;} const effective=getEffectiveStatsWithBuffs(s),price=sellingPrice(item.basePrice,effective.appraisal,s.equipment);result={success:true,message:`${item.name} elkelt.`};return {...s,gold:s.gold+price,inventory:s.inventory.filter(x=>x.instanceId!==instanceId),marketDemand:{...s.marketDemand,[item.id]:Math.max(-30,s.marketDemand[item.id]-3)},reputationParts:{...s.reputationParts,economic:s.reputationParts.economic+1},journal:[entry("market","Eladás",`${item.name} — ${price} arany.`),...s.journal].slice(0,60)};});return result;}, []);
-  const useNpcFunction = useCallback((npcId: NpcId, functionId: string, targetId?: string) => {
+  const useNpcFunction = useCallback((npcId: NpcId, functionId: string, targetId?: string, transactionId?: string, onResult?: (result: { success: boolean; message: string }) => void) => {
     let result={success:false,message:"Ezt a funkciót most nem tudod használni."};
-    setData(s=>{
+    let resultDelivered = false;
+    const complete = () => {
+      if (!onResult || resultDelivered) return;
+      resultDelivered = true;
+      const settled = { ...result };
+      queueMicrotask(() => onResult(settled));
+    };
+    const isInn = NPC_FUNCTIONS.some(candidate => candidate.id === functionId && candidate.npcId === npcId && candidate.kind === "inn");
+    if (isInn) {
+      const fingerprint = `${npcId}|${functionId}|${targetId ?? ""}`;
+      const reservation = reserveInnTransaction(transactionId, fingerprint);
+      if (reservation !== "reserved") {
+        result = {
+          success: false,
+          message: reservation === "duplicate" ? "Ezt a fogadói műveletet már feldolgoztuk."
+            : reservation === "collision" ? "A tranzakcióazonosító egy másik fogadói művelethez tartozik."
+            : "A fogadói tranzakcióazonosító hiányzik vagy érvénytelen.",
+        };
+        complete();
+        return result;
+      }
+    }
+    update(s=>{
       const npc=NPCS.find(n=>n.id===npcId); const fn=NPC_FUNCTIONS.find(x=>x.id===functionId && x.npcId===npcId);
-      if(!npc||!fn){result={success:false,message:"Ismeretlen NPC-funkció."};return s;}
+      if(!npc||!fn){result={success:false,message:"Ismeretlen NPC-funkció."};complete(); return s;}
       const present=npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id]);
-      if(s.currentRegion!==npc.region){result={success:false,message:`Jelenleg nem tudsz interakcióba lépni vele, mert nem a(z) ${npc.region} helyszínén vagy.`};return s;}
-      if(!present){result={success:false,message:`${npc.name} jelenleg más dolgaival foglalkozik. Most nem tudod használni a funkcióját.`};return s;}
+      if(s.currentRegion!==npc.region){result={success:false,message:`Jelenleg nem tudsz interakcióba lépni vele, mert nem a(z) ${npc.region} helyszínén vagy.`};complete(); return s;}
+      if(!present){result={success:false,message:`${npc.name} jelenleg más dolgaival foglalkozik. Most nem tudod használni a funkcióját.`};complete(); return s;}
       const max=100+Math.max(0,getEffectiveStatsWithBuffs(s).endurance)*5;
       let next={...s};
       const itemById=(id:string)=>ITEMS.find(i=>i.id===id);
@@ -594,98 +623,124 @@ export function useGameStore(): GameState {
       };
       switch(fn.kind){
         case "inn": {
-          // Alma's authored service is one hour for 60 gold and 10% max HP.
-          // Keep the existing food allow-list; item effects remain defined by content.ts.
-          if(targetId?.startsWith("buy:")){
-            const selectedId=targetId.slice(4);
-            const itemId=fn.itemIds?.includes(selectedId as ItemId) ? selectedId : undefined;
-            const item=itemId?itemById(itemId):undefined;
-            if(!item || item.type!=="consumable"){result={success:false,message:"A kiválasztott étel jelenleg nem érhető el."};return s;}
-            const preview=getInnFoodPreview(item,max,s.health,s.gold,next.inventory.length);
-            if(!preview.canPurchase){
-              result={success:false,message:preview.reason==="inventory-full"?"A táskád megtelt (80/80).":preview.reason==="insufficient-gold"?`Ehhez ${preview.price} arany szükséges.`:"A kiválasztott étel nem vásárolható meg."};
-              return s;
+          if (targetId?.startsWith("buy:")) {
+            const selectedId = targetId.slice(4);
+            const itemId = fn.itemIds?.includes(selectedId as ItemId) ? selectedId : undefined;
+            const item = itemId ? itemById(itemId) : undefined;
+            const purchase = planInnFoodPurchase(
+              { gold: s.gold, health: s.health, inventoryCount: s.inventory.length },
+              item,
+              fn.itemIds ?? [],
+              max,
+              80,
+            );
+            if (!purchase.success || !item) {
+              const price = purchase.preview?.price ?? item?.basePrice ?? 0;
+              result = {
+                success: false,
+                message: purchase.reason === "inventory-full" ? "A táskád megtelt (80/80)."
+                  : purchase.reason === "insufficient-gold" ? `Ehhez ${price} arany szükséges.`
+                  : "A kiválasztott étel nem vásárolható meg.",
+              };
+              complete(); return s;
             }
-            next={...next,gold:next.gold-preview.price,inventory:[...next.inventory,makeInventoryItem(item.id)]};
+            next = {
+              ...next,
+              gold: purchase.nextState.gold,
+              inventory: [...next.inventory, makeInventoryItem(item.id)],
+            };
             used();
-            result={success:true,message:`Megvetted: ${item.name} · ${preview.price} arany. Az étel bekerült a táskádba.`};
+            result = { success: true, message: `Megvetted: ${item.name} · ${purchase.preview?.price ?? item.basePrice} arany. Az étel bekerült a táskádba.` };
             break;
           }
-          if(targetId!==undefined && targetId!=="rest" && targetId!=="hours:1" && targetId!=="1"){
-            result={success:false,message:"Almánál egyórás pihenés foglalható."};
-            return s;
+          if (targetId !== "rest") {
+            result = { success: false, message: "Almánál kizárólag az egyórás pihenési cél használható." };
+            complete(); return s;
           }
-          const preview=getInnRestPreview(s.health,max,s.gold,fn.cost??60);
-          if(!preview.canRest){
-            result={success:false,message:preview.reason==="full-health"?"Teljes az életerőd, nincs szükséged alvásra.":preview.reason==="insufficient-gold"?`A pihenés ára ${preview.price} arany.`:"A pihenés jelenleg nem elérhető."};
-            return s;
+          const rest = planInnRest(
+            { gold: s.gold, health: s.health, inventoryCount: s.inventory.length },
+            max,
+            fn.cost ?? 60,
+          );
+          if (!rest.success) {
+            result = {
+              success: false,
+              message: rest.reason === "full-health" ? "Teljes az életerőd, nincs szükséged alvásra."
+                : rest.reason === "insufficient-gold" ? "A pihenés ára 60 arany."
+                : "A pihenés jelenleg nem elérhető.",
+            };
+            complete(); return s;
           }
-          next={...next,gold:next.gold-preview.price,health:s.health+preview.restoredHealth};
+          next = { ...next, gold: rest.nextState.gold, health: rest.nextState.health };
           used();
-          result={success:true,message:`Egy óra pihenés: +${preview.restoredHealth} életerő. Szállás: ${preview.price} arany.`};
+          result = {
+            success: true,
+            message: `Egy óra pihenés: +${rest.preview?.restoredHealth ?? 0} életerő. Szállás: ${rest.preview?.price ?? 60} arany.`,
+          };
           break;
         }
         case "foodTrade": case "food": {
           const selectedId = targetId?.startsWith("buy:") ? targetId.slice(4) : fn.itemIds?.[0];
           const itemId = fn.itemIds?.includes(selectedId as ItemId) ? selectedId : fn.itemIds?.[0];
           const item=itemId?itemById(itemId):undefined; const cost=fn.cost??item?.basePrice??20;
-          if(!item){result={success:false,message:"Nincs elérhető étel."};return s;} if(!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};return s;}
-          if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};return s;}
+          if(!item){result={success:false,message:"Nincs elérhető étel."};complete(); return s;} if(!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};complete(); return s;}
+          if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};complete(); return s;}
           next={...next,gold:next.gold-cost,inventory:[...next.inventory,makeInventoryItem(item.id)]}; used(); result={success:true,message:`Megvetted: ${item.name}. Az étel később százalékosan tölti vissza az életerődet.`}; break;
         }
         case "alchemy": {
           if(targetId?.startsWith("infuse:")){
             const instanceId=targetId.slice(7); const equipped=Object.values(next.equipment).find((v): v is InventoryItem => v !== null && v.instanceId===instanceId);
-            if(!equipped){result={success:false,message:"Az erősítéshez egy felszerelt tárgyat kell kiválasztanod."};return s;}
+            if(!equipped){result={success:false,message:"Az erősítéshez egy felszerelt tárgyat kell kiválasztanod."};complete(); return s;}
             const active=next.temporaryItemBuffs.find(b=>b.instanceId===instanceId && b.expiresAt>Date.now());
-            if(active){result={success:false,message:"Ezen a tárgyon már aktív alkímiai erősítés van."};return s;}
+            if(active){result={success:false,message:"Ezen a tárgyon már aktív alkímiai erősítés van."};complete(); return s;}
             const infusionIndex=next.inventory.findIndex(inv=>inv.itemId==="runeInfusion");
-            if(infusionIndex<0){result={success:false,message:"Nincs nálad Rúnás erősítő oldat. Előbb vásárolj egyet Eldrától."};return s;}
+            if(infusionIndex<0){result={success:false,message:"Nincs nálad Rúnás erősítő oldat. Előbb vásárolj egyet Eldrától."};complete(); return s;}
             const buff:TemporaryItemBuff={instanceId,stat:"strength",amount:1,expiresAt:Date.now()+30*60*1000,source:"Rúnás erősítő oldat"};
             next={...next,temporaryItemBuffs:next.temporaryItemBuffs.filter(b=>b.instanceId!==instanceId).concat(buff),inventory:next.inventory.filter((_,i)=>i!==infusionIndex)}; used(); result={success:true,message:"A felszerelt tárgy egy órára +1 Erő bónuszt kapott. Az erősítő oldat elfogyott, a hatás nem halmozható."}; break;
           }
           const itemId=targetId?.startsWith("buy:")?targetId.slice(4):undefined; const item=itemId?itemById(itemId):undefined;
-          if(!item || !fn.itemIds?.includes(item.id)){result={success:false,message:"Válassz egy alkímiai tárgyat."};return s;}
-          const cost=item.basePrice; if(!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};return s;}
-          if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};return s;}
+          if(!item || !fn.itemIds?.includes(item.id)){result={success:false,message:"Válassz egy alkímiai tárgyat."};complete(); return s;}
+          const cost=item.basePrice; if(!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};complete(); return s;}
+          if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};complete(); return s;}
           next={...next,gold:next.gold-cost,inventory:[...next.inventory,makeInventoryItem(item.id)]}; used(); result={success:true,message:`Megvetted: ${item.name}.`}; break;
         }
         case "forge": case "leatherwork": {
           if(targetId?.startsWith("craft:")){
-            const recipeId=targetId.slice(6); const crafted=itemById(recipeId); if(!crafted||!crafted.slot||crafted.sideQuestOnly||crafted.category==="relic"||crafted.marketEligible===false){result={success:false,message:"Ez a történeti vagy egyedi tárgy nem készíthető ebben a műhelyben."};return s;}
+            const recipeId=targetId.slice(6); const crafted=itemById(recipeId); if(!crafted||!crafted.slot||crafted.sideQuestOnly||crafted.category==="relic"||crafted.marketEligible===false){result={success:false,message:"Ez a történeti vagy egyedi tárgy nem készíthető ebben a műhelyben."};complete(); return s;}
             const recipeNeed=craftRecipeForItem(crafted, npc.region); const counts=new Map<string,number>(); next.inventory.forEach(inv=>counts.set(inv.itemId,(counts.get(inv.itemId)??0)+1)); const missing=recipeNeed.find(req=>(counts.get(req.id)??0)<req.count);
-            if(missing){result={success:false,message:`Nincs elég anyagod. Szükséges: ${recipeNeed.map(req=>`${itemById(req.id)?.name??req.id} × ${req.count}`).join(", ")}.`};return s;}
+            if(missing){result={success:false,message:`Nincs elég anyagod. Szükséges: ${recipeNeed.map(req=>`${itemById(req.id)?.name??req.id} × ${req.count}`).join(", ")}.`};complete(); return s;}
             let inv=[...next.inventory]; for(const req of recipeNeed){let left=req.count;inv=inv.filter(x=>{if(left<=0||x.itemId!==req.id)return true;left--;return false;});} inv.push(makeInventoryItem(crafted.id)); next={...next,inventory:inv}; used(); result={success:true,message:`Elkészült: ${crafted.name}.`}; break;
           }
           if(targetId){
-            const idx=next.inventory.findIndex(i=>i.instanceId===targetId); if(idx<0){result={success:false,message:"A kiválasztott tárgy nincs a táskádban."};return s;}
-            const owned=next.inventory[idx]; const item=getItem(owned.itemId); if(!item.slot){result={success:false,message:"Ezt a tárgyat a műhelyben nem lehet szétszerelni."};return s;}
+            const idx=next.inventory.findIndex(i=>i.instanceId===targetId); if(idx<0){result={success:false,message:"A kiválasztott tárgy nincs a táskádban."};complete(); return s;}
+            const owned=next.inventory[idx]; const item=getItem(owned.itemId); if(!item.slot){result={success:false,message:"Ezt a tárgyat a műhelyben nem lehet szétszerelni."};complete(); return s;}
             const yields=dismantleYieldsForItem(item);
             next={...next,inventory:next.inventory.filter((_,i)=>i!==idx).concat(yields.flatMap(req=>Array.from({length:req.count},()=>makeInventoryItem(req.id))))}; used(); result={success:true,message:`${item.name} szétszerelve. ${yields.map(y=>`${getItem(y.id).name} × ${y.count}`).join(", ")} került vissza.`}; break;
           }
           result={success:false,message:"Válassz egy műveletet a műhelyben."}; break;
         }
-        case "gamble": case "odds": { const cost=fn.cost??50; if(!setGold(cost)){result={success:false,message:`A tét ${cost} arany.`};return s;} const win=Math.random()<0.45; next={...next,gold:next.gold+(win?cost*2:-cost),reputationParts:{...next.reputationParts,economic:next.reputationParts.economic+(win?2:0),activity:next.reputationParts.activity+1}}; used(); result={success:true,message:win?`Nyertél. A fogadás után ${cost*2} aranyat kapsz.`:`Elvesztetted a ${cost} aranynyi tétet.`}; break; }
+        case "gamble": case "odds": { const cost=fn.cost??50; if(!setGold(cost)){result={success:false,message:`A tét ${cost} arany.`};complete(); return s;} const win=Math.random()<0.45; next={...next,gold:next.gold+(win?cost*2:-cost),reputationParts:{...next.reputationParts,economic:next.reputationParts.economic+(win?2:0),activity:next.reputationParts.activity+1}}; used(); result={success:true,message:win?`Nyertél. A fogadás után ${cost*2} aranyat kapsz.`:`Elvesztetted a ${cost} aranynyi tétet.`}; break; }
         case "training": case "arenaTraining": case "apprentice": {
-          const cost=fn.cost??50; const stat=fn.stat??(fn.kind==="apprentice"?"smithing":"strength"); if(!setGold(cost)){result={success:false,message:`A képzés ára ${cost} arany.`};return s;} const newBase={...next.baseStats,[stat]:Math.min(50,next.baseStats[stat]+1)}; next={...next,gold:next.gold-cost,baseStats:newBase,identity:{...next.identity,affinities:{...next.identity.affinities,trade:fn.kind==="apprentice"?Math.min(100,next.identity.affinities.trade+2):next.identity.affinities.trade,combat:fn.kind==="arenaTraining"?Math.min(100,next.identity.affinities.combat+2):next.identity.affinities.combat}}}; used(); result={success:true,message:`Képzést kaptál: +1 ${stat}.`}; break; }
-        case "healing": { const cost=fn.cost??35; if(!setGold(cost)){result={success:false,message:`Az ellátás ára ${cost} arany.`};return s;} const restored=Math.ceil(max*0.20); next={...next,gold:next.gold-cost,health:Math.min(max,next.health+restored)}; used(); result={success:true,message:`Ellátás: +${restored} életerő.`}; break; }
-        case "fishing": { const itemId=fn.itemIds?.[0]??"saltFish"; if(next.inventory.length>=80){result={success:false,message:"A táskád tele van."};return s;} next={...next,inventory:[...next.inventory,makeInventoryItem(itemId)]}; used(); result={success:true,message:`Fogtál egyet: ${getItem(itemId).name}.`}; break; }
+          const cost=fn.cost??50; const stat=fn.stat??(fn.kind==="apprentice"?"smithing":"strength"); if(!setGold(cost)){result={success:false,message:`A képzés ára ${cost} arany.`};complete(); return s;} const newBase={...next.baseStats,[stat]:Math.min(50,next.baseStats[stat]+1)}; next={...next,gold:next.gold-cost,baseStats:newBase,identity:{...next.identity,affinities:{...next.identity.affinities,trade:fn.kind==="apprentice"?Math.min(100,next.identity.affinities.trade+2):next.identity.affinities.trade,combat:fn.kind==="arenaTraining"?Math.min(100,next.identity.affinities.combat+2):next.identity.affinities.combat}}}; used(); result={success:true,message:`Képzést kaptál: +1 ${stat}.`}; break; }
+        case "healing": { const cost=fn.cost??35; if(!setGold(cost)){result={success:false,message:`Az ellátás ára ${cost} arany.`};complete(); return s;} const restored=Math.ceil(max*0.20); next={...next,gold:next.gold-cost,health:Math.min(max,next.health+restored)}; used(); result={success:true,message:`Ellátás: +${restored} életerő.`}; break; }
+        case "fishing": { const itemId=fn.itemIds?.[0]??"saltFish"; if(next.inventory.length>=80){result={success:false,message:"A táskád tele van."};complete(); return s;} next={...next,inventory:[...next.inventory,makeInventoryItem(itemId)]}; used(); result={success:true,message:`Fogtál egyet: ${getItem(itemId).name}.`}; break; }
         case "trade": case "rareTrade": case "spiceTrade": case "market": case "streetMarket": case "cargo": case "warehouse": case "currency": case "information": case "rumor": case "documents": case "ledger": case "map": case "archive": case "investigation": case "harborMaster": case "security": case "guardPatrol": case "jail": case "doorGuard": case "ruins": case "well": case "social": case "club": case "patronage": case "credit": case "bank": case "guild": case "broker": case "caravan": case "transport": case "sailorHire": case "freeSailing": case "smuggling": case "sailorHire": case "palaceSecurity": case "diplomacy": case "arenaEntry": case "arenaAnnounce": case "challenge": case "weapons": case "arenaAnnounce": case "weapons": case "spiceTrade": case "foodTrade": {
           const selectedId = targetId?.startsWith("buy:") ? targetId.slice(4) : undefined;
           const gainItem = selectedId && fn.itemIds?.includes(selectedId as ItemId) ? selectedId : fn.itemIds?.[0];
           const item = gainItem ? itemById(gainItem) : undefined;
           const cost = item?.basePrice ?? fn.cost ?? 0;
-          if(cost>0&&!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};return s;}
-          if(gainItem){ if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};return s;} next={...next,gold:next.gold-cost,inventory:[...next.inventory,makeInventoryItem(gainItem)]}; } else { next={...next,gold:next.gold-cost}; }
+          if(cost>0&&!setGold(cost)){result={success:false,message:`Ehhez ${cost} arany szükséges.`};complete(); return s;}
+          if(gainItem){ if(next.inventory.length>=80){result={success:false,message:"A táskád megtelt (80/80)."};complete(); return s;} next={...next,gold:next.gold-cost,inventory:[...next.inventory,makeInventoryItem(gainItem)]}; } else { next={...next,gold:next.gold-cost}; }
           next={...next,identity:{...next.identity,affinities:{...next.identity.affinities,trade:fn.kind==="trade"||fn.kind==="caravan"?Math.min(100,next.identity.affinities.trade+1):next.identity.affinities.trade,social:fn.kind==="social"||fn.kind==="club"||fn.kind==="patronage"?Math.min(100,next.identity.affinities.social+1):next.identity.affinities.social,lore:fn.kind==="archive"||fn.kind==="investigation"?Math.min(100,next.identity.affinities.lore+1):next.identity.affinities.lore}}}; used(); result={success:true,message:gainItem&&item?`Megvetted: ${item.name}.`:`${fn.title} elvégezve. ${fn.description}`}; break;
         }
         default: result={success:true,message:`${fn.title}: ${fn.description}`}; break;
       }
+      complete();
       return next;
     });
     return result;
-  }, []);
-  const interactNpc = useCallback((npcId: NpcId) => update(s=>{const npc=NPCS.find(n=>n.id===npcId);if(!npc||!s.regionAccess[npc.region]||s.currentRegion!==npc.region||!npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id]))return s;const facets={...s.relationshipFacets,[npcId]:applyFacetDelta(s.relationshipFacets[npcId],{trust:2,respect:1,affection:1})};const next=relationshipAggregate(facets[npcId]);const memory=addMemory({kind:"npc",title:"Találkozás",text:`Találkoztál ${npc.name} karakterével a ${npc.location ?? npc.district ?? "város"} helyszínen.`,npcId,region:npc.region,district:npc.district,tags:["meeting","npc"],importance:1,at:stamp()});const identity=mergeIdentity(s.identity,{axes:{orderFreedom:0,honorOpportunism:2,mercyCruelty:1,curiosityPragmatism:2,ambitionIndependence:1,riskSafety:0,loyaltyAutonomy:3},affinities:{combat:0,shadow:0,social:3,trade:0,lore:0}});const nextState={...s,identity,relationships:{...s.relationships,[npcId]:next},relationshipFacets:facets,npcStates:{...s.npcStates,[npcId]:{status:stateForRelationship(facets[npcId]),updatedAt:stamp(),note:"A találkozások hatással vannak a kapcsolatra."}},worldMemories:[memory,...s.worldMemories].slice(0,120),reputationParts:{...s.reputationParts,relationships:s.reputationParts.relationships+1,activity:s.reputationParts.activity+1},journal:[entry("world","Városlakóval találkoztál",`${npc.name} mostantól egy kicsit jobban ismer.`),...s.journal].slice(0,60),gmMessages:[gm("A Szem feljegyezte",`${npc.name} kapcsolatod most ${next}. A következő találkozás már nem ugyanaz lesz.`,"personal"),...s.gmMessages].slice(0,20)}; const ns=recordDynamicEvent(s.narrativeState,{type:"relationship",at:stamp(),npcId,region:npc.region,tags:["npc","relationship"],summary:`Találkozás és kapcsolati változás: ${npc.name}.`,importance:1}); nextState.narrativeState=syncNarrativeDirector(ns,buildNarrativeContext({region:s.currentRegion,playerIdentity:identity,relationshipFacets:facets,memories:[memory,...s.worldMemories],npcStates:nextState.npcStates,questStatus:s.questStatus,activeQuestId:s.trackedQuestId,worldHour:getWorldTime().hour,eyeSignals:s.gmMessages.slice(0,6).map(m=>({title:m.title,body:m.body,tone:m.tone}))}),stamp()); return nextState;}),[update]);
+  }, [update]);
+  const interactNpc = useCallback((npcId: NpcId) => update(s=>{const npc=NPCS.find(n=>n.id===npcId);if(!npc||!s.regionAccess[npc.region]||s.currentRegion!==npc.region||!npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id]))complete(); return s;const facets={...s.relationshipFacets,[npcId]:applyFacetDelta(s.relationshipFacets[npcId],{trust:2,respect:1,affection:1})};const next=relationshipAggregate(facets[npcId]);const memory=addMemory({kind:"npc",title:"Találkozás",text:`Találkoztál ${npc.name} karakterével a ${npc.location ?? npc.district ?? "város"} helyszínen.`,npcId,region:npc.region,district:npc.district,tags:["meeting","npc"],importance:1,at:stamp()});const identity=mergeIdentity(s.identity,{axes:{orderFreedom:0,honorOpportunism:2,mercyCruelty:1,curiosityPragmatism:2,ambitionIndependence:1,riskSafety:0,loyaltyAutonomy:3},affinities:{combat:0,shadow:0,social:3,trade:0,lore:0}});const nextState={...s,identity,relationships:{...s.relationships,[npcId]:next},relationshipFacets:facets,npcStates:{...s.npcStates,[npcId]:{status:stateForRelationship(facets[npcId]),updatedAt:stamp(),note:"A találkozások hatással vannak a kapcsolatra."}},worldMemories:[memory,...s.worldMemories].slice(0,120),reputationParts:{...s.reputationParts,relationships:s.reputationParts.relationships+1,activity:s.reputationParts.activity+1},journal:[entry("world","Városlakóval találkoztál",`${npc.name} mostantól egy kicsit jobban ismer.`),...s.journal].slice(0,60),gmMessages:[gm("A Szem feljegyezte",`${npc.name} kapcsolatod most ${next}. A következő találkozás már nem ugyanaz lesz.`,"personal"),...s.gmMessages].slice(0,20)}; const ns=recordDynamicEvent(s.narrativeState,{type:"relationship",at:stamp(),npcId,region:npc.region,tags:["npc","relationship"],summary:`Találkozás és kapcsolati változás: ${npc.name}.`,importance:1}); nextState.narrativeState=syncNarrativeDirector(ns,buildNarrativeContext({region:s.currentRegion,playerIdentity:identity,relationshipFacets:facets,memories:[memory,...s.worldMemories],npcStates:nextState.npcStates,questStatus:s.questStatus,activeQuestId:s.trackedQuestId,worldHour:getWorldTime().hour,eyeSignals:s.gmMessages.slice(0,6).map(m=>({title:m.title,body:m.body,tone:m.tone}))}),stamp()); return nextState;}),[update]);
   const acceptSideQuest = useCallback((sideQuestId: string) => { let result = { success:false, message:"Ez a történet már nem érhető el." }; update(s => { const record=s.narrativeState.runtime.sideQuests.records.find(r=>r.id===sideQuestId); if(!record||record.status!=="offered") return s; const npc=NPCS.find(n=>n.id===record.blueprint.giver); if(!npc||s.currentRegion!==record.blueprint.region||!npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id])) { result={success:false,message:"A történetadó jelenleg nincs elérhető közelségben."}; return s; } const ns=activateSideQuest(s.narrativeState,sideQuestId,Date.now()); const facets={...s.relationshipFacets,[npc.id]:applyFacetDelta(s.relationshipFacets[npc.id],{trust:2,respect:1,suspicion:-1})}; const memory=addMemory({kind:"quest",title:"Melléktörténet vállalva",text:`Elfogadtad ${npc.name} történetét.`,npcId:npc.id,region:npc.region,district:npc.district,tags:["side-quest","accepted",record.blueprint.source],importance:2,at:stamp()}); result={success:true,message:"Mellékküldetés elfogadva."}; return {...s,narrativeState:ns,relationshipFacets:facets,relationships:{...s.relationships,[npc.id]:relationshipAggregate(facets[npc.id])},worldMemories:[memory,...s.worldMemories].slice(0,160),journal:[entry("quest","Melléktörténet vállalva",record.blueprint.hook),...s.journal].slice(0,80),gmMessages:[gm("A Szem feljegyezte",`${npc.name} történetébe beléptél. A megoldás módja nyomot hagy majd.`,"personal"),...s.gmMessages].slice(0,20)}; }); return result; }, [update]);
   const declineSideQuest = useCallback((sideQuestId: string) => { let result={success:false,message:"Ez a történet már nem érhető el."}; update(s=>{const record=s.narrativeState.runtime.sideQuests.records.find(r=>r.id===sideQuestId); if(!record||record.status!=="offered") return s; const npc=NPCS.find(n=>n.id===record.blueprint.giver); const ns=resolveSideQuestRuntime(s.narrativeState,sideQuestId,"declined",Date.now()); if(!npc){result={success:true,message:"Figyelmen kívül hagytad a történetet."}; return {...s,narrativeState:ns};} const facets={...s.relationshipFacets,[npc.id]:applyFacetDelta(s.relationshipFacets[npc.id],{trust:-2,respect:-1,suspicion:1})}; const memory=addMemory({kind:"quest",title:"Melléktörténet elutasítva",text:`Nem vállaltad el ${npc.name} kérését.`,npcId:npc.id,region:npc.region,district:npc.district,tags:["side-quest","declined",record.blueprint.source],importance:1,at:stamp()}); result={success:true,message:"Figyelmen kívül hagytad. A kapcsolat emlékszik rá."}; return {...s,narrativeState:ns,relationshipFacets:facets,relationships:{...s.relationships,[npc.id]:relationshipAggregate(facets[npc.id])},worldMemories:[memory,...s.worldMemories].slice(0,160),journal:[entry("quest","Melléktörténet elutasítva",`${npc.name} emlékezni fog a döntésedre.`),...s.journal].slice(0,80),gmMessages:[gm("A Szem feljegyezte",`${npc.name} nem felejti el, hogy most nemet mondtál.`,"personal"),...s.gmMessages].slice(0,20)};}); return result;},[update]);
   const resolveSideQuest = useCallback((sideQuestId: string, choiceId: string) => {
