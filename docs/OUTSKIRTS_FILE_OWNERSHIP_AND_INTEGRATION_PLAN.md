@@ -74,3 +74,51 @@ Each request must include:
 
 ## 7. Workshop branch governance
 workshop/phase-1-crafting-specialization remains an unmerged candidate. Its changes must be reviewed separately. If accepted later, central integrator ports or merges only approved scope after comparing against current main and evaluating regressions. It must not become the new canonical baseline without explicit approval.
+
+
+---
+
+# PHASE 2 TARGETED GAP CLOSURE — OLD MARKET OWNERSHIP BOUNDARIES
+
+**Status:** DOCUMENTATION-ONLY CLARIFICATION · CENTRAL REVIEW REQUIRED  
+**Baseline:** `main`, `2.0.0-alpha.26`  
+**Branch:** `old-market/phase-1-specification`
+
+## 1. Old Market source ownership
+
+This Phase 2 source-verification addendum does not transfer ownership of shared runtime files to Developer 03.
+
+| Source / subsystem | Accountable owner remains | Old Market contribution |
+|---|---|---|
+| `src/lib/content.ts` | Central Meta-GPT / Content Integrator | Verified item/NPC/function catalogue; propose itemIds only after approval |
+| `src/lib/itemSystem.ts` | Central Meta-GPT / Item Systems Owner | Verified regional-pool membership; no local pool mutation |
+| `src/lib/rules.ts` | Central Meta-GPT / Gameplay Rules Owner | Verified current price/resale formulas; no local formula |
+| `src/lib/store.ts` | Central Meta-GPT / Runtime State Owner | Report Zora/Pell/Cador runtime defects; no local transaction handler |
+| `src/lib/types.ts` | Central Meta-GPT / Shared Types Owner | Report missing document/manifest fields; no new type or evidence model |
+| `src/lib/mainQuestAudit.ts` | Central Meta-GPT / Main Quest Canon Owner | Consume existing hooks only; no edits to the 60 main quests |
+| Damar shipment/manifest domain | Damar/Gate City owner, then Central approval | Cador may request read-only published references; no Cador-owned shipment/custody model |
+| Dain cargo/ship-log domain | Harbor owner, then Central approval | Provide cross-reference requirements only |
+| `docs/OUTSKIRTS_*.md` | Central Meta-GPT maintains shared matrices | Old Market supplies source-backed amendments; central review retains final ownership |
+
+## 2. Cador ↔ Damar future interface boundary
+
+**VERIFIED alpha.26:** Damar is the Gate City warehouse keeper and `fn-damar` is `kind:"warehouse"`; its description covers opening or checking official cargo movement subject to permission. Dain's `fn-dain` is `kind:"cargo"` and describes comparing ship logs and cargo manifests. Neither function currently exposes a typed manifest/custody record through its authored function definition.
+
+**PROPOSAL only:** if a future Damar shipment/manifest contract is approved, it remains Damar-owned. Cador may receive read-only references for ledger reconciliation (e.g. manifest reference, shipment reference, item ID, quantity, origin/destination, dispatch/arrival times, seal reference). Cador may not create a parallel manifest, shipment, custody, or evidence model and may not mutate Damar's authoritative shipment data.
+
+Sources: [Damar NPC](../src/lib/content.ts#L277-L277), [Damar function](../src/lib/content.ts#L422-L425), [Dain function](../src/lib/content.ts#L453-L453), [Damar quest hook](../src/lib/mainQuestAudit.ts#L21-L28).
+
+## 3. Ilren — BLOCKED, no ownership transfer
+
+Ilren remains outside Developer 03's accepted Old Market scope. The mismatch is recorded only:
+
+- `OUTSKIRTS_DISTRICTS.oldMarket.npcIds` includes `ilren`.
+- NPC master data defines Ilren as `region:"market"`, `district:"exchangeSquare"`.
+- No district relocation, Canon edit, item/function ownership change, or implementation plan is authorized.
+- Project owner is the decision-maker; Central Meta-GPT records the decision before any district owner acts.
+
+Sources: [Old Market district NPC list](../src/lib/content.ts#L410-L413), [Ilren master record](../src/lib/content.ts#L278-L278).
+
+## 4. Change control
+
+This branch contains documentation amendments only. No TypeScript, runtime, content, item, quest, save, or schema source is changed. No pull request is opened and no merge is performed. Central Meta-GPT review is required before the amended shared matrices become approved project policy.
