@@ -5,7 +5,7 @@ import { INITIAL_STATS, ITEMS, NPCS, NPC_FUNCTIONS, QUESTS } from "./content";
 import { getEffectiveStats, getItem, makeInventoryItem, marketPrice, reputationScore, sellingPrice, XP_FOR_LEVEL } from "./rules";
 import { rollReward, explainRewardRoll, nextRewardPity, type RewardPityState, type RewardRoll } from "./rewardEconomy";
 import { getWorldTime } from "./worldTime";
-import { createInnSubmissionController, createInnTransactionGuard, planInnFoodPurchase, planInnRest } from "./innService";
+import { createInnSubmissionController, createInnTransactionGuard, executeAlmaInnTransaction } from "./innService";
 import { craftRecipeForItem, dismantleYieldsForItem } from "./itemSystem";
 import { isMarketEligible, isSellable, itemAvailableInRegion, itemLegalStatus, itemSourceLabel, itemCategory } from "./itemSystem";
 import type { AvatarId, EquipmentSlot, GmMessage, InventoryItem, ItemId, JournalEntry, NpcId, QuestChoice, QuestDefinition, QuestId, QuestStatus, RegionId, ReputationBreakdown, Stats, TemporaryItemBuff, TemporaryStatBuff, StatId } from "./types";
@@ -631,60 +631,50 @@ export function useGameStore(): GameState {
       };
       switch(fn.kind){
         case "inn": {
-          if (targetId?.startsWith("buy:")) {
-            const selectedId = targetId.slice(4);
-            const itemId = fn.itemIds?.includes(selectedId as ItemId) ? selectedId : undefined;
-            const item = itemId ? itemById(itemId) : undefined;
-            const purchase = planInnFoodPurchase(
-              { gold: s.gold, health: s.health, inventoryCount: s.inventory.length },
-              item,
-              fn.itemIds ?? [],
-              max,
-              80,
-            );
-            if (!purchase.success || !item) {
-              const price = purchase.preview?.price ?? item?.basePrice ?? 0;
-              result = {
-                success: false,
-                message: purchase.reason === "inventory-full" ? "A táskád megtelt (80/80)."
-                  : purchase.reason === "insufficient-gold" ? `Ehhez ${price} arany szükséges.`
-                  : "A kiválasztott étel nem vásárolható meg.",
-              };
-              complete(); return s;
-            }
-            next = {
-              ...next,
-              gold: purchase.nextState.gold,
-              inventory: [...next.inventory, makeInventoryItem(item.id)],
-            };
-            used();
-            result = { success: true, message: `Megvetted: ${item.name} · ${purchase.preview?.price ?? item.basePrice} arany. Az étel bekerült a táskádba.` };
-            break;
-          }
-          if (targetId !== "rest") {
-            result = { success: false, message: "Almánál kizárólag az egyórás pihenési cél használható." };
-            complete(); return s;
-          }
-          const rest = planInnRest(
+          const transaction = executeAlmaInnTransaction(
             { gold: s.gold, health: s.health, inventoryCount: s.inventory.length },
-            max,
-            fn.cost ?? 60,
+            {
+              targetId: targetId ?? "",
+              transactionId,
+              npcId,
+              functionId,
+              allowedItemIds: fn.itemIds ?? [],
+              items: ITEMS,
+              maxHealth: max,
+              restPrice: fn.cost ?? 60,
+              inventoryLimit: 80,
+            },
+            reserveInnTransaction,
           );
-          if (!rest.success) {
+          if (!transaction.success) {
             result = {
               success: false,
-              message: rest.reason === "full-health" ? "Teljes az életerőd, nincs szükséged alvásra."
-                : rest.reason === "insufficient-gold" ? "A pihenés ára 60 arany."
-                : "A pihenés jelenleg nem elérhető.",
+              message: transaction.message === "full-health" ? "Teljes az életerőd, nincs szükséged alvásra."
+                : transaction.message === "insufficient-gold" ? "A pihenés ára 60 arany."
+                : transaction.message === "inventory-full" ? "A táskád megtelt (80/80)."
+                : transaction.message === "collision" ? "A tranzakcióazonosító egy másik fogadói művelethez tartozik."
+                : transaction.message === "duplicate" ? "Ezt a fogadói műveletet már feldolgoztuk."
+                : transaction.message === "invalid" ? "A fogadói tranzakcióazonosító hiányzik vagy érvénytelen."
+                : transaction.message === "invalid-item" ? "A kiválasztott étel nem vásárolható meg."
+                : "Almánál kizárólag egyórás pihenés vagy engedélyezett ételvásárlás használható.",
             };
-            complete(); return s;
+            complete();
+            return s;
           }
-          next = { ...next, gold: rest.nextState.gold, health: rest.nextState.health };
-          used();
-          result = {
-            success: true,
-            message: `Egy óra pihenés: +${rest.preview?.restoredHealth ?? 0} életerő. Szállás: ${rest.preview?.price ?? 60} arany.`,
-          };
+          if (transaction.addedItemId) {
+            const item = ITEMS.find(candidate => candidate.id === transaction.addedItemId);
+            next = {
+              ...next,
+              gold: transaction.state.gold,
+              inventory: [...next.inventory, makeInventoryItem(transaction.addedItemId)],
+            };
+            used();
+            result = { success: true, message: `Megvetted: ${item?.name ?? transaction.addedItemId} · az étel bekerült a táskádba.` };
+          } else {
+            next = { ...next, gold: transaction.state.gold, health: transaction.state.health };
+            used();
+            result = { success: true, message: `Egy óra pihenés. Új életerő: ${transaction.state.health}. Szállás: ${fn.cost ?? 60} arany.` };
+          }
           break;
         }
         case "foodTrade": case "food": {
