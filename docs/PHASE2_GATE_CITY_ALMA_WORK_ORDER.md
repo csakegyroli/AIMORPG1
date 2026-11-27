@@ -132,3 +132,35 @@ Expected scope after integration:
 
 Blocker:
 The connected GitHub tool can inspect and write individual files/commits, but does not provide a local git checkout or cherry-pick operation. Local `git clone` previously failed with `Could not resolve host: github.com`. Therefore the two commits are reviewed and their exact integration plan is documented, but they have NOT been integrated.
+
+
+## Owner follow-up — technical closure pass (2026-11-27)
+
+### Targeted code fixes committed
+- Removed an accidental self-import from `src/lib/innService.ts`; planner functions and `InnTransactionState` are declared in that same module and are referenced directly.
+- Changed `executeAlmaInnTransaction` so it completes plan validation before reserving the ID. A failed preflight therefore leaves gold/HP/inventory unchanged and does not burn the ID; a corrected retry can proceed. A successful request reserves the ID, and repeats are rejected as duplicate/collision.
+- In `src/lib/store.ts`, re-check the pending submission controller from inside the functional state updater immediately before any store mutation. A cancel that wins before that updater executes now prevents the transaction from committing.
+- Terminalize the submission controller on both successful and rejected execution paths, so invalid NPC/presence/preflight exits do not leave a pending lock behind.
+- Expanded `scripts/alma-inn-smoke.cjs` to execute the same `executeAlmaInnTransaction` boundary called by the store, including rest/purchase, full HP, insufficient gold, allow-list failures, unknown/non-consumable items, full inventory, duplicate/collision, failed-preflight retry, and controller cancel/commit/reset behavior.
+
+### Runtime evidence
+- Environment: Node `v22.16.0`; npm `10.9.2`; globally available TypeScript `5.8.3`.
+- The current branch test source was exercised in an isolated local harness with the same `innService.ts` implementation and expanded runtime assertions. Result: **PASS** — `Alma executor, planners, idempotency guard, and pending/cancel state-machine runtime checks.`
+- Scope limitation: the full repository checkout and all source dependencies were not present locally. The isolated harness exercised the shared transaction executor and state-machine module; it did not mount React or dispatch DOM clicks, and it was not the complete repository test suite.
+
+### Full project checks — NOT RUN against the branch checkout
+A complete `gate-city/phase-2-alma` git checkout could not be established. No `.git` repository exists in the available local project directories. DNS resolution for `github.com`, `api.github.com`, and `raw.githubusercontent.com` fails with `Temporary failure in name resolution`; there is no configured HTTP(S) proxy. Thus the full project dependency lockfile/node_modules are unavailable here.
+- `npm test`: **NOT RUN** as the complete project script. The focused Alma runtime test above passed in isolation.
+- `npm run lint`: **NOT RUN** against the repository. A diagnostic attempt in the isolated harness exited 1 because the full TypeScript project and tsconfig/dependencies were not present; the global compiler reports 5.8.3, not the repository-declared 5.9.3.
+- `npm run build`: **NOT RUN** against the repository. The isolated harness has no Next.js installation; diagnostic attempt exited 127 (`next: not found`).
+- `npm ci`: **NOT RUN**; there is no branch checkout/lockfile available locally and DNS resolution is failing.
+
+### Main alignment
+The current GitHub compare still reports 33 commits ahead and 2 behind main, with merge base `894e9606fa84f5d609d810152e326b1cfae09b18`. The two main commits were individually fetched and their complete diffs reviewed. Both only touch `docs/OUTSKIRTS_PHASE1_SHARED_ARCHITECTURE.md`, in order 076239c then 2190291. Direct path collision with Alma's six PR files is absent. Git cherry-pick was not performed because there is no local checkout and no working GitHub DNS; no conclusion about history-level conflict-free cherry-picking is claimed.
+
+### Remaining limitations / status
+- The React hook/UI click lifecycle is not dynamically verified; no DOM renderer is configured in this isolated environment.
+- Store functional-updater integration is established by source inspection and the shared executor/state-machine tests, not a live React mount.
+- The 256-entry receipt guard remains session-memory-only; it is not durable idempotency or server security.
+- No save key/version, save schema, InventoryItem, Canon, item definitions, or main quest data were intentionally changed.
+- PR #11 remains **Open / Draft / Unmerged**. Alma remains pending explicit owner acceptance. No other NPC implementation was started.
