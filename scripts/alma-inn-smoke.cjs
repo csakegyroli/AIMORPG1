@@ -82,6 +82,41 @@ try {
     assert.deepEqual(plan.nextState, state, "Rejected purchase must preserve its input gold, HP and inventory.");
   }
 
+  // Actual store transaction boundary used by the React store; assert full state outcome.
+  const integrationGuard = createInnTransactionGuard(32);
+  const storeState = { gold: 100, health: 100, inventoryCount: 79 };
+  const restArgs = {
+    targetId: "rest", transactionId: "alma:store:rest:tx000001",
+    npcId: "alma", functionId: "fn-alma",
+    allowedItemIds: ["heartyStew", "gateRations"], items: [stew, rations],
+    maxHealth: 125, restPrice: 60, inventoryLimit: 80,
+  };
+  const committedRest = executeAlmaInnTransaction(storeState, restArgs, integrationGuard);
+  assert.equal(committedRest.success, true);
+  assert.deepEqual(committedRest.state, { gold: 40, health: 113, inventoryCount: 79 });
+  const duplicateRest = executeAlmaInnTransaction(committedRest.state, restArgs, integrationGuard);
+  assert.equal(duplicateRest.success, false);
+  assert.deepEqual(duplicateRest.state, committedRest.state);
+
+  const purchaseArgs = {
+    ...restArgs, targetId: "buy:heartyStew",
+    transactionId: "alma:store:buy:tx000001",
+  };
+  const committedPurchase = executeAlmaInnTransaction(storeState, purchaseArgs, integrationGuard);
+  assert.equal(committedPurchase.success, true);
+  assert.equal(committedPurchase.addedItemId, "heartyStew");
+  assert.deepEqual(committedPurchase.state, { gold: 76, health: 100, inventoryCount: 80 });
+  const disallowed = executeAlmaInnTransaction(storeState, {
+    ...purchaseArgs, targetId: "buy:unknownItem", transactionId: "alma:store:buy:tx000002",
+  }, integrationGuard);
+  assert.equal(disallowed.success, false);
+  assert.deepEqual(disallowed.state, storeState);
+  const wrongTargetPayload = executeAlmaInnTransaction(storeState, {
+    ...purchaseArgs, targetId: "buy:gateRations",
+  }, (id, fingerprint) => integrationGuard(purchaseArgs.transactionId, fingerprint));
+  assert.equal(wrongTargetPayload.success, false);
+  assert.deepEqual(wrongTargetPayload.state, storeState);
+
   // Duplicate submission, ID collision, invalid ID and bounded-cache eviction.
   // UI submission state machine: pending may cancel before commit; committed work cannot cancel.
   const submission = createInnSubmissionController();
