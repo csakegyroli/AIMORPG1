@@ -32,8 +32,8 @@ try {
   assert.equal(getInnRestPreview(123, 125, 60).restoredHealth, 2);
   assert.equal(getInnRestPreview(125, 125, 1000).reason, "full-health");
   assert.equal(getInnRestPreview(100, 125, 59).reason, "insufficient-gold");
-  assert.equal(getInnRestPreview(100, 125, -1).reason, "invalid-preview");
-  assert.equal(getInnRestPreview(100, 125, Number.NaN).reason, "invalid-preview");
+  assert.equal(getInnRestPreview(100, 125, 100, -1).reason, "invalid-preview");
+  assert.equal(getInnRestPreview(100, 125, 100, Number.NaN).reason, "invalid-preview");
   assert.equal(getInnRestPreview(140, 125, 60).currentHealth, 140);
   assert.equal(getInnRestPreview(100, 125.9, 60).maxHealth, 125);
 
@@ -68,17 +68,18 @@ try {
   const validPurchase = planInnFoodPurchase(purchaseState, stew, ["heartyStew", "gateRations"], 125);
   assert.equal(validPurchase.success, true);
   assert.deepEqual(validPurchase.nextState, { gold: 76, health: 100, inventoryCount: 11 });
-  const invalidPlans = [
-    planInnFoodPurchase(purchaseState, undefined, ["heartyStew"], 125),
-    planInnFoodPurchase(purchaseState, stew, ["gateRations"], 125),
-    planInnFoodPurchase(purchaseState, { ...stew, type: "weapon" }, ["heartyStew"], 125),
-    planInnFoodPurchase(purchaseState, { ...stew, basePrice: -1 }, ["heartyStew"], 125),
-    planInnFoodPurchase({ ...purchaseState, gold: 1 }, stew, ["heartyStew"], 125),
-    planInnFoodPurchase({ ...purchaseState, inventoryCount: 80 }, stew, ["heartyStew"], 125),
+  const invalidInputs = [
+    [purchaseState, undefined, ["heartyStew"]],
+    [purchaseState, stew, ["gateRations"]],
+    [purchaseState, { ...stew, type: "weapon" }, ["heartyStew"]],
+    [purchaseState, { ...stew, basePrice: -1 }, ["heartyStew"]],
+    [{ ...purchaseState, gold: 1 }, stew, ["heartyStew"]],
+    [{ ...purchaseState, inventoryCount: 80 }, stew, ["heartyStew"]],
   ];
-  for (const plan of invalidPlans) {
+  for (const [state, item, allowList] of invalidInputs) {
+    const plan = planInnFoodPurchase(state, item, allowList, 125);
     assert.equal(plan.success, false);
-    assert.deepEqual(plan.nextState, purchaseState, "Rejected purchase must preserve gold, HP and inventory.");
+    assert.deepEqual(plan.nextState, state, "Rejected purchase must preserve its input gold, HP and inventory.");
   }
 
   // Duplicate submission, ID collision, invalid ID and bounded-cache eviction.
