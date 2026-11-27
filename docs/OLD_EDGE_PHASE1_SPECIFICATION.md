@@ -179,9 +179,9 @@ Evidence labels:
 #### Definition and current action path
 
 **VERIFIED**
-- `src/lib/content.ts:464`: `fn-eldra`, `npcId: "eldra"`, `kind: "alchemy"`; the configured `itemIds` are exactly `moonleaf`, `emberRoot`, `strengthTonic`, `runeInfusion`.
+- `src/lib/content.ts:463`: `fn-eldra`, `npcId: "eldra"`, `kind: "alchemy"`; the configured `itemIds` are exactly `moonleaf`, `emberRoot`, `strengthTonic`, `runeInfusion`.
 - `src/lib/types.ts:57-59`: `InventoryItem = { instanceId, itemId }`; `TemporaryStatBuff` stores `id/stat/amount/expiresAt/source`; `TemporaryItemBuff` stores `instanceId/stat/amount/expiresAt/source`. There is no recipe-instance or potion-batch type here.
-- `src/lib/store.ts:579-648` (handler starts at the `useNpcFunction` callback; alchemy branch at 626): NPC ID, function ID, current region and NPC presence are checked before the switch. The `alchemy` case has two paths:
+- `src/lib/store.ts:568-669` (handler starts at the `useNpcFunction` callback; alchemy branch at 626): NPC ID, function ID, current region and NPC presence are checked before the switch. The `alchemy` case has two paths:
   1. `buy:<itemId>`: validates the selected ID against `fn.itemIds`, checks gold and inventory capacity, deducts `item.basePrice`, adds `makeInventoryItem(item.id)`, then records the generic activity.
   2. `infuse:<instanceId>`: resolves the ID against currently equipped items, checks for an active item buff, finds one `runeInfusion` in inventory, consumes that item and attaches a temporary buff to the equipped instance.
 - `src/lib/itemSystem.ts:114-132`: `craftRecipeForItem` is a gear recipe helper. It requires a gear slot and returns workshop iron plus a region/synergy secondary material. It is not an alchemy recipe catalogue and does not define a `moonleaf`/`emberRoot` potion recipe.
@@ -214,7 +214,7 @@ Evidence labels:
 - `src/lib/store.ts:310-311`: after hydration, the full `data` object is serialized to localStorage whenever it changes. Buff arrays are part of that object. Therefore an unexpired buff survives reload in the current browser save; an expired buff is filtered out during load. Time continues to elapse while the game is closed because expiry uses wall-clock `Date.now()`.
 - `src/lib/store.ts:514-519`: using a second strength tonic replaces the existing `alchemy-strength` entry, consumes the second potion and refreshes expiry. It is refresh, not additive stacking.
 - `src/lib/store.ts:630-641`: duplicate active infusion is blocked by target item instance and unexpired timestamp. An expired buff does not block re-infusion.
-- `src/lib/store.ts:579-648`: the handler has no operation/session ID, idempotency token, duplicate-request ledger or transaction boundary. The `used()` helper awards the generic NPC-function XP/memory only once per function tag, but that does **not** prevent repeated purchases or repeated infusion actions after expiry.
+- `src/lib/store.ts:568-669`: the handler has no operation/session ID, idempotency token, duplicate-request ledger or transaction boundary. The `used()` helper awards the generic NPC-function XP/memory only once per function tag, but that does **not** prevent repeated purchases or repeated infusion actions after expiry.
 - **Interruption:** there is no multi-stage alchemy session or in-progress recipe to interrupt. A purchase is a single store update. A buff application is a single store update. There is no separate cancel/rollback flow after the click has committed.
 - **Capacity:** purchase checks `inventory.length >= 80` before adding the item. The rune infusion path consumes one infusion item and updates the buff in the same returned state object.
 
@@ -246,7 +246,7 @@ Evidence labels:
 **VERIFIED CURRENT BASELINE**
 - `src/lib/content.ts:339`: Siven is the Old Edge NPC at the Régi raktárudvar.
 - `src/lib/content.ts:481`: `fn-siven`, kind `ruins`, cost 40 gold.
-- `src/lib/store.ts:648-655`: `ruins` is included in the generic service/item handler, not a dedicated expedition handler. With no item list, it deducts the configured fee and returns the generic function description; no expedition route, stage, carried-instance set, trap state, clue record or return settlement is written.
+- `src/lib/store.ts:663-669`: `ruins` is included in the generic service/item handler, not a dedicated expedition handler. With no item list, it deducts the configured fee and returns the generic function description; no expedition route, stage, carried-instance set, trap state, clue record or return settlement is written.
 - `src/lib/narrative.ts:35-49`: existing Dynamic Layer has generic flags, bounded dynamic events, NPC overrides and discovered Canon hints. `NarrativeState` owns Canon (read-only), Dynamic Layer, director and runtime.
 - `src/lib/narrative.ts:749-800`: dynamic events are appended with generated IDs and bounded to 200; save sanitization retains typed flags/events and bounded discovered-hint strings.
 - `src/lib/store.ts:16,229-273,310-311`: save schema is currently localStorage key `aimorpg-final-demo-v1-29`, payload saveVersion 6 in fresh state, and the existing save/load pipeline has no expedition field.
@@ -299,7 +299,7 @@ This is a proposed logical contract only. It is not an alpha.26 type or an imple
 #### Jarek map compatibility and route discovery
 
 - `src/lib/content.ts:468-469`: `fn-jarek` is a 20-gold map service whose authored description says Jarek updates the route map and reveals shortcuts.
-- Alpha.26 generic handler does not verify a persistent route-discovery record for `fn-jarek`; the current `map` kind is routed through the generic service branch (`src/lib/store.ts:648-655`).
+- Alpha.26 generic handler does not verify a persistent route-discovery record for `fn-jarek`; the current `map` kind is routed through the generic service branch (`src/lib/store.ts:663-669`).
 - **PROPOSAL — CENTRAL DECISION REQUIRED:** use one canonical stable `routeId` namespace shared by Jarek's map content and Siven's expedition routes. Jarek may reveal/mark only route IDs that are authored and eligible; Siven may offer only route IDs already unlocked by the approved access rule. Do not create a second map graph inside Siven.
 - Discovery record should reference `routeId` and its source event; the UI route preview is recomputed. Whether the existing `dynamic.flags` or a shared map-discovery contract owns this flag is an open central decision.
 
@@ -307,8 +307,8 @@ This is a proposed logical contract only. It is not an alpha.26 type or an imple
 
 **VERIFIED CURRENT BASELINE**
 - `src/lib/content.ts:340`: Maela is the Néma Kút gondnoka in Old Edge.
-- `src/lib/content.ts:483`: `fn-maela`, kind `well`, with `itemIds: ["silentWellVial"]`.
-- `src/lib/store.ts:648-655`: `well` is in the generic item/service branch. Since the function has one item ID, the generic action can sell the vial; there is no puzzle evaluator or persistent discovery completion check in this handler.
+- `src/lib/content.ts:482`: `fn-maela`, kind `well`, with `itemIds: ["silentWellVial"]`.
+- `src/lib/store.ts:663-669`: `well` is in the generic item/service branch. Since the function has one item ID, the generic action can sell the vial; there is no puzzle evaluator or persistent discovery completion check in this handler.
 - `src/lib/content.ts:66`: `silentWellVial` is a 34-gold relic-category consumable, but it is currently `sellable: true` and `marketEligible: true`.
 - `src/lib/content.ts:430`: Niven's `fn-niven` rare-trade list also contains `silentWellVial`.
 - `src/lib/itemSystem.ts` regional explicit pool includes `silentWellVial` in the Outskirts pool; `isMarketEligible` and `isSellable` rely on the item flags and quest-item category, and `relic` is not automatically a quest-item category.
