@@ -59,3 +59,28 @@ This is a sequencing decision, not a Canon change. Damar remains the first Gate 
 4. Save compatibility and exploit checks.
 5. Remaining gaps / central decisions.
 6. PR URL and merge status (must remain unmerged).
+
+
+## Alma Varg — implementation closure notes (owner review)
+
+### Runtime contract
+- The canonical rest target is exactly `rest`. The store rejects `hours:1`, `1`, undefined and any unknown rest target.
+- No rest target or pending inn transaction is persisted in save v6. No migration was added.
+- The rest plan charges 60 gold and restores `ceil(10% of max HP)`, capped at the calculated maximum. If HP is already full/above max, no rest transaction is applied.
+- Food purchase is limited to existing `fn-alma.itemIds`, and each ID must resolve to an existing consumable with a finite, non-negative price. The store and UI both enforce that allow-list.
+- `heartyStew` and `gateRations` definitions/effects remain unchanged.
+
+### Transaction identity and protection
+- Each UI submission receives a unique ID composed of the Alma NPC ID, function ID, local timestamp and random suffix.
+- The store reserves that ID before queueing the functional state update. A repeated ID+target is rejected as duplicate; reuse of the same ID with another target is rejected as a collision.
+- The bounded receipt map stores at most 256 recent IDs in client memory. It is lost on reload and old entries can be evicted; it is not persistent idempotency and is not server-side security.
+- The existing functional store update evaluates gold, health and inventory from the latest state. The completion callback returns the resolved action result once, and the UI keeps its lock until that result is delivered rather than using a fixed delay.
+
+### HP parity and cancellation
+- The UI preview and store action both call the exported `getMaxHealth` calculation. It includes current equipment and active temporary stat/item buffs.
+- Cancel resets pending/lock/selection before submission and performs no store mutation. The control is disabled while a submitted transaction is pending; a submitted or committed store action cannot be rolled back.
+
+### Test scope
+- `scripts/alma-inn-smoke.cjs` dynamically exercises the pure rest/purchase planners and the bounded transaction-ID guard.
+- Its static contract checks verify store/UI wiring, canonical target, save key/version and the 60 main quests.
+- React DOM click dispatch and the full React hook lifecycle are not dynamically tested because this repository has no configured component renderer or DOM test framework.
