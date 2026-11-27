@@ -176,8 +176,12 @@ export function executeAlmaInnTransaction(
   reserve: (id: unknown, fingerprint: string) => string,
 ): AlmaInnCommitResult {
   // 1. Validate the operation target and identity payload without reserving an ID.
-  const validTarget = args.targetId === "rest"
-    || (typeof args.targetId === "string" && args.targetId.startsWith("buy:") && args.targetId.length > 4);
+  if (!args || typeof args !== "object") {
+    return { success: false, message: "invalid-payload", state, addedItemId: null };
+  }
+  const targetId = args.targetId;
+  const validTarget = targetId === "rest"
+    || (typeof targetId === "string" && targetId.startsWith("buy:") && targetId.length > 4);
   const validPayload = typeof args.npcId === "string" && args.npcId.length > 0
     && typeof args.functionId === "string" && args.functionId.length > 0
     && Array.isArray(args.allowedItemIds) && Array.isArray(args.items)
@@ -187,12 +191,12 @@ export function executeAlmaInnTransaction(
   }
 
   // 2. Build the exact business transaction plan first.
-  const itemId = args.targetId.startsWith("buy:") ? args.targetId.slice(4) : null;
-  const plan = args.targetId === "rest"
+  const itemId = targetId.startsWith("buy:") ? targetId.slice(4) : null;
+  const plan = targetId === "rest"
     ? planInnRest(state, args.maxHealth, args.restPrice ?? 60)
     : planInnFoodPurchase(
         state,
-        args.items.find(candidate => candidate.id === itemId),
+        args.items.find(candidate => candidate?.id === itemId),
         args.allowedItemIds,
         args.maxHealth,
         args.inventoryLimit ?? 80,
@@ -204,7 +208,7 @@ export function executeAlmaInnTransaction(
   }
 
   // 5–6. Only a valid, successful plan reaches ID reservation.
-  const fingerprint = `${args.npcId}|${args.functionId}|${args.targetId}`;
+  const fingerprint = `${args.npcId}|${args.functionId}|${targetId}`;
   const idResult = reserve(args.transactionId, fingerprint);
   if (idResult !== "reserved") {
     return { success: false, message: idResult, state, addedItemId: null };
@@ -213,7 +217,7 @@ export function executeAlmaInnTransaction(
   // 7. The caller may apply this state only after this successful result.
   return {
     success: true,
-    message: args.targetId === "rest" ? "rest" : "purchase",
+    message: targetId === "rest" ? "rest" : "purchase",
     state: plan.nextState,
     addedItemId: itemId,
   };
