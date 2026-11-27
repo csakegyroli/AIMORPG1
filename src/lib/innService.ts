@@ -149,7 +149,6 @@ export function createInnSubmissionController() {
   };
 }
 
-import type { ItemDefinition } from "./types";
 import { planInnFoodPurchase, planInnRest, type InnTransactionState } from "./innService";
 
 export type AlmaInnCommitResult = {
