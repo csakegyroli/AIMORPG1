@@ -345,22 +345,24 @@ A győzelem/vereség/döntetlen kizárólag practice eredmény. Nem ad goldot, i
 
 **Teljes 12×12 lapkombinációs mátrix:** minden cella egy kötelező külön resolver-tesztet jelent. A TC teszt elvárása: a két lap effektív családjának, speciális hatásának és az A4 sorrendnek megfelelő determinisztikus kimenet. A 144 kombináció mindegyikére rögzíteni kell a két fél fordulópontját és a következő állapotot.
 
-| Játékos \ Havel | EL | KI | VK | BL | SZ | KO | ŐR | ELT | VL | CS | TÜ | MEG |
+| Játékos \\ Havel | EL | KI | VK | BL | SZ | KO | ŐR | ELT | VL | CS | TÜ | MEG |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| EL | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| KI | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| VK | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| BL | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| SZ | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| KO | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| ŐR | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| ELT | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| VL | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| CS | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| TÜ | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
-| MEG | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC | TC |
+| EL | 2:2 | 2:2 | 2:1 | 4:1 | 4:1 | 4:1 | 2:1 | 2:1 | 0:0 | 4:1 | 2:3 | 2:3 |
+| KI | 2:2 | 2:2 | 2:1 | 2:1 | 2:1 | 2:1 | 2:1 | 2:1 | 0:0 | 2:1 | 2:1 | 2:1 |
+| VK | 1:2 | 1:2 | 1:1 | 3:1 | 3:1 | 3:1 | 1:1 | 1:1 | 0:0 | 3:1 | 1:3 | 1:3 |
+| BL | 1:4 | 1:2 | 1:3 | 1:1 | 1:1 | 1:1 | 1:1 | 3:1 | 0:0 | 1:1 | 0:1 | 0:1 |
+| SZ | 1:4 | 1:2 | 1:3 | 1:1 | 1:1 | 1:1 | 1:1 | 3:1 | 0:0 | 1:1 | 1:1 | 1:1 |
+| KO | 1:4 | 1:2 | 1:3 | 1:1 | 1:1 | 1:1 | 1:1 | 3:1 | 0:0 | 1:1 | 1:1 | 1:1 |
+| ŐR | 1:2 | 1:2 | 1:1 | 1:1 | 1:1 | 1:1 | 1:1 | 1:1 | 0:0 | 1:3 | 3:1 | 3:1 |
+| ELT | 1:2 | 1:2 | 1:1 | 1:3 | 1:3 | 1:3 | 1:1 | 1:1 | 0:0 | 1:3 | 3:1 | 3:1 |
+| VL | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 | 0:0 |
+| CS | 1:4 | 1:2 | 1:3 | 1:1 | 1:1 | 1:1 | 3:1 | 3:1 | 0:0 | 1:1 | 1:1 | 1:1 |
+| TÜ | 3:2 | 1:2 | 3:1 | 1:0 | 1:1 | 1:1 | 1:3 | 1:3 | 0:0 | 1:1 | 1:1 | 1:1 |
+| MEG | 3:2 | 1:2 | 3:1 | 1:0 | 1:1 | 1:1 | 1:3 | 1:3 | 0:0 | 1:1 | 1:1 | 1:1 |
 
-**Kombinációs fixture-azonosítók:** `H-COMB-<playerCardId>-<havelCardId>`. A fenti 144 cella mindegyikéhez pontosan egy fixture tartozik. A 4×4 családpár-mátrix külön aggregált ellenőrzése kötelező, hogy a speciális lapok ne fedjék el a családszintű hibákat.
+<sub>Cell format: játékos pont : Havel pont. Fixture-alapállapot: 1. forduló, nincs fókuszbónusz és nincs előző fordulóból aktív Megakasztás; az Előrejelzés tesztje helyes tippet ad. A Tükör az első fordulóban saját Fordítás család marad. A mátrix a 144 lappár mindegyikének konkrét elsőfordulós kimenetét rögzíti; a későbbi fordulófüggő speciális állapotokat a H-S tesztek fedik le.</sub>
+
+Kombinációs fixture-azonosítók:** `H-COMB-<playerCardId>-<havelCardId>`. A fenti 144 cella mindegyikéhez pontosan egy fixture tartozik. A 4×4 családpár-mátrix külön aggregált ellenőrzése kötelező, hogy a speciális lapok ne fedjék el a családszintű hibákat.
 
 **Speciális interakciós tesztek:**
 
