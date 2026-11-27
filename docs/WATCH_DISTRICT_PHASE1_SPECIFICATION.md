@@ -280,7 +280,8 @@ A következő lista a BASE_ITEMS alpha.26 definícióit rögzíti. A tags mező 
 | blackCoin | relic | Ismeretlen | evidence | nincs deklarálva | true | false / false | fő történeti tárgy; main_outskirts_09 evidence hook |
 | silentWellVial | relic | Külváros · Régi Perem | legal | nincs deklarálva | nincs deklarálva | true / true | authored tárgy; main_outskirts_05 material/evidence-szerű vizsgálati input, de legalStatus nem evidence |
 | arenaBlackToken | contraband | Aréna · rejtett fogadások | illegal | nincs deklarálva | nincs deklarálva | true / true | item hook szerepel a main_outskirts_17-ben; nem hitelesített bizonyíték |
-| blackCoinCargoTag | quest | a BASE_ITEMS definícióban külön itemként szerepel | ellenőrizendő a pontos item-metaadat | ellenőrizendő | ellenőrizendő | ellenőrizendő | main_outskirts_22 jutalom; nem szabad metaadatot következtetni a nevéből |
+| captainsLogPage | quest | Kikötő · Vasrakpart | evidence | nincs deklarálva | true | false / false | authored quest item; main_outskirts_21 jutalma és main_outskirts_22 nem fogyasztott követelménye |
+| blackCoinCargoTag | quest | Kikötő · Éjjeli Raktárak | evidence | nincs deklarálva | true | false / false | authored quest item; main_outskirts_22 jutalma |
 
 **Hitelesített bizonyíték státusz: GAP.** Az alpha.26 ItemDefinition mezői között nincs authenticityStatus, issuer, signature/seal verification, registry reference, acquiredAt, custody history vagy per-instance provenance. Az InventoryItem csak instanceId és itemId. A legalStatus="evidence" jogi/tartalmi kategória, nem hitelességi vizsgálat eredménye. A document category és az origin szöveg önmagában nem bizonyít eredetet vagy sértetlenséget.
 
