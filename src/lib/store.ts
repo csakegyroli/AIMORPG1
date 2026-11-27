@@ -5,7 +5,7 @@ import { INITIAL_STATS, ITEMS, NPCS, NPC_FUNCTIONS, QUESTS } from "./content";
 import { getEffectiveStats, getItem, makeInventoryItem, marketPrice, reputationScore, sellingPrice, XP_FOR_LEVEL } from "./rules";
 import { rollReward, explainRewardRoll, nextRewardPity, type RewardPityState, type RewardRoll } from "./rewardEconomy";
 import { getWorldTime } from "./worldTime";
-import { createInnTransactionGuard, planInnFoodPurchase, planInnRest } from "./innService";
+import { createInnSubmissionController, createInnTransactionGuard, planInnFoodPurchase, planInnRest } from "./innService";
 import { craftRecipeForItem, dismantleYieldsForItem } from "./itemSystem";
 import { isMarketEligible, isSellable, itemAvailableInRegion, itemLegalStatus, itemSourceLabel, itemCategory } from "./itemSystem";
 import type { AvatarId, EquipmentSlot, GmMessage, InventoryItem, ItemId, JournalEntry, NpcId, QuestChoice, QuestDefinition, QuestId, QuestStatus, RegionId, ReputationBreakdown, Stats, TemporaryItemBuff, TemporaryStatBuff, StatId } from "./types";
@@ -71,7 +71,7 @@ function freshState() {
 
 export type GameData = ReturnType<typeof freshState>;
 export type GameState = GameData & {
-  consumeItem: (instanceId: string) => { success: boolean; message: string }; rest: () => { success: boolean; message: string }; takeDamage: (amount: number, reason?: string) => { success: boolean; message: string }; useNpcFunction: (npcId: NpcId, functionId: string, targetId?: string, transactionId?: string, onResult?: (result: { success: boolean; message: string }) => void) => { success: boolean; message: string };
+  consumeItem: (instanceId: string) => { success: boolean; message: string }; rest: () => { success: boolean; message: string }; takeDamage: (amount: number, reason?: string) => { success: boolean; message: string }; useNpcFunction: (npcId: NpcId, functionId: string, targetId?: string, transactionId?: string, onResult?: (result: { success: boolean; message: string }) => void) => { success: boolean; message: string }; cancelInnSubmission: (transactionId: string) => boolean;
   setName: (name: string) => void; setAvatar: (avatarId: AvatarId) => void; improveStat: (stat: keyof Stats) => void; travel: (region: RegionId) => void;
   startQuest: (questId: QuestId) => void; setMainQuestFollowing: (following: boolean) => void; followQuestChapter: (chapter: number | null) => void; trackQuest: (questId: QuestId | null) => void; trackSideQuest: (sideQuestId: string | null) => void; resolveQuest: (questId: QuestId, choice: QuestChoice) => { success: boolean; message: string };
   equip: (instanceId: string, slot: EquipmentSlot) => void; unequip: (slot: EquipmentSlot) => void;
@@ -308,6 +308,7 @@ export function getMaxHealth(state: GameData) {
   return Math.floor(100 + Math.max(0, getEffectiveStatsWithBuffs(state).endurance) * 5);
 }
 const reserveInnTransaction = createInnTransactionGuard(256);
+const innSubmissionController = createInnSubmissionController();
 
 
 export function useGameStore(): GameState {
@@ -575,6 +576,7 @@ export function useGameStore(): GameState {
   const sell = useCallback((instanceId: string) => { let result={success:false,message:"Ez a tárgy már nincs a táskádban."}; setData(s=>{const owned=s.inventory.find(x=>x.instanceId===instanceId);if(!owned)return s;const item=getItem(owned.itemId); if(!isSellable(item)){result={success:false,message:`${item.name} nem értékesíthető. A tárgy történeti, bizonyítéki vagy kötött státuszú.`}; return s;} const effective=getEffectiveStatsWithBuffs(s),price=sellingPrice(item.basePrice,effective.appraisal,s.equipment);result={success:true,message:`${item.name} elkelt.`};return {...s,gold:s.gold+price,inventory:s.inventory.filter(x=>x.instanceId!==instanceId),marketDemand:{...s.marketDemand,[item.id]:Math.max(-30,s.marketDemand[item.id]-3)},reputationParts:{...s.reputationParts,economic:s.reputationParts.economic+1},journal:[entry("market","Eladás",`${item.name} — ${price} arany.`),...s.journal].slice(0,60)};});return result;}, []);
   const useNpcFunction = useCallback((npcId: NpcId, functionId: string, targetId?: string, transactionId?: string, onResult?: (result: { success: boolean; message: string }) => void) => {
     let result={success:false,message:"Ezt a funkciót most nem tudod használni."};
+    let submissionReserved = false;
     let resultDelivered = false;
     const complete = () => {
       if (!onResult || resultDelivered) return;
@@ -584,6 +586,11 @@ export function useGameStore(): GameState {
     };
     const isInn = NPC_FUNCTIONS.some(candidate => candidate.id === functionId && candidate.npcId === npcId && candidate.kind === "inn");
     if (isInn) {
+      if (!transactionId || !innSubmissionController.canCommit(transactionId)) {
+        result = { success: false, message: "A fogadói műveletet megszakították a végrehajtás előtt." };
+        complete();
+        return result;
+      }
       const fingerprint = `${npcId}|${functionId}|${targetId ?? ""}`;
       const reservation = reserveInnTransaction(transactionId, fingerprint);
       if (reservation !== "reserved") {
@@ -596,6 +603,7 @@ export function useGameStore(): GameState {
         complete();
         return result;
       }
+      submissionReserved = true;
     }
     update(s=>{
       const npc=NPCS.find(n=>n.id===npcId); const fn=NPC_FUNCTIONS.find(x=>x.id===functionId && x.npcId===npcId);
@@ -735,11 +743,13 @@ export function useGameStore(): GameState {
         }
         default: result={success:true,message:`${fn.title}: ${fn.description}`}; break;
       }
+      if (isInn && submissionReserved && transactionId) innSubmissionController.commit(transactionId);
       complete();
       return next;
     });
     return result;
   }, [update]);
+  const cancelInnSubmission = useCallback((transactionId: string) => innSubmissionController.cancel(transactionId), []);
   const interactNpc = useCallback((npcId: NpcId) => update(s=>{const npc=NPCS.find(n=>n.id===npcId);if(!npc||!s.regionAccess[npc.region]||s.currentRegion!==npc.region||!npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id]))complete(); return s;const facets={...s.relationshipFacets,[npcId]:applyFacetDelta(s.relationshipFacets[npcId],{trust:2,respect:1,affection:1})};const next=relationshipAggregate(facets[npcId]);const memory=addMemory({kind:"npc",title:"Találkozás",text:`Találkoztál ${npc.name} karakterével a ${npc.location ?? npc.district ?? "város"} helyszínen.`,npcId,region:npc.region,district:npc.district,tags:["meeting","npc"],importance:1,at:stamp()});const identity=mergeIdentity(s.identity,{axes:{orderFreedom:0,honorOpportunism:2,mercyCruelty:1,curiosityPragmatism:2,ambitionIndependence:1,riskSafety:0,loyaltyAutonomy:3},affinities:{combat:0,shadow:0,social:3,trade:0,lore:0}});const nextState={...s,identity,relationships:{...s.relationships,[npcId]:next},relationshipFacets:facets,npcStates:{...s.npcStates,[npcId]:{status:stateForRelationship(facets[npcId]),updatedAt:stamp(),note:"A találkozások hatással vannak a kapcsolatra."}},worldMemories:[memory,...s.worldMemories].slice(0,120),reputationParts:{...s.reputationParts,relationships:s.reputationParts.relationships+1,activity:s.reputationParts.activity+1},journal:[entry("world","Városlakóval találkoztál",`${npc.name} mostantól egy kicsit jobban ismer.`),...s.journal].slice(0,60),gmMessages:[gm("A Szem feljegyezte",`${npc.name} kapcsolatod most ${next}. A következő találkozás már nem ugyanaz lesz.`,"personal"),...s.gmMessages].slice(0,20)}; const ns=recordDynamicEvent(s.narrativeState,{type:"relationship",at:stamp(),npcId,region:npc.region,tags:["npc","relationship"],summary:`Találkozás és kapcsolati változás: ${npc.name}.`,importance:1}); nextState.narrativeState=syncNarrativeDirector(ns,buildNarrativeContext({region:s.currentRegion,playerIdentity:identity,relationshipFacets:facets,memories:[memory,...s.worldMemories],npcStates:nextState.npcStates,questStatus:s.questStatus,activeQuestId:s.trackedQuestId,worldHour:getWorldTime().hour,eyeSignals:s.gmMessages.slice(0,6).map(m=>({title:m.title,body:m.body,tone:m.tone}))}),stamp()); return nextState;}),[update]);
   const acceptSideQuest = useCallback((sideQuestId: string) => { let result = { success:false, message:"Ez a történet már nem érhető el." }; update(s => { const record=s.narrativeState.runtime.sideQuests.records.find(r=>r.id===sideQuestId); if(!record||record.status!=="offered") return s; const npc=NPCS.find(n=>n.id===record.blueprint.giver); if(!npc||s.currentRegion!==record.blueprint.region||!npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id])) { result={success:false,message:"A történetadó jelenleg nincs elérhető közelségben."}; return s; } const ns=activateSideQuest(s.narrativeState,sideQuestId,Date.now()); const facets={...s.relationshipFacets,[npc.id]:applyFacetDelta(s.relationshipFacets[npc.id],{trust:2,respect:1,suspicion:-1})}; const memory=addMemory({kind:"quest",title:"Melléktörténet vállalva",text:`Elfogadtad ${npc.name} történetét.`,npcId:npc.id,region:npc.region,district:npc.district,tags:["side-quest","accepted",record.blueprint.source],importance:2,at:stamp()}); result={success:true,message:"Mellékküldetés elfogadva."}; return {...s,narrativeState:ns,relationshipFacets:facets,relationships:{...s.relationships,[npc.id]:relationshipAggregate(facets[npc.id])},worldMemories:[memory,...s.worldMemories].slice(0,160),journal:[entry("quest","Melléktörténet vállalva",record.blueprint.hook),...s.journal].slice(0,80),gmMessages:[gm("A Szem feljegyezte",`${npc.name} történetébe beléptél. A megoldás módja nyomot hagy majd.`,"personal"),...s.gmMessages].slice(0,20)}; }); return result; }, [update]);
   const declineSideQuest = useCallback((sideQuestId: string) => { let result={success:false,message:"Ez a történet már nem érhető el."}; update(s=>{const record=s.narrativeState.runtime.sideQuests.records.find(r=>r.id===sideQuestId); if(!record||record.status!=="offered") return s; const npc=NPCS.find(n=>n.id===record.blueprint.giver); const ns=resolveSideQuestRuntime(s.narrativeState,sideQuestId,"declined",Date.now()); if(!npc){result={success:true,message:"Figyelmen kívül hagytad a történetet."}; return {...s,narrativeState:ns};} const facets={...s.relationshipFacets,[npc.id]:applyFacetDelta(s.relationshipFacets[npc.id],{trust:-2,respect:-1,suspicion:1})}; const memory=addMemory({kind:"quest",title:"Melléktörténet elutasítva",text:`Nem vállaltad el ${npc.name} kérését.`,npcId:npc.id,region:npc.region,district:npc.district,tags:["side-quest","declined",record.blueprint.source],importance:1,at:stamp()}); result={success:true,message:"Figyelmen kívül hagytad. A kapcsolat emlékszik rá."}; return {...s,narrativeState:ns,relationshipFacets:facets,relationships:{...s.relationships,[npc.id]:relationshipAggregate(facets[npc.id])},worldMemories:[memory,...s.worldMemories].slice(0,160),journal:[entry("quest","Melléktörténet elutasítva",`${npc.name} emlékezni fog a döntésedre.`),...s.journal].slice(0,80),gmMessages:[gm("A Szem feljegyezte",`${npc.name} nem felejti el, hogy most nemet mondtál.`,"personal"),...s.gmMessages].slice(0,20)};}); return result;},[update]);
@@ -825,6 +835,6 @@ export function useGameStore(): GameState {
   const speakNpc = useCallback((npcId: NpcId, topicId?: string) => { let result={success:false,message:"Most nincs új beszélgetési téma."}; update(s=>{const npc=NPCS.find(n=>n.id===npcId); if(!npc||s.currentRegion!==npc.region||!npcRuntimePresent(npc,getWorldTime().hour,s.npcStates[npc.id])) {result={success:false,message:"Az NPC jelenleg nem elérhető."}; return s;} const context=buildNarrativeContext({region:s.currentRegion,playerIdentity:s.identity,relationshipFacets:s.relationshipFacets,memories:s.worldMemories,npcStates:s.npcStates,questStatus:s.questStatus,activeQuestId:s.trackedQuestId,worldHour:getWorldTime().hour,eyeSignals:s.gmMessages.slice(0,6).map(m=>({title:m.title,body:m.body,tone:m.tone}))}); const topics=getAvailableDialogueTopics(context,npcId,Date.now()); const topic=topics.find(t=>t.id===topicId)||topics[0]; if(!topic) return s; const ns=markDialogueTopicSeen(s.narrativeState,npcId,topic.id,Date.now()); const delta=topic.kind==="secret"?{trust:3,respect:2,affection:2,suspicion:-2}:{trust:1,respect:1,affection:1,suspicion:0}; const facets={...s.relationshipFacets,[npcId]:applyFacetDelta(s.relationshipFacets[npcId],delta)}; const memory=addMemory({kind:"npc",title:"Beszélgetés",text:`${npc.name}: ${topic.label}.`,npcId,region:npc.region,district:npc.district,tags:["dialogue",topic.kind],importance:topic.kind==="secret"?3:1,at:stamp()}); result={success:true,message:topic.reason}; return {...s,narrativeState:ns,relationshipFacets:facets,relationships:{...s.relationships,[npcId]:relationshipAggregate(facets[npcId])},worldMemories:[memory,...s.worldMemories].slice(0,160),journal:[entry("world",`${npc.name} mesélt`,topic.reason),...s.journal].slice(0,80),gmMessages:[gm("A Szem figyel",`${npc.name} most megosztott veled valamit: ${topic.label}.`,"personal"),...s.gmMessages].slice(0,20)};}); return result;},[update]);
   const markMessagesSeen = useCallback(() => update(s => ({ ...s, gmMessages: s.gmMessages.map(m => ({ ...m, seen: true })) })), [update]);
   const reset = useCallback(()=>setData(freshState()),[]);
-  return { ...data, consumeItem, rest, takeDamage, useNpcFunction, setName, setAvatar, improveStat, travel, startQuest, setMainQuestFollowing, followQuestChapter, trackQuest, resolveQuest, equip, unequip, buy, buyListing, sell, interactNpc, acceptSideQuest, declineSideQuest, resolveSideQuest, speakNpc, markMessagesSeen, reset, trackSideQuest };
+  return { ...data, cancelInnSubmission, consumeItem, rest, takeDamage, useNpcFunction, setName, setAvatar, improveStat, travel, startQuest, setMainQuestFollowing, followQuestChapter, trackQuest, resolveQuest, equip, unequip, buy, buyListing, sell, interactNpc, acceptSideQuest, declineSideQuest, resolveSideQuest, speakNpc, markMessagesSeen, reset, trackSideQuest };
 }
 export const getReputation = (state: Pick<GameState,"reputationParts">) => reputationScore(state.reputationParts);
