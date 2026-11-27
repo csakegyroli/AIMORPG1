@@ -296,3 +296,104 @@ Every extension needs separate central approval with trigger, source data, exact
 ## 15. Phase gate
 
 This is PHASE 1 draft only. It authorizes no code changes, merges, save migration, Canon changes, probability tables or economy changes. Proceed only after explicit owner approval.
+
+
+---
+
+## 16. PHASE 2 — owner-approved central architecture decisions
+
+**Decision status:** OWNER-APPROVED  
+**Decision baseline:** AIMORPG v2.0.0-alpha.26  
+**Approval:** Project owner, 2026-11-27  
+**Scope:** These decisions are binding inputs for all six district specification branches. They authorize documentation and source-verification updates, not automatic implementation, merge, or Canon changes.
+
+### ADR-P2-001 — NPC transaction and idempotency: HYBRID
+
+**Approved rule**
+- Initial single-player demo work may use client-side business-logic transaction protection.
+- Every state-changing NPC transaction must have an explicit stable transaction identifier and duplicate-execution protection.
+- Client-side protection is an application-integrity/replay guard only. It is not server security and must never be represented as such.
+- The future server-authority transition contract must be documented now: request identity, validation, authoritative resolution, atomic state/economy mutation, durable result record, retry behavior, and duplicate-key response.
+- The server migration must preserve the same business operation identity where practical; client-generated identifiers are correlation/idempotency inputs, not proof of authorization.
+
+**Still open:** canonical transaction ID format/scope and retention; behavior for same key with different payload; conflict/retry policy; transaction history location; exact shared API boundary. These are not silently decided by this ADR.
+
+### ADR-P2-002 — Damar shipment: MODEL A
+
+**Approved rule**
+- Use one domain-specific Shipment aggregate as the authoritative current shipment state.
+- Use a Shipment-scoped custody event log to record handoff, receipt, inspection, hold, acceptance and rejection history.
+- This is not a general event bus or universal event-sourcing framework.
+- Reuse the existing item and inventory model. Shipment lines reference existing item instances and quantities; no parallel cargo inventory, item registry or generic warehouse stock system.
+- Shipment aggregate state and its custody history must remain internally consistent.
+
+### ADR-P2-003 — Partial receipt: ITEM/LINE LEVEL
+
+**Approved rule**
+- Each shipment line can be received, rejected or held independently.
+- Quantities and line-level outcomes must be explicit and reconcilable.
+- Aggregate shipment status is derived from its line outcomes and custody state; acceptance of one line does not imply acceptance of the whole shipment.
+- Reuse existing item-instance/inventory contracts. No duplicated item ownership or silent item cloning.
+
+**Still open:** exact quantity semantics where the current item model represents unique instances; whether a line can be split across accepted/rejected quantities; custody transfer timing for each outcome. Specify only after source verification and present unresolved choices for owner approval.
+
+### ADR-P2-004 — Transaction authority: RISK-TIERED
+
+**Approved rule**
+- The initial single-player demo may remain client-side for ordinary, low-risk NPC interactions, provided the approved client-side transaction ID and duplicate-execution contract is followed.
+- Before release as a trusted economic transaction, server-side authority is mandatory for high-value, chance-based, competitive, or future multiplayer-affecting transactions.
+- Client-only results for those categories are demo/practice outcomes, not trusted settlement.
+- Havel's card-game economy and Brenka's odds/betting settlement must be treated explicitly under this boundary. Their rulesets may be specified independently, but actual trusted economic settlement is blocked until a server-authoritative resolver and ledger/transaction contract exist.
+- The server authority boundary must be documented in each relevant workpackage; do not make all single-player NPC services wait for a server rewrite.
+
+**Still open:** numerical/qualitative definition of high value; competitive classification; server service architecture, persistence/ledger ownership, RNG trust model, auditability and operational deployment. No server implementation is authorized by this decision alone.
+
+### ADR-P2-005 — Save/migration: PER-NEW-PERSISTENT-DOMAIN-STATE
+
+**Approved rule**
+- Before introducing each new persistent domain state, prepare a separate versioned migration plan for that state.
+- Each plan must document old-save compatibility, defaults/normalization, malformed-data handling, migration idempotency, fixtures and tests, rollback/recovery and release conditions.
+- Existing saves must remain backward compatible.
+- This does not authorize or require a general save-system redesign.
+- No district may independently change the global save key/version or add persistent fields without the applicable migration plan and explicit implementation approval.
+
+### 16.1 Cross-district application
+
+| District | Required application of approved decisions |
+|---|---|
+| Gate City | Damar uses Shipment aggregate + scoped custody log + line-level receipt; Alma remains under its separate owner-acceptance gate; Petar/Vera/Jarek continue independent source/specification work with shared dependencies marked accurately. |
+| Workshop | Existing crafting/service flows specify client-side transaction IDs and duplicate protection for the demo; durability, recipe and mastery decisions remain open; no parallel inventory. |
+| Old Market | Zora/Cador/Pell service and document flows apply transaction protection; trade/economy remains shared; unresolved item IDs/prices and Ilren questions remain open. |
+| Red Streets | Havel ruleset and Brenka odds model can be specified separately; no trusted real-money/gold settlement for chance-based or competitive play without server authority. |
+| Watch District | Evidence/case specifications may progress independently; any shipment reference uses Damar's Shipment ID and scoped custody history, not a parallel evidence event bus. |
+| Old Edge | Eldra/Siven/Maela and Eye work continue independently; any new persistent expedition/discovery state requires its own versioned migration plan; Eye remains observation-only. |
+
+### 16.2 Remaining central decisions — NOT APPROVED BY ADR-P2-001..005
+
+The following remain open; the five approvals do not close them:
+
+1. Canonical transaction identifier format, scope, collision handling, payload mismatch behavior, retention and transaction-result history.
+2. Exact threshold/rule for classifying a transaction as high-value or competitive.
+3. Server-authority architecture, trusted RNG, durable settlement/ledger, audit and retry contracts for Havel/Brenka and later multiplayer transactions.
+4. Shipment line quantity semantics, partial-quantity splitting, item-instance custody transfer and terminal-state rules.
+5. Shared item-instance extension/schema and its migration, if any.
+6. Durability/condition and repair model.
+7. +1–+9 enhancement probabilities, costs, protection and failure consequences.
+8. Shared professional mastery contract.
+9. Canonical recipe schema and cross-district crafting contract.
+10. Persistent minigame session ownership, save/recovery and replay policy.
+11. Cross-district access/permission and document/evidence provenance contract.
+12. A Szem observation extension policy and any new event/output schema.
+13. Ilren region/district discrepancy.
+14. Shared-file ownership, integration order and merge authority.
+15. Havel/Brenka practice-mode disclosure, economic balance limits and the eventual server-settlement release gate.
+
+### 16.3 Governance and implementation gate
+
+- District developers may continue independent specification and source-verification work against alpha.26.
+- Shared decisions above must be consumed as approved constraints, not reopened as generic pending questions.
+- Remaining open questions must be listed separately and must not block unrelated local specification work.
+- No automatic merge, no cross-branch cherry-pick, no unapproved source implementation.
+- Preserve Canon, all 60 main quest nodes and existing item/inventory structures.
+- Gate City implementation order remains: Alma owner acceptance first; only then may the next NPC implementation be separately authorized. Damar specification work may continue now.
+- This register records decisions; it does not itself authorize code changes.
